@@ -25,7 +25,7 @@ bool GameManager::Initialize()
     //Initialize window
     {
         mWindow = new Window(mhInstance);
-        mWindow->Initialize(1280,720);
+        mWindow->Initialize(1280, 720);
     }
     // Init TextRenderer (spritesheet DDS)
     {
@@ -43,16 +43,16 @@ bool GameManager::Initialize()
         ecs.addComponent<velocityComponent>(mp_player->m_entity, velocityComponent(1, 1, 1));
         m_playerMesh = MeshCreator::CreateBox(mWindow, mp_player->m_entity, 1.0f, 1.0f, 1.0f, XMFLOAT4(Colors::Red));
         mEntityMesh.insert({ mp_player->m_entity, m_playerMesh });
-		gun = ecs.createEntity(transformComponent(0, 0, 0));
+        gun = ecs.createEntity(transformComponent(0, 0, 0));
         MeshGeometry gunMesh = MeshCreator::CreateCustomMesh(mWindow, gun, "..\\..\\res\\Gun.json", 1, (XMFLOAT4)Colors::DarkRed);
-		mEntityMesh.insert({ gun, gunMesh });
+        mEntityMesh.insert({ gun, gunMesh });
     }
 
     // Debug stuff
     {
         testEnemy = new Enemy();
         ColliderComponent tempCollider = ecs.getComponent<ColliderComponent>(testEnemy->m_entity);
-		m_enemyMesh = MeshCreator::CreateCustomMesh(mWindow, testEnemy->m_entity, "..\\..\\res\\Snake.json", 1, (XMFLOAT4)Colors::Green);
+        m_enemyMesh = MeshCreator::CreateCustomMesh(mWindow, testEnemy->m_entity, "..\\..\\res\\Snake.json", 1, (XMFLOAT4)Colors::Green);
 
         ecs.getComponent<transformComponent>(testEnemy->m_entity).position = FLOAT3(-2, 0, 4);
 
@@ -91,7 +91,7 @@ bool GameManager::Initialize()
                     if (not doSkip3) {
                         if (not doSkip4) {
                             Enemy* newEnemy = new Enemy();
-                            ColliderComponent tempCollider = ECS::GetInstance().getComponent<ColliderComponent>(newEnemy->m_entity);
+                            ColliderComponent tempCollider = ECS::GetInstance().getComponent<ColliderComponent>(testEnemy->m_entity);
                             m_enemyMesh = MeshCreator::CreateBox(mWindow, -2, tempCollider.width, tempCollider.height, tempCollider.depth, XMFLOAT4(Colors::Yellow));
 
                             ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity).position = FLOAT3(point.x, 0.5f, point.y);
@@ -157,26 +157,39 @@ bool GameManager::Initialize()
 
 void GameManager::Update()
 {
-    float deltaTime = GetDeltatime(); 
-	transformComponent& playerTrans = ecs.getComponent<transformComponent>(mp_player->m_entity);
-	// generate obstacles on the road
-	mTimerGenCooldown += deltaTime;
-    for (FLOAT2 point : road.points) {
-		if (mTimerGenCooldown >= 3.0f)
-        {
-            if (rand() % 100 < 20) { // 20% chance to generate an obstacle on each point, and only if it's not too far to the player and not too close too
-                if (sqrt(pow(playerTrans.position.x - point.x, 2) + pow(playerTrans.position.z - point.y, 2)) < 80 && sqrt(pow(playerTrans.position.x - point.x, 2) + pow(playerTrans.position.z -
-                    point.y, 2)) > 20) {
+    float deltaTime = GetDeltatime();
+    transformComponent& playerTrans = ecs.getComponent<transformComponent>(mp_player->m_entity);
+    // generate obstacles on the road
+    mTimerGenCooldown += deltaTime;
+    for (auto it = road.points.rbegin(); it != road.points.rend(); ++it) {
+        FLOAT2 point = *it;
+
+        if (mTimerGenCooldown >= 3.0f) {
+            // Correction de la probabilité : 20% de chance (votre commentaire disait 20 mais le code 100)
+            if (rand() % 100 < 20) {
+
+                // Calcul de la distance au carré pour éviter les appels coûteux à sqrt()
+                float dx = playerTrans.position.x - point.x;
+                float dz = playerTrans.position.z - point.y;
+                float distSq = (dx * dx) + (dz * dz);
+
+                // 20^2 = 400, 80^2 = 6400
+                if (distSq < 6400.0f && distSq > 400.0f) {
                     Obstacle* newObstacle = new Obstacle();
+
                     ecs.getComponent<transformComponent>(newObstacle->m_entity).position = FLOAT3(point.x, 1.5f, point.y);
+
                     mp_obstacleList.push_back(newObstacle);
                     mEntityMesh.insert({ newObstacle->m_entity, m_obstacleMesh });
+
+                    mTimerGenCooldown = 0.0f;
+
+                    // Optionnel : break; si vous ne voulez générer qu'UN SEUL obstacle par frame
+                    // break; 
                 }
             }
-            mTimerGenCooldown = 0.0f;
         }
-    }
-    // Player Shoot
+    }    // Player Shoot
     if (InputSystem::isKeyDown(VK_SPACE) && not mp_player->isCrouching) {
         if (mp_player->canShoot) {
             AddBullet(mp_player->m_entity);
@@ -189,10 +202,10 @@ void GameManager::Update()
     }
     else {
         mp_player->SlowDown(false);
-	}
+    }
     // Player Crouch
     if (InputSystem::isKeyDown('C')) {
-         mp_player->isCrouching = true;
+        mp_player->isCrouching = true;
     }
     else {
         mp_player->isCrouching = false;
@@ -230,26 +243,24 @@ void GameManager::Update()
                     mp_destroyObstacleList.push_back(mp_obstacleList[j]);
                     mp_obstacleList.erase(mp_obstacleList.begin() + j);
                     mp_bulletList[i]->toBeDestroyed = true;
-					mp_player->m_score += 50;
+                    mp_player->m_score += 50;
                     break;
                 }
             }
         }
     }
-    
+
 
     // Update Player
     mp_player->Update();
 
     // Update Enemies
     for (Enemy* enemy : mp_enemyList) {
-        FLOAT3 enemyPos = ECS::GetInstance().getComponent<transformComponent>(enemy->m_entity).position;
-        enemy->Update(); 
-
-        if (sqrt(pow(playerTrans.position.x - enemyPos.x, 2) + pow(playerTrans.position.z - enemyPos.y, 2)) < 40 && sqrt(pow(playerTrans.position.x - enemyPos.x, 2) + pow(playerTrans.position.z -
-            enemyPos.y, 2)) > 5) {
-			enemy->LookAt(mp_player->m_entity);
-			if (enemy->canShoot) {
+        transformComponent enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->m_entity);
+        enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
+        // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
+        if (sqrt(pow(playerTrans.position.x - enemyTransform.position.x, 2) + pow(playerTrans.position.z - enemyTransform.position.y, 2)) < 40) {
+            if (enemy->canShoot) {
                 AddBullet(enemy->m_entity);
                 enemy->canShoot = false;
             }
@@ -261,7 +272,7 @@ void GameManager::Update()
         // Player Collision Check
         if (ecs.getComponent<ColliderComponent>(mp_obstacleList[i]->m_entity).collisionCheck(mp_player->m_entity)) {
             mp_player->takeDamage();
-            
+
             mp_destroyObstacleList.push_back(mp_obstacleList[i]);
             mp_obstacleList.erase(mp_obstacleList.begin() + i);
         }
@@ -297,7 +308,7 @@ void GameManager::Update()
         // Update player position
         FLOAT3 pos = playerTrans.position;
         pos.x += mov.x * deltaTime * 5.0f * playerVel.velocity.x;
-		pos.y += mov.y * deltaTime * 5.0f * playerVel.velocity.y;
+        pos.y += mov.y * deltaTime * 5.0f * playerVel.velocity.y;
         pos.z += mov.z * deltaTime * 5.0f * playerVel.velocity.z;
 
         playerTrans.position = pos;
@@ -384,8 +395,8 @@ bool GameManager::Run()
             Pause();
             if (!mAppPaused)
             {
-                 mWindow->CalculateFrameStats();
-				Update();
+                mWindow->CalculateFrameStats();
+                Update();
                 Draw();
             }
             else
@@ -400,7 +411,7 @@ bool GameManager::Run()
 
 void GameManager::Draw()
 {
-     mWindow->BeginFrame();
+    mWindow->BeginFrame();
 
     // Draw all entities
     for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
@@ -408,7 +419,7 @@ void GameManager::Draw()
         int entityID = it->first;
         MeshGeometry meshPtr = it->second;
 
-         mWindow->Draw(meshPtr, entityID);
+        mWindow->Draw(meshPtr, entityID);
     }
     for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
     {
@@ -455,7 +466,7 @@ void GameManager::AddBullet(Entity sender) {
     Bullet* newBullet = new Bullet();
 
     ecs.getComponent<transformComponent>(newBullet->m_entity) = ecs.getComponent<transformComponent>(sender);
-	if (sender == mp_player->m_entity)
+    if (sender == mp_player->m_entity)
     {
         transformComponent& playerTrans = ecs.getComponent<transformComponent>(mp_player->m_entity);
         float pitch = playerTrans.rotation.x;

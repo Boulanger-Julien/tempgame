@@ -35,6 +35,7 @@ private:
 	Player* mp_player;
 	Enemy* testEnemy; // Just for debug 
 	Obstacle* testObstacle; // Ditto
+	Obstacle* newObstacle; // Used to generate new obstacles on the road
 	Entity gun;
 	Entity healthBar;
 
@@ -55,6 +56,7 @@ private:
 	std::vector<Enemy*> mp_destroyEnemyList;
 
 	std::vector<Bullet*> mp_bulletList;
+	std::vector<Bullet*> mp_PlayerbulletList;
 	std::vector<Bullet*> mp_destroyBulletList;
 
 	std::unordered_map<int, MeshGeometry> mUIMesh;
