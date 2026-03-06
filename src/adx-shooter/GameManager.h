@@ -2,30 +2,45 @@
 #include <vector>
 #include "Bullet.h"
 #include "Player.h"
+#include "Enemy.h"
+#include "Obstacle.h"
 #include "MeshCreator.h"
 #include "adx-render/framework.h"
 #include "adx-render/Window.h"
+#include "adx-render/TextRenderer.h"
+#include "adx-render/UIRenderer.h"
 
 class GameManager
 {
 private:
-	static GameManager* mp_instance;
-
 	bool firstFrame = true;
 	bool spaceDownLastFrame = false;
 	bool spaceDown = false;
 	bool mAppPaused = false;
+
+	int offsetHBX = 20;
+	int offsetHBY = 800;
+	float healthBarWidth = 400;
+	float healthBarHeight = 100;
+	float mTimerGenCooldown = 3.0f;
+
 
 	MSG msg = { 0 };
 
 	HINSTANCE mhInstance;
 	Window* mWindow;
 
-	ECS tempECS;
+	ECS ecs;
 
 	Player* mp_player;
+	Enemy* testEnemy; // Just for debug 
+	Obstacle* testObstacle; // Ditto
+	Entity gun;
+	Entity healthBar;
 
-	MeshGeometry playerMesh;
+	MeshGeometry m_obstacleMesh;
+	MeshGeometry m_playerMesh;
+	MeshGeometry m_enemyMesh;
 	MeshGeometry m_bulletMesh;
 
 	Light mLight;
@@ -33,25 +48,33 @@ private:
 
 	Road road;
 
+	std::vector<Obstacle*> mp_obstacleList;
+	std::vector<Obstacle*> mp_destroyObstacleList;
+
+	std::vector<Enemy*> mp_enemyList;
+	std::vector<Enemy*> mp_destroyEnemyList;
+
 	std::vector<Bullet*> mp_bulletList;
 	std::vector<Bullet*> mp_destroyBulletList;
 
+	std::unordered_map<int, MeshGeometry> mUIMesh;
 	std::unordered_map<int, MeshGeometry> mEntityMesh;		// Stores Entities & their Meshs
+
+	TextRenderer* mScoreTextRenderer;
+	TextRenderer* mLifeTextRenderer;
 
 public:
 	GameManager();
 	GameManager(HINSTANCE hInstance);
 
-	static GameManager GetInstance();
-
 	bool Initialize();
-	void Update(const Timer& timer);
+	void Update();
 	bool Run();
 	void Draw();
 	void Pause();
 
 	float GetDeltatime();
-	void AddBullet();
-	void DestroyBullets();
+	void AddBullet(Entity sender);
+	void Destroy();
 };
 

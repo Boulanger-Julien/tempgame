@@ -5,25 +5,33 @@
 
 using namespace DirectX;
 
-Game::Game(HINSTANCE hInstance)
+Game::Game(HINSTANCE hInstance, int winW, int winH)
 {
 
     mhInstance = hInstance;
     //Initialize window
     {
         mWindow = new Window(mhInstance);
-        mWindow->Initialize();
+        mWindow->Initialize(winW, winH);
     }
-    player = ECS::GetInstance().createEntity(transformComponent(-2, 1, -2), velocityComponent(3, 0, 3));
+    player = ECS::GetInstance().createEntity(transformComponent(-2, 6, -2), velocityComponent(3, 0, 3));
+	gun = ECS::GetInstance().createEntity(transformComponent(0, 0, 0));
+    mLifeTextRenderer = new TextRenderer(mWindow);
+	mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+	mScoreTextRenderer = new TextRenderer(mWindow);
+    mScoreTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 }
 
 bool Game::Initialize()
 {
     InputSystem::HideCursor(true);
-    //Create player
+
+	//Generate player
     {
-        MeshGeometry playerMesh = MeshCreator::CreateBox(mWindow, player, 2, 2, 2, (XMFLOAT4)Colors::Navy, L"..\\..\\res\\Textures\\Diamond2.dds");
+        MeshGeometry playerMesh = MeshCreator::CreateBox(mWindow, player, 2, 6, 2, (XMFLOAT4)Colors::Navy, L"..\\..\\res\\Textures\\Diamond2.dds");
         mEntityMesh.insert({ player, playerMesh });
+		MeshGeometry gunMesh = MeshCreator::CreateCustomMesh(mWindow, player, "..\\..\\res\\Gun.json", 1, (XMFLOAT4)Colors::DarkRed);
+		mEntityMesh.insert({ gun, gunMesh });
     }
 
     //Generate random roads connected
@@ -34,12 +42,16 @@ bool Game::Initialize()
     }
 
 	Entity cloud = ECS::GetInstance().createEntity(transformComponent(0, 10, 0));
-	MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\mesh_data.json", 1000, (XMFLOAT4)Colors::White);
+	MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Cloud.json", 1000,  (XMFLOAT4)Colors::White);
 	mEntityMesh.insert({ cloud, cloudMesh });
+	sun = ECS::GetInstance().createEntity(transformComponent(-200, 100, 200));
+    MeshGeometry sunMesh = MeshCreator::CreateBall(mWindow, sun, 20, 30, 8, (XMFLOAT4)Colors::Yellow);
+	mEntityMesh.insert({ sun, sunMesh });
 	//Setup camera
     {
         mCamera.SetPosition(0.0f, 3.0f, -10.0f);
-        mCamera.SetLens(0.25f * XM_PI, 1.0f, 1.0f, 1000.0f);
+        float aspect = mWindow->AspectRatio();
+        mCamera.SetLens(0.25f * XM_PI, aspect, 1.0f, 1000.0f);
         XMFLOAT3 pos = { 0.0f, 3.0f, -10.0f };
         XMVECTOR camPos = XMLoadFloat3(&pos);
         XMVECTOR target = XMVectorZero();
@@ -53,31 +65,26 @@ bool Game::Initialize()
         mWindow->SetLight(mLight);
     }
 
+    //Generate health bar
+    {
+        Entity healthExtBar = ECS::GetInstance().createEntity(transformComponent(offsetHBX, offsetHBY));
+		UIRenderer healthBarExtMesh(*mWindow, healthExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
+		mUIMesh.insert({ healthExtBar, healthBarExtMesh.UIQuad });
+        healthBar = ECS::GetInstance().createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight*0.3f));
+		UIRenderer healthBarMesh(*mWindow, healthBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Red));
+		mUIMesh.insert({ healthBar, healthBarMesh.UIQuad });
+        mLifeTextRenderer = new TextRenderer(mWindow);
+		mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    }
+
     mWindow->ExecuteInitCommands();
+    mWindow->FlushCommandQueue();
     return true;
 }
 
 void Game::Update(const Timer& timer)
 {
-    static bool camf = false;
     static bool cDownLastFrame = false;
-    // Toggle camera mode when F5 is pressed (first person / third person)
-    {
-        if (InputSystem::isKeyDown(VK_F5) && !camf && !cDownLastFrame)
-        {
-            camf = true;
-            cDownLastFrame = true;
-        }
-        else if (InputSystem::isKeyDown(VK_F5) && camf && !cDownLastFrame)
-        {
-            camf = false;
-            cDownLastFrame = true;
-        }
-        if (!InputSystem::isKeyDown(VK_F5) && cDownLastFrame)
-        {
-            cDownLastFrame = false;
-        }
-    }
 
     // Update player position and camera position to follow the player
     {
@@ -85,6 +92,7 @@ void Game::Update(const Timer& timer)
         float arrivalThreshold = 0.5f;
 
         transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(player);
+        ECS::GetInstance().getComponent<transformComponent>(sun).position = FLOAT3(playerTrans.position.x - 200, 100, playerTrans.position.z + 200);
         velocityComponent& playerVel = ECS::GetInstance().getComponent<velocityComponent>(player);
 
         FLOAT3 mov = { 0.0f, 0.0f, 0.0f };
@@ -108,15 +116,15 @@ void Game::Update(const Timer& timer)
 
         // Update player position
         FLOAT3 pos = playerTrans.position;
-        pos.x += mov.x * timer.GetDeltatime() * 5.0f * playerVel.velocity.x;
-        pos.z += mov.z * timer.GetDeltatime() * 5.0f * playerVel.velocity.z;
+        pos.x += mov.x * timer.GetDeltatime() * 5.0f * playerVel.velocity.x * mTimerSpeed;
+        pos.z += mov.z * timer.GetDeltatime() * 5.0f * playerVel.velocity.z * mTimerSpeed;
 
         playerTrans.position = pos;
 
         // Gestion de la caméra
         playerTrans.rotation.x -= InputSystem::GetMouseDelta().y * timer.GetDeltatime();
         playerTrans.rotation.y += InputSystem::GetMouseDelta().x * timer.GetDeltatime();
-        playerTrans.rotation.x = std::clamp(playerTrans.rotation.x, -XM_PIDIV2 + 0.1f, XM_PIDIV2 - 1.5f);
+        playerTrans.rotation.x = std::clamp(playerTrans.rotation.x, -XM_PIDIV2 + 0.1f, XM_PIDIV2 - 1.0f);
         InputSystem::SetMousePos(400, 300);
         // Update camera position to follow the player
         {
@@ -124,11 +132,6 @@ void Game::Update(const Timer& timer)
             transformComponent camOrbit;
             camOrbit.rotation = playerTrans.rotation;
 
-            if (!camf)
-            {
-                transformSystem::RotateAround(camOrbit, playerTrans, 10.0f);
-            }
-            else
             {
                 transformSystem::RotateAround(camOrbit, playerTrans, 0.1f);
             }
@@ -142,8 +145,29 @@ void Game::Update(const Timer& timer)
             mCamera.LookAt(camPosVect, targetVect);
             mWindow->SetCamera(mCamera);
         }
+        //Update gun position to be in front of the player
+        {
+            transformComponent& gunTrans = ECS::GetInstance().getComponent<transformComponent>(gun);
+            transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(player);
+            float pitch = playerTrans.rotation.x;
+            float yaw = playerTrans.rotation.y;   
 
+            FLOAT3 forward = {
+                sin(yaw) * cos(pitch),
+                -sin(pitch),
+                cos(yaw) * cos(pitch)
+            };
+
+            FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
+
+			gunTrans.position = playerTrans.position - (forward * 2.5f) - (right * 0.8f) + FLOAT3(0, -0.5f, 0);
+
+            gunTrans.rotation.y = yaw - XM_PIDIV2;
+            gunTrans.rotation.z = -pitch;
+        }
     }
+	mPlayerHealth -= timer.GetDeltatime() * 5.0f * mTimerSpeed;
+	ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = mPlayerHealth / mMaxPlayerHealth;
     static int entityToRemove = -1;
     // Update world matrix of all entities to draw them in the correct position
     {
@@ -153,6 +177,12 @@ void Game::Update(const Timer& timer)
             XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
             mWindow->Update(entityID, entityWorld);
         }
+        for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
+        {
+            int entityID = it->first;
+            XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
+            mWindow->UpdateUI(entityID, entityWorld);
+		}
     }
 }
 
@@ -174,6 +204,7 @@ bool Game::Run()
             if (!mAppPaused)
             {
                 mWindow->CalculateFrameStats();
+				SpeedDown();
                 Update(*Timer::GetInstance());
                 Draw();
             }
@@ -191,7 +222,6 @@ void Game::Draw()
 {
     mWindow->BeginFrame();
 
-    // Draw all entities (only player for the moment)
     for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
     {
         int entityID = it->first;
@@ -200,8 +230,19 @@ void Game::Draw()
         mWindow->Draw(meshPtr, entityID);
     }
 
+    for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
+    {
+        int entityID = it->first;
+        MeshGeometry meshPtr = it->second;
+        mWindow->DrawUI(meshPtr, entityID);
+	}
+	mScore += Timer::GetInstance()->GetDeltatime() * 10.0f * mTimerSpeed;
+    mScoreTextRenderer->DrawTxt(mScore > 0 ? "Score: " + std::to_string((int)mScore) : "No Score", 20, 20, 24);
+	mLifeTextRenderer->DrawTxt(mPlayerHealth > 0 ? std::to_string((int)mPlayerHealth) + "/" + std::to_string((int)mMaxPlayerHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
+
     firstFrame = false;
     mWindow->EndFrame();
+
 }
 
 void Game::Pause()
@@ -209,16 +250,37 @@ void Game::Pause()
     // Toggle pause when F1 is pressed
     if (InputSystem::isKeyDown(VK_F1))
     {
-        spaceDown = true;
-        if (spaceDown != spaceDownLastFrame)
+        F1Down = true;
+        if (F1Down != F1DownLastFrame)
         {
             mAppPaused = !mAppPaused;
         }
-        spaceDownLastFrame = true;
-        spaceDown = false;
+        F1DownLastFrame = true;
+        F1Down = false;
     }
     else
     {
-        spaceDownLastFrame = false;
+        F1DownLastFrame = false;
+    }
+}
+
+void Game::SpeedDown()
+{
+    if (InputSystem::isKeyDown(VK_SPACE))
+    {
+		if (mSpeedDownTimer > mSpeedDownCd)
+        {
+            mTimerSpeed = 0.1f;
+			mSpeedDownTimer = 0.0f;
+        }
+    }
+    if (mSpeedDownDuration > mSpeedDownTimer)
+    {
+        mSpeedDownTimer += Timer::GetInstance()->GetDeltatime();
+    }
+    else
+    {
+        mSpeedDownTimer += Timer::GetInstance()->GetDeltatime();
+        mTimerSpeed = 1.0f;
     }
 }

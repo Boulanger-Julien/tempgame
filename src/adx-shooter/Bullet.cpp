@@ -1,13 +1,18 @@
 #include "pch.h"
 #include "Bullet.h"
-#include "GameManager.h"
+#include "adx-core/Timer.h"
 
 Bullet::Bullet() {
-	m_entity = ECS::GetInstance().createEntity(transformComponent(), ColliderComponent(m_entity));
+	m_entity = ECS::GetInstance().createEntity(transformComponent(), ColliderComponent());
+	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).compOwner = m_entity;
+}
+
+Bullet::~Bullet() {
+	ECS::GetInstance().Release(m_entity);
 }
 
 void Bullet::Update() {
-	float deltaTime = GameManager::GetInstance().GetDeltatime();
+	float deltaTime = Timer::GetInstance()->GetDeltatime();
 
 	if (currentLifetime >= maxLifetime) {
 		toBeDestroyed = true;
@@ -15,9 +20,5 @@ void Bullet::Update() {
 	}
 	currentLifetime += deltaTime;
 
-	transformSystem::Move(ECS::GetInstance().getComponent<transformComponent>(m_entity), 0, 0, m_speed*deltaTime);
-}
-
-Bullet::~Bullet() {
-	ECS::GetInstance().Release(m_entity); // check if components free too
+	transformSystem::MoveForward(ECS::GetInstance().getComponent<transformComponent>(m_entity), m_speed*deltaTime);
 }

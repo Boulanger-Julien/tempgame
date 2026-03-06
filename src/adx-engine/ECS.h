@@ -41,7 +41,7 @@ private:
 public:
 	ECS()
 	{
-		entityIDCounter = 0;
+		entityIDCounter = 10; // Start from to avoid conflicts
 		realEntityCount = 0;
 		if (instance == nullptr)
 		{

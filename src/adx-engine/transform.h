@@ -120,6 +120,8 @@ struct transformComponent
 struct transformSystem
 {
 	static void Move(transformComponent& transform, float x = 0, float y = 0, float z = 0);
+	static void MoveForward(transformComponent& transform, float distance = 1);
+	static void UpdateForward(transformComponent& transform);
 	static void SetYPR(transformComponent& transform, float x = 0, float y = 0, float z = 0);
 	static void Rotate(transformComponent& transform, float x = 0, float y = 0, float z = 0);
 	static DirectX::XMMATRIX GetWorldMatrix(transformComponent& transform);

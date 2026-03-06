@@ -11,6 +11,7 @@ cbuffer cbPerObject : register(b0)
     float4x4 gWorld;
     float4x4 gWorldInvTranspose;
     int gUseTexture;
+    int gUseLight;
 };
 
 cbuffer cbLight : register(b1)
@@ -71,6 +72,12 @@ float4 PS(VertexOut pin) : SV_Target
     float3 lighting = saturate(ambient + diffuse);
 
     float3 result = baseColor.rgb * lighting * gLightColor.xyz;
-
-    return float4(result, baseColor.a * gLightColor.w);
+    if (gUseLight == 0)
+    {
+        return float4(baseColor.rgb, baseColor.a);
+    }
+    else
+    {
+        return float4(result, baseColor.a * gLightColor.w);
+    }
 }

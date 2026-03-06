@@ -26,5 +26,5 @@ private:
 		static MeshGeometry CreatePyramid(   Window* win, int index, float width,        float height,      float depth,								  XMFLOAT4 color = XMFLOAT4(Colors::Gray), const wchar_t* filename = nullptr);
 		static MeshGeometry CreateMount(     Window* win, int index, int rows,           int cols,          int height,									  XMFLOAT4 colorTop = XMFLOAT4(Colors::White), XMFLOAT4 colorBottom = XMFLOAT4(Colors::DarkGreen));
 		
-		static MeshGeometry CreateCustomMesh(Window* win, int index, const char* jsonpath, int numOfMesh,	  XMFLOAT4 color = XMFLOAT4(Colors::Gray), const wchar_t* filename = nullptr);
+		static MeshGeometry CreateCustomMesh(Window* win, int index, const char* jsonpath, int numOfMesh, XMFLOAT4 color = XMFLOAT4(Colors::Gray), const wchar_t* filename = nullptr);
 };

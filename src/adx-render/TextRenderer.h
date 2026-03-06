@@ -1,31 +1,37 @@
 #pragma once
-#include "framework.h"
+#include "pch.h"
 #include "../adx-render/Window.h"
 #include <array>
 #include <string>
 
 struct FontCharacter
 {
-    float width, height; // Dimensions en "unités monde"
-    float posx, posy; // position dans la grille (col,row) — stocké en tant que indices flottants
+	float width, height; // Dimensions in world units
+    float posx, posy; // pos on grid (col,row)
 };
 
 class TextRenderer
 {
 public:
-    // Construire avec la fenêtre (utilisée pour BuildMesh/Draw)
+    // Rendering text using a sprite-shee
+    // Each glyph is a cell in a grid (cols x rows) inside a single texture
+    // This class builds quads (4 vertices, 6 indices) per glyph
+    // And Window renders as a mesh
+    TextRenderer() = default;
     TextRenderer(Window* window);
     ~TextRenderer();
 
-    // Initialise la sprite sheet.
-    // - spriteFile : chemin vers la texture (wstring)
-    // - cols / rows : nombre de colonnes/lines dans la sprite sheet
-    // - glyphWidthWorld / glyphHeightWorld : taille d'un glyph en unités monde (pour positionnement)
-    // - startChar : code du premier caractère dans la grille (par défaut espace 32)
+    // - spriteFile : path to texture (wstring)
+    // - cols / rows : number of colomns/lines dans in  sprite sheet
+    // - glyphWidthWorld / glyphHeightWorld : size of a glyph in world units
+    // - startChar : code of first character in grid (default space 32)
     bool Initialize(const wchar_t* spriteFile, int cols, int rows, float glyphWidthWorld = 1.0f, float glyphHeightWorld = 1.0f, unsigned char startChar = 32);
 
-    // Dessine le texte à la position (x,y) en unités monde ; scale multiplie les dimensions définies par glyphWidthWorld / glyphHeightWorld.
-    void DrawText(const std::string& text, float x, float y, float scale = 1.0f);
+    // Draws texte at pos(x,y) in world units; scale multiplies dimensions definined by glyphWidthWorld / glyphHeightWorld
+    // text: the ASCII/UTF-8 string
+    // x, y: starting position in world units
+    // scale: scale factor applied to glyph world size
+    void DrawTxt(const std::string& text, float x, float y, float scale = 1.0f);
 
 private:
     bool mInitialized = false;
@@ -39,6 +45,12 @@ private:
     std::array<FontCharacter, 256> mChars;
     int mNextMeshIndex = 0;
 
-    // index réservé pour enregistrer la texture UNE FOIS dans Window::BuildMesh
-    int mTextureRegisterIndex = 100000; // valeur arbitraire improbable d'ID entité
+    int mTextureRegisterIndex = 1000;
+    static constexpr int MAX_CHARS = 256;
+
+    int mMeshIndex = 0;
+    MeshGeometry mMesh;
+
+	std::vector<Vertex> mVertices;
+	std::vector<uint32_t> mIndices;
 };

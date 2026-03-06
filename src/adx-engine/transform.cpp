@@ -13,6 +13,12 @@ void transformSystem::Move(transformComponent& transform, float x, float y, floa
 	return;
 }
 
+void transformSystem::MoveForward(transformComponent& transform, float distance) {
+	transform.position.x += distance * transform.forward.x;
+	transform.position.y += distance * transform.forward.y;
+	transform.position.z += distance * transform.forward.z;
+}
+
 void transformSystem::SetYPR(transformComponent& transform, float x, float y, float z)
 {
 	transform.rotation.x = XMConvertToRadians(x);
@@ -52,7 +58,7 @@ XMMATRIX transformSystem::GetWorldMatrix(transformComponent& transform)
 void transformSystem::RotateAround(transformComponent& transform, transformComponent target, float radius)
 {
     const float eps = 1e-4f;
-    const float maxPitch = XM_PIDIV2 - eps; // XM_PIDIV2 == PI/2
+    const float maxPitch = XM_PIDIV2 - eps;
     target.rotation.x = std::clamp(target.rotation.x, -maxPitch, maxPitch);
 
     const float twoPi = XM_PI * 2.0f;
@@ -69,4 +75,21 @@ void transformSystem::RotateAround(transformComponent& transform, transformCompo
     transform.position.x = target.position.x + radius * cp * sy;
     transform.position.y = target.position.y - radius * sp;
     transform.position.z = target.position.z + radius * cp * cy;
+}
+
+void transformSystem::UpdateForward(transformComponent& transform)
+{
+	// Récupère un quaternion grâce au vecteur de rotation (roll, pitch, yaw)
+	 XMVECTOR quat = XMQuaternionRotationRollPitchYaw(transform.rotation.x, transform.rotation.y, transform.rotation.z);
+
+	// XMVector3Rotate(Axe du forward(0,0,1), quaternion);
+	
+	 XMVECTOR fwVect = XMVector3Rotate(XMVectorSet(0.f, 0.f, 1.f, 0.f), quat);
+	
+	// normalize le vector -> forward
+	XMVECTOR normVect = XMVector3Normalize(fwVect);
+
+	transform.forward.x = -XMVectorGetX(normVect);
+	transform.forward.y = -XMVectorGetY(normVect);
+	transform.forward.z = -XMVectorGetZ(normVect);
 }

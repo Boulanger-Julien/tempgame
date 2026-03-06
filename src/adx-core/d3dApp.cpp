@@ -41,7 +41,7 @@ HWND D3DApp::MainWnd()const
 
 float D3DApp::AspectRatio()const
 {
-    return static_cast<float>(mClientWidth) / mClientHeight;
+    return static_cast<float>(mWindowRect.right) / mWindowRect.bottom;
 }
 
 bool D3DApp::Get4xMsaaState()const
@@ -92,9 +92,9 @@ int D3DApp::Run()
     return (int)msg.wParam;
 }
 
-bool D3DApp::Initialize()
+bool D3DApp::Initialize(int winW, int winH)
 {
-    if (!InitMainWindow())
+    if (!InitMainWindow(winW,winH))
         return false;
 
     if (!InitDirect3D())
@@ -140,7 +140,7 @@ void D3DApp::OnResize()
 
     ThrowIfFailed(mSwapChain->ResizeBuffers(
         SwapChainBufferCount,
-        mClientWidth, mClientHeight,
+        mWindowRect.right, mWindowRect.bottom,
         mBackBufferFormat,
         DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 
@@ -157,8 +157,8 @@ void D3DApp::OnResize()
     D3D12_RESOURCE_DESC depthStencilDesc;
     depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     depthStencilDesc.Alignment = 0;
-    depthStencilDesc.Width = mClientWidth;
-    depthStencilDesc.Height = mClientHeight;
+    depthStencilDesc.Width = mWindowRect.right;
+    depthStencilDesc.Height = mWindowRect.bottom;
     depthStencilDesc.DepthOrArraySize = 1;
     depthStencilDesc.MipLevels = 1;
     depthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
@@ -202,12 +202,12 @@ void D3DApp::OnResize()
 
     mScreenViewport.TopLeftX = 0;
     mScreenViewport.TopLeftY = 0;
-    mScreenViewport.Width = static_cast<float>(mClientWidth);
-    mScreenViewport.Height = static_cast<float>(mClientHeight);
+    mScreenViewport.Width = static_cast<float>(mWindowRect.right);
+    mScreenViewport.Height = static_cast<float>(mWindowRect.bottom);
     mScreenViewport.MinDepth = 0.0f;
     mScreenViewport.MaxDepth = 1.0f;
 
-    mScissorRect = { 0, 0, mClientWidth, mClientHeight };
+    mScissorRect = { 0, 0, (LONG)mWindowRect.right, (LONG)mWindowRect.bottom };
 }
 
 LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -228,8 +228,8 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_SIZE:
-        mClientWidth = LOWORD(lParam);
-        mClientHeight = HIWORD(lParam);
+        mWindowRect.right = LOWORD(lParam);
+        mWindowRect.bottom = HIWORD(lParam);
         if (md3dDevice)
         {
             if (wParam == SIZE_MINIMIZED)
@@ -315,14 +315,22 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         else if ((int)wParam == VK_F2)
             Set4xMsaaState(!m4xMsaaState);
+        else if (wParam == VK_F11)
+        {
+            ToggleFullscreen();
+        }
         return 0;
     }
 
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-bool D3DApp::InitMainWindow()
+bool D3DApp::InitMainWindow(int winWidth, int winHeight)
 {
+    mWindowRect.left = 0;
+    mWindowRect.top = 0;
+    mWindowRect.right = winWidth;
+    mWindowRect.bottom = winHeight;
     WNDCLASS wc;
     wc.style = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc = MainWndProc;
@@ -341,7 +349,7 @@ bool D3DApp::InitMainWindow()
         return false;
     }
 
-    RECT R = { 0, 0, mClientWidth, mClientHeight };
+    RECT R = { 0, 0, mWindowRect.right, mWindowRect.bottom };
     AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
     int width = R.right - R.left;
     int height = R.bottom - R.top;
@@ -441,8 +449,8 @@ void D3DApp::CreateSwapChain()
     mSwapChain.Reset();
 
     DXGI_SWAP_CHAIN_DESC sd;
-    sd.BufferDesc.Width = mClientWidth;
-    sd.BufferDesc.Height = mClientHeight;
+    sd.BufferDesc.Width = mWindowRect.right;
+    sd.BufferDesc.Height = mWindowRect.bottom;
     sd.BufferDesc.RefreshRate.Numerator = 60;
     sd.BufferDesc.RefreshRate.Denominator = 1;
     sd.BufferDesc.Format = mBackBufferFormat;
@@ -521,5 +529,34 @@ void D3DApp::CalculateFrameStats()
 
         frameCnt = 0;
         timeElapsed += 1.0f;
+    }
+}
+
+void D3DApp::ToggleFullscreen()
+{
+    if (!mIsFullscreen) // On passe en plein écran
+    {
+        // On sauvegarde la position actuelle de la fenêtre
+        GetWindowRect(mhMainWnd, &mWindowPosBeforeFullscreen);
+
+        SetWindowLong(mhMainWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+
+        int width = GetSystemMetrics(SM_CXSCREEN);
+        int height = GetSystemMetrics(SM_CYSCREEN);
+
+        mIsFullscreen = true;
+        SetWindowPos(mhMainWnd, HWND_TOP, 0, 0, width, height, SWP_FRAMECHANGED | SWP_NOZORDER);
+    }
+    else // On revient au mode fenêtré
+    {
+        SetWindowLong(mhMainWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+
+        mIsFullscreen = false;
+        SetWindowPos(mhMainWnd, HWND_TOP,
+            mWindowPosBeforeFullscreen.left,
+            mWindowPosBeforeFullscreen.top,
+            mWindowPosBeforeFullscreen.right - mWindowPosBeforeFullscreen.left,
+            mWindowPosBeforeFullscreen.bottom - mWindowPosBeforeFullscreen.top,
+            SWP_FRAMECHANGED | SWP_NOZORDER);
     }
 }

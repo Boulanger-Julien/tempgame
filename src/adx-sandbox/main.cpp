@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "main.h"
-
+#define WINWIDTH 1280
+#define WINHEIGHT 720
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdShow)
 {
 #if defined(DEBUG) | defined(_DEBUG)
@@ -9,7 +10,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, i
 
 	try
 	{
-		Game App(hInstance);
+		Game App(hInstance, WINWIDTH, WINHEIGHT);
 		if (!App.Initialize())
 			return 0;
 

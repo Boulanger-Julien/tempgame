@@ -1,16 +1,19 @@
 #pragma once
 #include "adx-engine/framework.h"
+
 class Enemy
 {
+private:
+	int m_shootCooldown = 1;
+	float m_currentShootCooldown = 0;
+
 public:
-	Entity* mp_player;
+	Entity m_entity;
 
+	bool canShoot = false;
 
-	int m_healthPoints = 100; //probs add health regen
-
-
-	void Update(); //mbe
-
-	void takeDamage(int amount);
-	void Shoot();
+	Enemy();
+	~Enemy();
+	void Update(); 
+	void LookAt(Entity target);
 };

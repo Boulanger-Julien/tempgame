@@ -78,7 +78,7 @@ MeshGeometry MeshCreator::CreateBox(Window* win, int index, float width, float h
 
 	for (int i = 0; i < 6; ++i)
 	{
-		uint32_t baseIndex = (uint32_t)vertices.size();
+		unsigned int baseIndex = (unsigned int)vertices.size();
 
 		for (int j = 0; j < 4; ++j)
 		{
@@ -114,7 +114,7 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 	float xPos = 0;
 	for (int i = 0; i < totRoad; ++i) {
 		int length = max((int)length1 / 2, rand() % (int)length1) * 2;
-		int baseIndex = vertices.size();
+		unsigned int baseIndex = (unsigned int)vertices.size();
 		type = road[rand() % 3];
 		while (lastType != 0 && type == lastType)
 			type = road[rand() % 3];
@@ -165,7 +165,7 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 		}
 		else if (type == 1) // left curve
 		{
-			baseIndex = vertices.size();
+			baseIndex = (unsigned int)vertices.size();
 			if (currentRoad == 0)
 			{
 				vertices.push_back({ XMFLOAT3(xPos - width, 0, zPos), color, XMFLOAT3(0,1,0) });
@@ -219,7 +219,7 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 		}
 		else if (type == -1) // right curve
 		{
-			baseIndex = vertices.size();
+			baseIndex = (unsigned int)vertices.size();
 			if (currentRoad == 0)
 			{
 				vertices.push_back({ XMFLOAT3(xPos, 0, zPos), color, XMFLOAT3(0,1,0) });
@@ -354,7 +354,7 @@ MeshGeometry MeshCreator::CreateBall(Window* win, int index, float radius, int s
 		}
 	}
 
-	ComputeNormals(vertices, indices);
+	//ComputeNormals(vertices, indices);
 
 	return win->BuildMesh(vertices, indices, index, filepath);
 }
@@ -622,44 +622,57 @@ MeshGeometry MeshCreator::CreateCustomMesh(Window* win, int index, const char* j
 
 	for (const auto& vertexJson : j["vertices"]) {
 		Vertex v;
-		v.FromJson(vertexJson, v, color, { 0,0,0 });
+
+		v.FromJson(vertexJson, color);
+
 		vertices.push_back(v);
 	}
-	for (int j = 0; j < (int)vertices.size(); j++) {
-		indices.push_back(j);
-	}
+	indices = j["indices"].get<std::vector<std::uint32_t>>();
 
-	// Draw multiple models
-	std::vector<Vertex> mergedVertices;
-	std::vector<std::uint32_t> mergedIndices;
 
-	for (int i = 0; i < numOfMesh; ++i)
+
+	if (numOfMesh > 1)
 	{
-		FLOAT3 randomOffset = FLOAT3(0, 0, 0);
-		int signX = rand() % 2 == 0 ? -1 : 1;
-		int signY = rand() % 2 == 0 ? -1 : 1;
-		int rotation = rand() % 2 == 0 ? -1 : 1;
-		int randomX = rand() % 300;
-		int randomY = (rand() % 150) + 20;
-		int randomZ = rand() % 30000;
-		randomOffset = FLOAT3(randomX * signX, randomY * signY, randomZ);
+		// Draw multiple models
+		std::vector<Vertex> mergedVertices;
+		std::vector<std::uint32_t> mergedIndices;
 
-		for (auto& vertice : vertices)
+		for (int i = 0; i < numOfMesh; ++i)
 		{
-			Vertex tempVertex = vertice;
-			tempVertex.Pos = toXMFLOAT3(randomOffset + toFLOAT3(vertice.Pos));
-			FLOAT3 tempPos = toFLOAT3(tempVertex.Pos);
-			tempPos.x *= rotation;
-			tempVertex.Pos = toXMFLOAT3(tempPos);
-			mergedVertices.push_back(tempVertex);
+			FLOAT3 randomOffset = FLOAT3(0, 0, 0);
+			int signX = rand() % 2 == 0 ? -1 : 1;
+			int signY = rand() % 2 == 0 ? -1 : 1;
+			int rotation = rand() % 2 == 0 ? -1 : 1;
+			float randomX = (float)(rand() % 1500);
+			float randomY = (float)((rand() % 150) + 20);
+			float randomZ = (float)(rand() % 30000);
+			{
+				randomOffset = FLOAT3(randomX * signX, randomY * signY, randomZ);
+			}
+
+			for (auto& vertice : vertices)
+			{
+				Vertex tempVertex = vertice;
+				tempVertex.Pos = toXMFLOAT3(randomOffset + toFLOAT3(vertice.Pos));
+				FLOAT3 tempPos = toFLOAT3(tempVertex.Pos);
+				tempPos.x *= rotation;
+				tempVertex.Pos = toXMFLOAT3(tempPos);
+				tempVertex.Color = color;
+				mergedVertices.push_back(tempVertex);
+			}
 		}
+
+		for (auto i = 0; i < numOfMesh * indices.size(); i++) {
+			mergedIndices.push_back(i);
+		}
+
+		//ComputeNormals(vertices, indices);
+
+		return win->BuildMesh(mergedVertices, mergedIndices, index, filepath);
 	}
-
-	for (size_t i = 0; i < numOfMesh * indices.size(); i++) {
-		mergedIndices.push_back(i);
+	else
+	{
+		ComputeNormals(vertices, indices);
+		return win->BuildMesh(vertices, indices, index, filepath);
 	}
-
-	//ComputeNormals(vertices, indices);
-
-	return win->BuildMesh(mergedVertices, mergedIndices, index, filepath);
 }

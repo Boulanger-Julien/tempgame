@@ -10,9 +10,9 @@ struct ColliderComponent
 	float depth;
 	adx_aabb aabb;
 
-	bool isTrigger = false;
+	bool isTrigger;
 
-	ColliderComponent(int ownerEntity, float w = 1.0f, float h = 1.0f, float d = 1.0f);
+	ColliderComponent(int ownerEntity = 1, float w = 1.0f, float h = 1.0f, float d = 1.0f);
 	void updateCollider();
 
 	// TODO - move that elsewhere

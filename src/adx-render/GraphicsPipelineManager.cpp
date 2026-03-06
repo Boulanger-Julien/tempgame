@@ -95,4 +95,21 @@ void GraphicsPipelineManager::BuildPSO(ID3D12Device* device, DXGI_FORMAT backBuf
 	psoDesc.SampleDesc.Quality = msaaState ? (msaaQuality - 1) : 0;
 	psoDesc.DSVFormat = depthStencilFormat;
 	ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO)));
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC uiPsoDesc = psoDesc; 
+
+	uiPsoDesc.DepthStencilState.DepthEnable = FALSE;
+	uiPsoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+
+	D3D12_RENDER_TARGET_BLEND_DESC& blendDesc = uiPsoDesc.BlendState.RenderTarget[0];
+	blendDesc.BlendEnable = TRUE;
+	blendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	ThrowIfFailed(device->CreateGraphicsPipelineState(&uiPsoDesc, IID_PPV_ARGS(&mPSO_UI)));
 }
