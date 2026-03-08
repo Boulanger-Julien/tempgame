@@ -101,7 +101,7 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 {
 	std::vector<Vertex> vertices;
 	std::vector<std::uint32_t> indices;
-	std::vector<FLOAT2> points;
+	std::vector<Points> points;
 	int road[3] =
 	{ 0, //straight
 		1, //left curve
@@ -127,8 +127,8 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 				vertices.push_back({ XMFLOAT3(-width + xPos, 0, zPos + length), color, XMFLOAT3(0,1,0) });
 				vertices.push_back({ XMFLOAT3(xPos, 0, zPos), color, XMFLOAT3(0,1,0) });
 				vertices.push_back({ XMFLOAT3(-width + xPos, 0, zPos), color, XMFLOAT3(0,1,0) });
-				points.push_back(FLOAT2(xPos - width / 2, zPos));
-				points.push_back(FLOAT2(xPos - width / 2, zPos + length));
+				points.push_back(Points(FLOAT2(xPos - width / 2, zPos)));
+				points.push_back(Points(FLOAT2(xPos - width / 2, zPos + length)));
 
 				zPos += length;
 				currentRoad = 0;
@@ -139,8 +139,8 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 				vertices.push_back({ XMFLOAT3(xPos + length - width, 0, zPos), color, XMFLOAT3(0,1,0) });
 				vertices.push_back({ XMFLOAT3(xPos - width, 0, width + zPos), color, XMFLOAT3(0,1,0) });
 				vertices.push_back({ XMFLOAT3(xPos + length - width, 0, width + zPos), color, XMFLOAT3(0,1,0) });
-				points.push_back(FLOAT2(xPos - width, zPos + width / 2));
-				points.push_back(FLOAT2(xPos + length - width, zPos + width / 2));
+				points.push_back(Points(FLOAT2(xPos - width, zPos + width / 2)));
+				points.push_back(Points(FLOAT2(xPos + length - width, zPos + width / 2)));
 				xPos += length;
 				currentRoad = -1;
 			}
@@ -150,8 +150,8 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 				vertices.push_back({ XMFLOAT3(xPos - length, 0, width + zPos), color, XMFLOAT3(0,1,0) });
 				vertices.push_back({ XMFLOAT3(xPos, 0, zPos), color, XMFLOAT3(0,1,0) });
 				vertices.push_back({ XMFLOAT3(xPos - length, 0, zPos), color, XMFLOAT3(0,1,0) });
-				points.push_back(FLOAT2(xPos, zPos + width / 2));
-				points.push_back(FLOAT2(xPos - length / 2, zPos + width / 2));
+				points.push_back(Points(FLOAT2(xPos, zPos + width / 2)));
+				points.push_back(Points(FLOAT2(xPos - length / 2, zPos + width / 2)));
 				xPos -= length;
 				currentRoad = 1;
 			}
@@ -177,10 +177,10 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 					vertices.push_back({ DirectX::XMFLOAT3(x - width, 0, z), color, XMFLOAT3(0,1,0) });
 				}
 				for (int i = 0; i < 8; ++i) {
-					points.push_back(FLOAT2(
+					points.push_back(Points(FLOAT2(
 						(vertices[baseIndex].Pos.x + vertices[i + 1 + baseIndex].Pos.x) / 2,
 						(vertices[baseIndex].Pos.z + vertices[i + 1 + baseIndex].Pos.z) / 2
-					));
+					),true));
 				}
 				for (int i = 0; i < 8; ++i) {
 					indices.push_back((i + 1) % 9 + 1 + baseIndex);
@@ -203,10 +203,10 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 					vertices.push_back({ DirectX::XMFLOAT3(x - width, 0, z + width), color, XMFLOAT3(0,1,0) });
 				}
 				for (int i = static_cast<int>(vertices.size()) - 1; i >= static_cast<int>(vertices.size()) - 9; --i) {
-					points.push_back(FLOAT2(
+					points.push_back(Points(FLOAT2(
 						(vertices[vertices.size() - 9].Pos.x + vertices[i].Pos.x - width) / 2,
 						(vertices[vertices.size() - 9].Pos.z + vertices[i].Pos.z) / 2
-					));
+					),true));
 				}
 				for (int i = 0; i < 8; ++i) {
 					indices.push_back(baseIndex);
@@ -232,10 +232,10 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 					vertices.push_back({ DirectX::XMFLOAT3(x, 0, z), color, XMFLOAT3(0,1,0) });
 				}
 				for (int i = 0; i < 8; ++i) {
-					points.push_back(FLOAT2(
+					points.push_back(Points(FLOAT2(
 						(vertices[baseIndex].Pos.x + vertices[i + 1 + baseIndex].Pos.x) / 2,
 						(vertices[baseIndex].Pos.z + vertices[i + 1 + baseIndex].Pos.z) / 2
-					));
+					),true));
 				}
 				for (int i = 0; i < 8; ++i) {
 					indices.push_back(baseIndex);
@@ -257,10 +257,10 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 					vertices.push_back({ DirectX::XMFLOAT3(x, 0, z + width), color, XMFLOAT3(0,1,0) });
 				}
 				for (int i = static_cast<int>(vertices.size()) - 1; i >= static_cast<int>(vertices.size()) - 9; --i) {
-					points.push_back(FLOAT2(
+					points.push_back(Points(FLOAT2(
 						(vertices[vertices.size() - 9].Pos.x + vertices[i].Pos.x + width) / 2,
 						(vertices[vertices.size() - 9].Pos.z + vertices[i].Pos.z) / 2
-					));
+					),true));
 				}
 				for (int i = 0; i < 8; ++i) {
 					indices.push_back((i + 1) % 9 + 1 + baseIndex);

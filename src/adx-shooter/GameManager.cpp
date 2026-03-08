@@ -79,35 +79,33 @@ bool GameManager::Initialize()
     }
 
     //Create Enemies based on the Road
-    {
-        // Set skips to ignore most of the points (needed to not overwhelm with enemies)
-        bool doSkip = true;
-        bool doSkip2 = true;
-        bool doSkip3 = false;
-        bool doSkip4 = false;
-        for (FLOAT2 point : road.points) {
-            if (not doSkip) {
-                if (not doSkip2) {
-                    if (not doSkip3) {
-                        if (not doSkip4) {
-                            Enemy* newEnemy = new Enemy();
-                            ColliderComponent tempCollider = ECS::GetInstance().getComponent<ColliderComponent>(newEnemy->m_entity);
-                            m_enemyMesh = MeshCreator::CreateBox(mWindow, -2, tempCollider.width, tempCollider.height, tempCollider.depth, XMFLOAT4(Colors::Yellow));
-
-                            ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity).position = FLOAT3(point.x, 0.5f, point.y);
-
-                            mp_enemyList.push_back(newEnemy);
-                            mEntityMesh.insert({ newEnemy->m_entity, m_enemyMesh });
-                        }
-                        doSkip4 = !doSkip4;
-                    }
-                    doSkip3 = !doSkip3;
-                }
-                doSkip2 = !doSkip2;
-            }
-            doSkip = !doSkip;
-        }
-    }
+    //{
+    //    // Set skips to ignore most of the points (needed to not overwhelm with enemies)
+    //    bool doSkip = true;
+    //    bool doSkip2 = true;
+    //    bool doSkip3 = false;
+    //    bool doSkip4 = false;
+    //    for (FLOAT2 point : road.points) {
+    //        if (not doSkip) {
+    //            if (not doSkip2) {
+    //                if (not doSkip3) {
+    //                    if (not doSkip4) {
+    //                        Enemy* newEnemy = new Enemy();
+    //                        ColliderComponent tempCollider = ECS::GetInstance().getComponent<ColliderComponent>(newEnemy->m_entity);
+    //                        m_enemyMesh = MeshCreator::CreateBox(mWindow, -2, tempCollider.width, tempCollider.height, tempCollider.depth, XMFLOAT4(Colors::Yellow));
+    //                        ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity).position = FLOAT3(point.x, 0.5f, point.y);
+    //                        mp_enemyList.push_back(newEnemy);
+    //                        mEntityMesh.insert({ newEnemy->m_entity, m_enemyMesh });
+    //                    }
+    //                    doSkip4 = !doSkip4;
+    //                }
+    //                doSkip3 = !doSkip3;
+    //            }
+    //            doSkip2 = !doSkip2;
+    //        }
+    //        doSkip = !doSkip;
+    //    }
+    //}
 
     //Generate random clouds
     {
@@ -161,19 +159,20 @@ void GameManager::Update()
 	transformComponent& playerTrans = ecs.getComponent<transformComponent>(mp_player->m_entity);
 	// generate obstacles on the road
 	mTimerGenCooldown += deltaTime;
-    for (FLOAT2 point : road.points) {
+    for (Points point : road.points) {
 		if (mTimerGenCooldown >= 3.0f)
         {
-            if (rand() % 100 < 20) { // 20% chance to generate an obstacle on each point, and only if it's not too far to the player and not too close too
-                if (sqrt(pow(playerTrans.position.x - point.x, 2) + pow(playerTrans.position.z - point.y, 2)) < 80 && sqrt(pow(playerTrans.position.x - point.x, 2) + pow(playerTrans.position.z -
-                    point.y, 2)) > 20) {
+            if (rand() % 100 < 60 && !point.used) { // 20% chance to generate an obstacle on each point, and only if it's not too far to the player and not too close too
+                if (sqrt(pow(playerTrans.position.x - point.points.x, 2) + pow(playerTrans.position.z - point.points.y, 2)) < 80 && sqrt(pow(playerTrans.position.x - point.points.x, 2) + pow(playerTrans.position.z -
+                    point.points.y, 2)) > 20) {
                     Obstacle* newObstacle = new Obstacle();
-                    ecs.getComponent<transformComponent>(newObstacle->m_entity).position = FLOAT3(point.x, 1.5f, point.y);
+                    ecs.getComponent<transformComponent>(newObstacle->m_entity).position = FLOAT3(point.points.x, 1.5f, point.points.y);
                     mp_obstacleList.push_back(newObstacle);
                     mEntityMesh.insert({ newObstacle->m_entity, m_obstacleMesh });
+                    mTimerGenCooldown = 0.0f;
+					point.used = true;
                 }
             }
-            mTimerGenCooldown = 0.0f;
         }
     }
     // Player Shoot
@@ -278,10 +277,10 @@ void GameManager::Update()
         FLOAT3 mov = { 0.0f, 0.0f, 0.0f };
 
         if (currentTargetIdx < road.points.size()) {
-            FLOAT2 target = road.points[currentTargetIdx];
+            Points target = road.points[currentTargetIdx];
 
-            float dirX = target.x - playerTrans.position.x;
-            float dirZ = target.y - playerTrans.position.z;
+            float dirX = target.points.x - playerTrans.position.x;
+            float dirZ = target.points.y - playerTrans.position.z;
 
             float distance = sqrt(dirX * dirX + dirZ * dirZ);
 

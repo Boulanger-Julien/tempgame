@@ -1,13 +1,19 @@
 #pragma once 
 #include "adx-render\Window.h"
 
-class Road {
+struct Points
+{
+	FLOAT2 points;
+	bool used = false;
+};
+
+struct Road {
 public:
 	FLOAT2 start;
 	FLOAT2 end;
-	std::vector<FLOAT2> points;
+	std::vector<Points> points;
 	MeshGeometry mesh;
-	Road(FLOAT2 start, FLOAT2 end, std::vector<FLOAT2> points, MeshGeometry mesh) : start(start), end(end), points(points), mesh(mesh) {}
+	Road(FLOAT2 start, FLOAT2 end, std::vector<Points> points, MeshGeometry mesh) : start(start), end(end), points(points), mesh(mesh) {}
 	Road() : start(0, 0), end(0, 0), points(), mesh() {}
 };
 
