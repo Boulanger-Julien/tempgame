@@ -6,7 +6,7 @@ Enemy::Enemy() {
 	m_entity = ECS::GetInstance().createEntity();
 	ECS::GetInstance().addComponent<transformComponent>(m_entity, transformComponent());
 	ECS::GetInstance().addComponent<ColliderComponent>(m_entity, ColliderComponent(m_entity, 2.f, 2.f, 2.f));
-	ECS::GetInstance().addComponent<velocityComponent>(m_entity, velocityComponent(1.5f, 1, 1.5f));
+	ECS::GetInstance().addComponent<velocityComponent>(m_entity, velocityComponent(1.5f));
 }
 
 Enemy::~Enemy() {

@@ -3,51 +3,24 @@
 #include "adx-core/Timer.h"
 
 Player::Player() {
-	m_entity = ECS::GetInstance().createEntity();
-	ECS::GetInstance().addComponent<transformComponent>(m_entity, transformComponent());
-	ECS::GetInstance().addComponent<ColliderComponent>(m_entity, ColliderComponent(m_entity));
-
-	ECS::GetInstance().getComponent<transformComponent>(m_entity).position = FLOAT3(0, 3, 0);
-	baseY = ECS::GetInstance().getComponent<transformComponent>(m_entity).position.y;
+	m_entity = ECS::GetInstance().createEntity(transformComponent(0,2,0), velocityComponent(35), ColliderComponent());
+	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).updateCollider();
 }
 
 void Player::Update() {
-	float deltatime = Timer::GetInstance()->GetDeltatime() * m_timeSpeed;
-
-	// Crouch
-	if (isCrouching) {
-		ECS::GetInstance().getComponent<transformComponent>(m_entity).position.y = baseY - 1;
-	}
-	else {
-		if (ECS::GetInstance().getComponent<transformComponent>(m_entity).position.y != baseY) {
-			ECS::GetInstance().getComponent<transformComponent>(m_entity).position.y = baseY;
-		}
-	}
+	float deltatime = Timer::GetInstance()->GetDeltatime();
 
 	// Health Regen (1hp/s)
-	if (m_currentHealthRegenCooldown >= m_healthRegenCooldown && m_healthPoints < 100) {
-		m_healthPoints += 1;
-		m_currentHealthRegenCooldown = 0;
+	if (mCurrentHealthRegenCooldown >= mHealthRegenCooldown && mHealthPoints < 100) {
+		mHealthPoints += 1;
+		mCurrentHealthRegenCooldown = 0;
 	}
-	m_currentHealthRegenCooldown += deltatime;
-
-	// Shoot
-	if (m_currentShootCooldown >= m_shootCooldown) {
-		canShoot = true;
-		m_currentShootCooldown = 0;
-	}
-	if (not canShoot) {
-		m_currentShootCooldown += deltatime;
-	}
+	mCurrentHealthRegenCooldown += deltatime;
 }
 
-void Player::takeDamage() {
-	m_healthPoints -= 15;
-	if (m_healthPoints <= 0) {
-		m_healthPoints = 0;
+void Player::takeDamage(int damage) {
+	mHealthPoints -= damage;
+	if (mHealthPoints <= 0) {
+		mHealthPoints = 0;
 	}
-}
-
-void Player::SlowDown(bool slow) {
-	m_timeSpeed = slow ? 0.5f : 1.0f;
 }

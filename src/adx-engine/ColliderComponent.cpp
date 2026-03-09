@@ -8,8 +8,6 @@ ColliderComponent::ColliderComponent(int ownerEntity, float w, float h, float d)
 	depth = d;
 
 	isTrigger = false;
-
-	updateCollider();
 }
 
 bool ColliderComponent::collisionCheck(int entity) {

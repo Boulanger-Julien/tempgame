@@ -13,18 +13,18 @@ void transformSystem::Move(transformComponent& transform, float x, float y, floa
 	return;
 }
 
-void transformSystem::MoveKey(transformComponent& transform, FLOAT3 angle)
+void transformSystem::MoveKey(transformComponent& transform,velocityComponent& velo, FLOAT3 angle, float deltaTime)
 {
-	// On convertit l'angle de degrÈs en radians si nÈcessaire
+	// On convertit l'angle de degr√©s en radians si n√©cessaire
 	// float rad = angle.y * (3.14159f / 180.0f); 
 	float rad = angle.y * XM_PI / 180.0f;
 
 	// Calcul des vecteurs forward (Z) et right (X)
-	float forwardX = sin(rad);
-	float forwardZ = cos(rad);
+	float forwardX = sin(rad) * deltaTime * velo.velocity;
+	float forwardZ = cos(rad) * deltaTime * velo.velocity;
 
-	float rightX = cos(rad);
-	float rightZ = -sin(rad);
+	float rightX = cos(rad) * deltaTime * velo.velocity;
+	float rightZ = -sin(rad) * deltaTime * velo.velocity;
 
 	// Z / S : Avancer / Reculer
 	if (InputSystem::isKeyDown('Z'))
@@ -120,7 +120,7 @@ void transformSystem::LookAt(transformComponent& transform, FLOAT3 target)
 
 void transformSystem::UpdateForward(transformComponent& transform)
 {
-	// RÈcupËre un quaternion gr‚ce au vecteur de rotation (roll, pitch, yaw)
+	// R√©cup√®re un quaternion gr√¢ce au vecteur de rotation (roll, pitch, yaw)
 	 XMVECTOR quat = XMQuaternionRotationRollPitchYaw(transform.rotation.x, transform.rotation.y, transform.rotation.z);
 
 	// XMVector3Rotate(Axe du forward(0,0,1), quaternion);

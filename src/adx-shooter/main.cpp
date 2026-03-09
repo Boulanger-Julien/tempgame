@@ -11,7 +11,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, i
 
 	try
 	{
-		GameManager App(hInstance);
+		GameManager App(hInstance,1080,720);
 		if (!App.Initialize())
 			return 0;
 
