@@ -160,28 +160,28 @@ void GameManager::Update()
     // generate obstacles on the road
     mTimerGenCooldown += deltaTime;
     for (auto it = road.points.rbegin(); it != road.points.rend(); ++it) {
-        FLOAT2 point = *it;
+        Points point = *it;
 
         if (mTimerGenCooldown >= 3.0f) {
             // Correction de la probabilité : 20% de chance (votre commentaire disait 20 mais le code 100)
-            if (rand() % 100 < 20) {
+            if (rand() % 100 < 20 && !point.used) {
 
                 // Calcul de la distance au carré pour éviter les appels coûteux à sqrt()
-                float dx = playerTrans.position.x - point.x;
-                float dz = playerTrans.position.z - point.y;
+                float dx = playerTrans.position.x - point.points.x;
+                float dz = playerTrans.position.z - point.points.y;
                 float distSq = (dx * dx) + (dz * dz);
 
                 // 20^2 = 400, 80^2 = 6400
-                if (distSq < 6400.0f && distSq > 400.0f) {
+                if (distSq < pow(50 , 2) && distSq > (pow(20,2))) {
                     Obstacle* newObstacle = new Obstacle();
 
-                    ecs.getComponent<transformComponent>(newObstacle->m_entity).position = FLOAT3(point.x, 1.5f, point.y);
+                    ecs.getComponent<transformComponent>(newObstacle->m_entity).position = FLOAT3(point.points.x, 1.5f, point.points.y);
 
                     mp_obstacleList.push_back(newObstacle);
                     mEntityMesh.insert({ newObstacle->m_entity, m_obstacleMesh });
 
                     mTimerGenCooldown = 0.0f;
-
+					point.used = true;
                     // Optionnel : break; si vous ne voulez générer qu'UN SEUL obstacle par frame
                     // break; 
                 }
@@ -299,6 +299,7 @@ void GameManager::Update()
                 mov.z = dirZ / distance;
             }
             else {
+				road.points.erase(road.points.begin());
                 currentTargetIdx++;
             }
         }
