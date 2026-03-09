@@ -13,6 +13,38 @@ void transformSystem::Move(transformComponent& transform, float x, float y, floa
 	return;
 }
 
+void transformSystem::MoveKey(transformComponent& transform, FLOAT3 angle)
+{
+	// On convertit l'angle de degrés en radians si nécessaire
+	// float rad = angle.y * (3.14159f / 180.0f); 
+	float rad = angle.y * XM_PI / 180.0f;
+
+	// Calcul des vecteurs forward (Z) et right (X)
+	float forwardX = sin(rad);
+	float forwardZ = cos(rad);
+
+	float rightX = cos(rad);
+	float rightZ = -sin(rad);
+
+	// Z / S : Avancer / Reculer
+	if (InputSystem::isKeyDown('Z'))
+		Move(transform, forwardX, 0, forwardZ);
+	if (InputSystem::isKeyDown('S'))
+		Move(transform, -forwardX, 0, -forwardZ);
+
+	// Q / D : Strafe Gauche / Droite
+	if (InputSystem::isKeyDown('Q'))
+		Move(transform, -rightX, 0, -rightZ);
+	if (InputSystem::isKeyDown('D'))
+		Move(transform, rightX, 0, rightZ);
+	if (InputSystem::isKeyDown(VK_SHIFT))
+		Move(transform, 0, -1, 0);
+	if (InputSystem::isKeyDown(VK_SPACE))
+		Move(transform, 0, 1, 0);
+
+	return;
+}
+
 void transformSystem::MoveForward(transformComponent& transform, float distance) {
 	transform.position.x += distance * transform.forward.x;
 	transform.position.y += distance * transform.forward.y;
@@ -75,6 +107,15 @@ void transformSystem::RotateAround(transformComponent& transform, transformCompo
     transform.position.x = target.position.x + radius * cp * sy;
     transform.position.y = target.position.y - radius * sp;
     transform.position.z = target.position.z + radius * cp * cy;
+}
+
+void transformSystem::LookAt(transformComponent& transform, FLOAT3 target)
+{
+	FLOAT3 direction = target - transform.position;
+	float yaw = atan2f(direction.x, direction.z);
+	float pitch = atan2f(-direction.y, sqrtf(direction.x * direction.x + direction.z * direction.z));
+	transform.rotation.x = pitch;
+	transform.rotation.y = yaw;
 }
 
 void transformSystem::UpdateForward(transformComponent& transform)

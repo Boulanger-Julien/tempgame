@@ -15,7 +15,6 @@ Game::Game(HINSTANCE hInstance, int winW, int winH)
         mWindow->Initialize(winW, winH);
     }
     player = ECS::GetInstance().createEntity(transformComponent(-2, 6, -2), velocityComponent(3, 0, 3));
-	gun = ECS::GetInstance().createEntity(transformComponent(0, 0, 0));
     mLifeTextRenderer = new TextRenderer(mWindow);
 	mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 	mScoreTextRenderer = new TextRenderer(mWindow);
@@ -28,17 +27,15 @@ bool Game::Initialize()
 
 	//Generate player
     {
-        MeshGeometry playerMesh = MeshCreator::CreateBox(mWindow, player, 2, 6, 2, (XMFLOAT4)Colors::Navy, L"..\\..\\res\\Textures\\Diamond2.dds");
+        MeshGeometry playerMesh = MeshCreator::CreateBox(mWindow, player, 2, 2, 2, (XMFLOAT4)Colors::Navy, L"..\\..\\res\\Textures\\Diamond2.dds");
         mEntityMesh.insert({ player, playerMesh });
-		MeshGeometry gunMesh = MeshCreator::CreateCustomMesh(mWindow, player, "..\\..\\res\\Gun.json", 1, (XMFLOAT4)Colors::DarkRed);
-		mEntityMesh.insert({ gun, gunMesh });
     }
 
     //Generate random roads connected
     {
 		Entity road1 = ECS::GetInstance().createEntity(transformComponent(0, 0, 0));
-        road = MeshCreator::CreateRoad(mWindow, road1, 6.0f, 30.0f, 3600, (XMFLOAT4)Colors::Gray);
-        mEntityMesh.insert({ road1, road.mesh });
+        MeshGeometry road = MeshCreator::CreateBox(mWindow, road1, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
+        mEntityMesh.insert({ road1, road});
     }
 
 	Entity cloud = ECS::GetInstance().createEntity(transformComponent(0, 10, 0));
@@ -94,25 +91,8 @@ void Game::Update(const Timer& timer)
         transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(player);
         ECS::GetInstance().getComponent<transformComponent>(sun).position = FLOAT3(playerTrans.position.x - 200, 100, playerTrans.position.z + 200);
         velocityComponent& playerVel = ECS::GetInstance().getComponent<velocityComponent>(player);
-
+        transformSystem::MoveKey(playerTrans, FLOAT3(0, -45, 0));
         FLOAT3 mov = { 0.0f, 0.0f, 0.0f };
-
-        if (currentTargetIdx < road.points.size()) {
-            FLOAT2 target = road.points[currentTargetIdx];
-
-            float dirX = target.x - playerTrans.position.x;
-            float dirZ = target.y - playerTrans.position.z;
-
-            float distance = sqrt(dirX * dirX + dirZ * dirZ);
-
-            if (distance > arrivalThreshold) {
-                mov.x = dirX / distance;
-                mov.z = dirZ / distance;
-            }
-            else {
-                currentTargetIdx++;
-            }
-        }
 
         // Update player position
         FLOAT3 pos = playerTrans.position;
@@ -128,15 +108,9 @@ void Game::Update(const Timer& timer)
         InputSystem::SetMousePos(400, 300);
         // Update camera position to follow the player
         {
-            transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(player);
-            transformComponent camOrbit;
-            camOrbit.rotation = playerTrans.rotation;
+			transformComponent camOrbit = mCamera.GetTransform();
 
-            {
-                transformSystem::RotateAround(camOrbit, playerTrans, 0.1f);
-            }
-
-            mCamera.SetPosition(toXMFLOAT3(camOrbit.position));
+            mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30,30,-30)));
             XMFLOAT3 plpos = toXMFLOAT3(playerTrans.position);
             XMFLOAT3 camPos = mCamera.Position();
             XMVECTOR camPosVect = XMLoadFloat3(&camPos);
@@ -145,28 +119,7 @@ void Game::Update(const Timer& timer)
             mCamera.LookAt(camPosVect, targetVect);
             mWindow->SetCamera(mCamera);
         }
-        //Update gun position to be in front of the player
-        {
-            transformComponent& gunTrans = ECS::GetInstance().getComponent<transformComponent>(gun);
-            transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(player);
-            float pitch = playerTrans.rotation.x;
-            float yaw = playerTrans.rotation.y;   
-
-            FLOAT3 forward = {
-                sin(yaw) * cos(pitch),
-                -sin(pitch),
-                cos(yaw) * cos(pitch)
-            };
-
-            FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
-
-			gunTrans.position = playerTrans.position - (forward * 2.5f) - (right * 0.8f) + FLOAT3(0, -0.5f, 0);
-
-            gunTrans.rotation.y = yaw - XM_PIDIV2;
-            gunTrans.rotation.z = -pitch;
-        }
     }
-	mPlayerHealth -= timer.GetDeltatime() * 5.0f * mTimerSpeed;
 	ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = mPlayerHealth / mMaxPlayerHealth;
     static int entityToRemove = -1;
     // Update world matrix of all entities to draw them in the correct position

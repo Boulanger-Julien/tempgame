@@ -80,3 +80,53 @@ public:
 	void Destroy();
 };
 
+class GameManager
+{
+public:
+	GameManager(HINSTANCE hInstance, int winW, int winH);
+	~GameManager() {}
+	bool Initialize();
+	void Update();
+	bool Run();
+	void Draw();
+	void Pause();
+	void SpeedDown();
+	void AddBullet(Entity sender);
+	void Destroy();
+
+
+private:
+	bool firstFrame = true;
+	bool F1DownLastFrame = false;
+	bool F1Down = false;
+	bool mAppPaused = false;
+	float mSpeedDownCd = 10.0f;
+	float mSpeedDownTimer = 0.0f;
+	float mSpeedDownDuration = 5.0f;
+	float mPlayerHealth = 100.0f;
+	float mMaxPlayerHealth = 100.0f;
+	float mScore = 0.0f;
+	int offsetHBX = 20;
+	int offsetHBY = 800;
+	float healthBarWidth = 400;
+	float healthBarHeight = 100;
+
+
+	MSG msg = { 0 };
+
+	HINSTANCE mhInstance;
+	Window* mWindow;
+	Entity healthBar;
+	Entity player;
+	Entity sun;
+	Light mLight;
+	Camera mCamera;
+	TextRenderer* mScoreTextRenderer;
+	TextRenderer* mLifeTextRenderer;
+
+	float mTimerSpeed = 1.0f;
+
+	std::unordered_map<int, MeshGeometry> mEntityMesh;
+	std::unordered_map<int, MeshGeometry> mUIMesh;
+
+};

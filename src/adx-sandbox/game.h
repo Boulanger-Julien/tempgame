@@ -39,8 +39,6 @@ private:
 	Entity healthBar;
 	Entity player;
 	Entity sun;
-	Entity gun;
-	Road road;
 	Light mLight;
 	Camera mCamera;
 	TextRenderer* mScoreTextRenderer;
