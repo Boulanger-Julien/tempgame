@@ -4,18 +4,12 @@
 class Player
 {
 private:
-	int mHealthRegenCooldown = 5.0f;
-	float mCurrentHealthRegenCooldown = 0;
-	int mHPRegenAmount = 1;
-
 public:
+	StatsComponent Stats;
 	Entity m_entity;
 
-	int mExp = 0;
-	float mHealthPoints = 100;
-	float mMaxHealthPoints = 100;
-
 	Player();
+	void ChooseClass(int classID);
 	void Update();
 
 	void takeDamage(int damage);

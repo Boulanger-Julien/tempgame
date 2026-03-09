@@ -13,18 +13,18 @@ void transformSystem::Move(transformComponent& transform, float x, float y, floa
 	return;
 }
 
-void transformSystem::MoveKey(transformComponent& transform,velocityComponent& velo, FLOAT3 angle, float deltaTime)
+void transformSystem::MoveKey(transformComponent& transform,float velo, FLOAT3 angle, float deltaTime)
 {
 	// On convertit l'angle de degrés en radians si nécessaire
 	// float rad = angle.y * (3.14159f / 180.0f); 
 	float rad = angle.y * XM_PI / 180.0f;
 
 	// Calcul des vecteurs forward (Z) et right (X)
-	float forwardX = sin(rad) * deltaTime * velo.velocity;
-	float forwardZ = cos(rad) * deltaTime * velo.velocity;
+	float forwardX = sin(rad) * deltaTime * velo;
+	float forwardZ = cos(rad) * deltaTime * velo;
 
-	float rightX = cos(rad) * deltaTime * velo.velocity;
-	float rightZ = -sin(rad) * deltaTime * velo.velocity;
+	float rightX = cos(rad) * deltaTime * velo;
+	float rightZ = -sin(rad) * deltaTime * velo;
 
 	// Z / S : Avancer / Reculer
 	if (InputSystem::isKeyDown('Z'))

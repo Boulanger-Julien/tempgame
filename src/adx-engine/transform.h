@@ -116,16 +116,11 @@ struct transformComponent
 	FLOAT3 right;
 	FLOAT3 up;
 };
-struct velocityComponent
-{
-	velocityComponent(float v = 0) : velocity(v) {}
-	float velocity;
-};
 
 struct transformSystem
 {
 	static void Move(transformComponent& transform, float x = 0, float y = 0, float z = 0);
-	static void MoveKey(transformComponent& transform,velocityComponent& velo, FLOAT3 angle = FLOAT3(0, 0, 0), float deltaTime = 1);
+	static void MoveKey(transformComponent& transform, float velo, FLOAT3 angle = FLOAT3(0, 0, 0), float deltaTime = 1);
 	static void MoveForward(transformComponent& transform, float distance = 1);
 	static void UpdateForward(transformComponent& transform);
 	static void SetYPR(transformComponent& transform, float x = 0, float y = 0, float z = 0);

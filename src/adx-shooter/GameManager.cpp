@@ -90,8 +90,8 @@ void GameManager::Update()
         float arrivalThreshold = 0.5f;
 
         transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(mPlayer->m_entity);
-        velocityComponent& playerVel = ECS::GetInstance().getComponent<velocityComponent>(mPlayer->m_entity);
-		transformSystem::MoveKey(playerTrans, playerVel, FLOAT3(0, -45, 0), deltaTime);
+        
+		transformSystem::MoveKey(playerTrans, mPlayer->Stats.mMoveSpeed, FLOAT3(0, -45, 0), deltaTime);
 
         // Update camera position to follow the player
         {
@@ -182,8 +182,8 @@ void GameManager::Draw()
 
     // Show text
     {
-        mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->mExp) , 20, 20, 24);
-        mLifeTextRenderer->DrawTxt(mPlayer->mHealthPoints > 0 ? std::to_string((int)mPlayer->mHealthPoints) + "/" + std::to_string((int)mPlayer->mMaxHealthPoints) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
+        mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->Stats.mExp) , 20, 20, 24);
+        mLifeTextRenderer->DrawTxt(mPlayer->Stats.mHealthPoints > 0 ? std::to_string((int)mPlayer->Stats.mHealthPoints) + "/" + std::to_string((int)mPlayer->Stats.mMaxHealthPoints) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
     }
 
     firstFrame = false;
