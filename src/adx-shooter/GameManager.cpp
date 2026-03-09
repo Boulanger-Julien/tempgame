@@ -83,13 +83,15 @@ void GameManager::Update()
 {
     float deltaTime = GetDeltatime();
     static bool cDownLastFrame = false;
-
+	POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
+	ScreenToClient(mWindow->MainWnd(), &mousePos);
+    float finalMouseX = static_cast<float>(mousePos.x);
+    float finalMouseY = static_cast<float>(mousePos.y);
+	Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
+	mPlayer->Update(ray);
     // Update player position and camera position to follow the player
     {
-        static size_t currentTargetIdx = 0;
-        float arrivalThreshold = 0.5f;
-
-        transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(mPlayer->m_entity);
+		transformComponent& playerTrans = mPlayer->GetTransform();
         
 		transformSystem::MoveKey(playerTrans, mPlayer->Stats.mMoveSpeed, FLOAT3(0, -45, 0), deltaTime);
 

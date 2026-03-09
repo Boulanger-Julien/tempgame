@@ -3,7 +3,10 @@
 #include <DirectXMath.h>
 
 using namespace DirectX;
-
+struct Ray {
+    XMVECTOR origin;
+    XMVECTOR direction;
+};
 class Camera {
 public:
     Camera();
@@ -26,7 +29,7 @@ public:
 
     XMMATRIX View() const { return XMLoadFloat4x4(&mView); }
     XMMATRIX Proj() const { return XMLoadFloat4x4(&mProj); }
-
+    Ray GetRayFromMouse(float mouseX, float mouseY, float screenWidth, float screenHeight) const;
 private:
     XMFLOAT3 mPosition{ 0.0f, 0.0f, 0.0f };
     XMFLOAT3 mRight{ 1.0f, 0.0f, 0.0f };

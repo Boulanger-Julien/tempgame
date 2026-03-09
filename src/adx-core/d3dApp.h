@@ -38,6 +38,8 @@ public:
     virtual LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     void CalculateFrameStats();
     void FlushCommandQueue();
+    RECT mWindowRect = { 0, 0, 800, 600 };
+
 protected:
     void ToggleFullscreen();
     virtual void CreateRtvAndDsvDescriptorHeaps();
@@ -106,6 +108,5 @@ protected:
     DXGI_FORMAT mBackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
     DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
     bool mIsFullscreen = false;
-    RECT mWindowRect = { 0, 0, 800, 600 };
     RECT mWindowPosBeforeFullscreen;
 };

@@ -116,3 +116,25 @@ transformComponent Camera::GetTransform()
     transform.forward = mLook;
     return transform;
 }
+
+Ray Camera::GetRayFromMouse(float mouseX, float mouseY, float screenWidth, float screenHeight) const
+{
+    float ndcX = (2.0f * mouseX) / screenWidth - 1.0f;
+    float ndcY = 1.0f - (2.0f * mouseY) / screenHeight;
+
+    XMMATRIX view = View();
+    XMMATRIX proj = Proj();
+    XMMATRIX invViewProj = XMMatrixInverse(nullptr, XMMatrixMultiply(view, proj));
+
+    // 2. Points dans l'espace NDC
+    XMVECTOR nearPoint = XMVectorSet(ndcX, ndcY, 0.0f, 1.0f);
+    XMVECTOR farPoint = XMVectorSet(ndcX, ndcY, 1.0f, 1.0f);
+
+    // 3. Unproject vers l'espace Monde
+    XMVECTOR worldNear = XMVector3TransformCoord(nearPoint, invViewProj);
+    XMVECTOR worldFar = XMVector3TransformCoord(farPoint, invViewProj);
+
+    XMVECTOR rayDir = XMVector3Normalize(XMVectorSubtract(worldFar, worldNear));
+
+    return { worldNear, rayDir };
+}

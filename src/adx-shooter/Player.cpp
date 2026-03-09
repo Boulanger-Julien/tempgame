@@ -1,10 +1,13 @@
 #include "pch.h"
 #include "Player.h"
 #include "adx-core/Timer.h"
+#include "adx-engine\framework.h"
 
 Player::Player() {
 	m_entity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent());
-	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).updateCollider();
+	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
+	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
+	mCollider.updateCollider();
 }
 
 void Player::ChooseClass(int classID) {
@@ -24,7 +27,7 @@ void Player::ChooseClass(int classID) {
 	}
 }
 
-void Player::Update() {
+void Player::Update(const Ray& mouseRay) {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
 	// Health Regen (1hp/s)
@@ -33,6 +36,16 @@ void Player::Update() {
 		Stats.mCurrentHealthRegenCooldown = 0;
 	}
 	Stats.mCurrentHealthRegenCooldown += deltatime;
+
+	float t = (mTransform.position.y - XMVectorGetY(mouseRay.origin)) / XMVectorGetY(mouseRay.direction);
+	XMVECTOR intersectPoint = XMVectorAdd(mouseRay.origin, XMVectorScale(mouseRay.direction, t));
+	float targetX = XMVectorGetX(intersectPoint);
+	float targetZ = XMVectorGetZ(intersectPoint);
+	float dx = targetX - mTransform.position.x;
+	float dz = targetZ - mTransform.position.z;
+	float angle = atan2f(dx, dz);
+	mTransform.rotation.y = angle;
+	ECS::GetInstance().getComponent<transformComponent>(m_entity) = mTransform;
 }
 
 void Player::takeDamage(int damage) {
