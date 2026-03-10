@@ -32,7 +32,11 @@ bool GameManager::Initialize()
     {
         MeshGeometry playerMesh = MeshCreator::CreateBox(mWindow, mPlayer->m_entity, 2, 2, 2, (XMFLOAT4)Colors::Navy, L"..\\..\\res\\Textures\\Diamond2.dds");
         mEntityMesh.insert({ mPlayer->m_entity, playerMesh });
+		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->equippedWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"..\\..\\res\\Textures\\Diamond2.dds");
+		mEntityMesh.insert({ mPlayer->equippedWeapon->GetEntity(), weaponMesh });
     }
+	m_bulletMesh = MeshCreator::CreateBall(mWindow, 999, 2.0f, 10, 10, (XMFLOAT4)Colors::Blue);
+    m_enemyMesh = MeshCreator::CreateBox(mWindow, 998, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"..\\..\\res\\Textures\\Diamond2.dds");
 
     //Generate random roads connected
     {
@@ -83,54 +87,99 @@ void GameManager::Update()
 {
     float deltaTime = GetDeltatime();
     static bool cDownLastFrame = false;
-	POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
-	ScreenToClient(mWindow->MainWnd(), &mousePos);
+
+    // Input & Player Update
+    POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
+    ScreenToClient(mWindow->MainWnd(), &mousePos);
     float finalMouseX = static_cast<float>(mousePos.x);
     float finalMouseY = static_cast<float>(mousePos.y);
-	Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
-	mPlayer->Update(ray);
-    // Update player position and camera position to follow the player
+
+    Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
+    mPlayer->Update(ray);
+
+    // Mouvement du joueur et Caméra
+    transformComponent& playerTrans = mPlayer->GetTransform();
+    transformSystem::MoveKey(playerTrans, mPlayer->Stats.mMoveSpeed, FLOAT3(0, -45, 0), deltaTime);
+
+    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
+	XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
+    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
+	XMFLOAT3 camPos = mCamera.Position();
+    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
+    mWindow->SetCamera(mCamera);
+
+    // Update de la barre de vie UI
+    ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = mPlayer->Stats.mHealthPoints / mPlayer->Stats.mMaxHealthPoints;
+
+    // --- MISE À JOUR DES MATRICES DE RENDU ---
+    // On met à jour les constantes de chaque entité dans le Window
+    for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
     {
-		transformComponent& playerTrans = mPlayer->GetTransform();
+        int entityID = it->first;
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
+        mWindow->Update(entityID, entityWorld);
+    }
+    for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
+    {
+        int entityID = it->first;
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
+        mWindow->UpdateUI(entityID, entityWorld);
+    }
+
+    // Tir (Bullet instantiation)
+    if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    {
+        //if (!cDownLastFrame) {
+            AddBullet(mPlayer->m_entity);
+            cDownLastFrame = true;
+        //}
+    }
+    else {
+        cDownLastFrame = false;
+    }
+    if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    {
+		SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+    }
+
+    // --- BOUCLE DES BULLETS ET COLLISIONS ---
+    for (int i = mBulletList.size() - 1; i >= 0; i--) {
+        mBulletList[i]->Update();
+
+        // Vérification de collision avec les ennemis (si la balle n'est pas déjà marquée)
+        if (!mBulletList[i]->toBeDestroyed) {
+            for (Enemy* enemy : mEnemyList) {
+                // TRÈS IMPORTANT : On vérifie s'il n'est pas déjà mort
+                if (enemy->isDead) continue;
+
+                if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(enemy->m_entity)) {
+                    enemy->isDead = true; // On le marque immédiatement
+                    mDestroyEnemyList.push_back(enemy);
+                    mBulletList[i]->toBeDestroyed = true;
+                    break;
+                }
+            }
         
-		transformSystem::MoveKey(playerTrans, mPlayer->Stats.mMoveSpeed, FLOAT3(0, -45, 0), deltaTime);
+            //{
+            //    if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->m_entity)) {
+            //        mPlayer->takeDamage(2);
+            //        mBulletList[i]->toBeDestroyed = true;
+            //    }
+            //}
+        }
 
-        // Update camera position to follow the player
-        {
-            transformComponent camOrbit = mCamera.GetTransform();
-
-            mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
-            XMFLOAT3 plpos = toXMFLOAT3(playerTrans.position);
-            XMFLOAT3 camPos = mCamera.Position();
-            XMVECTOR camPosVect = XMLoadFloat3(&camPos);
-            XMVECTOR targetVect = XMLoadFloat3(&plpos);
-
-            mCamera.LookAt(camPosVect, targetVect);
-            mWindow->SetCamera(mCamera);
+        // Si la balle doit être détruite (sortie d'écran ou collision)
+        if (mBulletList[i]->toBeDestroyed) {
+            mDestroyBulletList.push_back(mBulletList[i]);
+            mBulletList.erase(mBulletList.begin() + i);
         }
     }
-    ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = mPlayerHealth / mMaxPlayerHealth;
-    static int entityToRemove = -1;
-    // Update world matrix of all entities to draw them in the correct position
-    {
-        for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
-        {
-            int entityID = it->first;
-            XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
-            mWindow->Update(entityID, entityWorld);
-        }
-        for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
-        {
-            int entityID = it->first;
-            XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
-            mWindow->UpdateUI(entityID, entityWorld);
-        }
-    }
-
-    // At the end of the Update, destroy all entities unneeded
+    for (Enemy* enemy : mEnemyList) {
+        enemy->Update();
+	}
+    // Nettoyage final des entités supprimées ce frame
     Destroy();
 }
-
 
 bool GameManager::Run()
 {
@@ -171,15 +220,16 @@ void GameManager::Draw()
     for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
     {
         int entityID = it->first;
-        MeshGeometry meshPtr = it->second;
+        MeshGeometry& meshRef = it->second;
 
-        mWindow->Draw(meshPtr, entityID);
+        mWindow->Draw(meshRef, entityID);
     }
     for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
     {
         int entityID = it->first;
-        MeshGeometry meshPtr = it->second;
-        mWindow->DrawUI(meshPtr, entityID);
+        MeshGeometry& meshRef = it->second;
+
+        mWindow->DrawUI(meshRef, entityID);
     }
 
     // Show text
@@ -234,42 +284,79 @@ void GameManager::AddBullet(Entity sender) {
 
         FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
 
-        ecs.getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position - (forward * 2.5f) - (right * 0.8f);
+        ecs.getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position + (forward * 2.5f) - (right * 0.8f);
     }
-
+	transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
+	bulletTrans.forward = bulletTrans.forward * -1;
 
     transformSystem::Move(ecs.getComponent<transformComponent>(newBullet->m_entity), 0, 0, 2);
 
-    mEntityMesh.insert({ newBullet->m_entity,  m_bulletMesh });
+    mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
+    mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
+    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
+    mWindow->Update(newBullet->m_entity, bulletWorld);
+
     mBulletList.push_back(newBullet);
 }
-
 float GameManager::GetDeltatime() {
     return Timer::GetInstance()->GetDeltatime();
 }
 
 void GameManager::Destroy() {
-    if (not mDestroyBulletList.empty()) {
+    // NETTOYAGE DES BULLETS
+    if (!mDestroyBulletList.empty()) {
         for (Bullet* bullet : mDestroyBulletList) {
+            // 1. Libérer les ressources DirectX (Slots de descripteurs)
+            mWindow->RemoveEntityResources(bullet->m_entity);
+
+            // 2. Retirer du système de rendu
             mEntityMesh.erase(bullet->m_entity);
+
+            // 4. Supprimer l'objet C++
             delete bullet;
         }
         mDestroyBulletList.clear();
     }
 
-    if (not mDestroyEnemyList.empty()) {
+    // NETTOYAGE DES ENNEMIS (Même logique)
+    if (!mDestroyEnemyList.empty()) {
         for (Enemy* enemy : mDestroyEnemyList) {
+            // 1. On le retire de la liste de l'Update LOGIQUE
+            auto it = std::find(mEnemyList.begin(), mEnemyList.end(), enemy);
+            if (it != mEnemyList.end()) {
+                mEnemyList.erase(it);
+            }
+
+            // 2. On retire les ressources DirectX
+            mWindow->RemoveEntityResources(enemy->m_entity);
+
+            // 3. On le retire du dictionnaire de rendu
             mEntityMesh.erase(enemy->m_entity);
+
+            // 4. Supprimer l'objet C++
             delete enemy;
         }
         mDestroyEnemyList.clear();
     }
 
-    if (not mDestroyObstacleList.empty()) {
+    // NETTOYAGE DES OBSTACLES
+    if (!mDestroyObstacleList.empty()) {
         for (Obstacle* obstacle : mDestroyObstacleList) {
+            mWindow->RemoveEntityResources(obstacle->m_entity);
             mEntityMesh.erase(obstacle->m_entity);
             delete obstacle;
         }
         mDestroyObstacleList.clear();
     }
+}
+
+void GameManager::SpawnMob(float x, float z, int mob) {
+    Enemy* newEnemy = new Enemy();
+    newEnemy->GetTransform() = ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity);
+    newEnemy->GetTransform().position = FLOAT3(x, 2, z);
+    mWindow->RegisterExistingMeshForEntity(newEnemy->m_entity);
+    mEntityMesh.insert({ newEnemy->m_entity, m_enemyMesh });
+    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity));
+    mWindow->Update(newEnemy->m_entity, enemyWorld);
+	mEnemyList.push_back(newEnemy);
 }

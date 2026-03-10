@@ -28,6 +28,8 @@ public:
 	MeshGeometry InitUI(const wchar_t* filename, int index, float width, float height, XMFLOAT4 color);
 
 	MeshGeometry CreateDynamicMesh(int index, UINT maxVertices, UINT maxIndices);
+	void RegisterExistingMeshForEntity(int entityID);
+	void RemoveEntityResources(int entityID);
 
 private:
 	virtual void OnResize() override;

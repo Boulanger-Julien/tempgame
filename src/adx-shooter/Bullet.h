@@ -9,7 +9,6 @@ public:
 	Entity m_entity;
 
 	float m_speed = 50;
-
 	int maxLifetime = 1;			// in Seconds
 	float currentLifetime = 0;
 	bool toBeDestroyed = false;

@@ -10,11 +10,13 @@ class Basic_Sword : public Sword
 		mAttackSpeed = 1.0f;
 		mRange = 1.0f;
 		mRarity = 1.0f;
-		mBaseDamage = 10.0f;
+		mBaseDamage = 5.0f;
+		mName = L"Basic_Sword";
 	}
 	~Basic_Sword() {}
 	void Attack() override {
-		std::cout << "Basic Sword Attack!" << std::endl;
+		transformComponent& Trans = ECS::GetInstance().getComponent<transformComponent>(m_entity);
+		Trans.rotation.y += 0.5f;
 	}
 	void Update() override {
 		std::cout << "Basic Sword Update!" << std::endl;

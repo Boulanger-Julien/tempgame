@@ -2,11 +2,13 @@
 #include "Player.h"
 #include "adx-core/Timer.h"
 #include "adx-engine\framework.h"
+#include "Basic_Sword.h"
 
 Player::Player() {
 	m_entity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
+	equippedWeapon = new Basic_Sword();
 	mCollider.updateCollider();
 }
 
@@ -46,6 +48,9 @@ void Player::Update(const Ray& mouseRay) {
 	float angle = atan2f(dx, dz);
 	mTransform.rotation.y = angle;
 	ECS::GetInstance().getComponent<transformComponent>(m_entity) = mTransform;
+	transformComponent weaponTransform = mTransform;
+	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
+	ECS::GetInstance().getComponent<transformComponent>(equippedWeapon->GetEntity()) = weaponTransform;
 }
 
 void Player::takeDamage(int damage) {

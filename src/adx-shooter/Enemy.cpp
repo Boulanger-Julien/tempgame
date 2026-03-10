@@ -3,9 +3,12 @@
 #include "adx-core/Timer.h"
 
 Enemy::Enemy() {
-	m_entity = ECS::GetInstance().createEntity();
-	ECS::GetInstance().addComponent<transformComponent>(m_entity, transformComponent());
-	ECS::GetInstance().addComponent<ColliderComponent>(m_entity, ColliderComponent(m_entity, 2.f, 2.f, 2.f));
+	m_entity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
+	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
+	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
+	auto& col = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
+	col.compOwner = m_entity;
+	col.updateCollider();
 }
 
 Enemy::~Enemy() {
@@ -22,6 +25,8 @@ void Enemy::Update() {
 	if (not canShoot) {
 		m_currentShootCooldown += deltatime;
 	}
+	ECS::GetInstance().getComponent<transformComponent>(m_entity) = mTransform;
+	ECS::GetInstance().getComponent<ColliderComponent>(m_entity) = mCollider;
 }
 
 void Enemy::LookAt(Entity target)
