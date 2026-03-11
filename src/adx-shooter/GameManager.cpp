@@ -137,6 +137,10 @@ void GameManager::Update()
     else {
         cDownLastFrame = false;
     }
+    if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    {
+        AddBullet(mPlayer->m_entity);
+    }
     if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
 		SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
@@ -268,7 +272,7 @@ void GameManager::Draw()
 void GameManager::Pause()
 {
     // Toggle pause when F1 is pressed
-    if (InputSystem::isKeyDown(VK_F1))
+    if (mPlayer->Stats.mHealthPoints == 0)
     {
         spaceDown = true;
         if (spaceDown != spaceDownLastFrame)
@@ -281,6 +285,26 @@ void GameManager::Pause()
     else
     {
         spaceDownLastFrame = false;
+    }
+	if (InputSystem::isKeyDown(VK_F1) && mPlayer->Stats.mHealthPoints == 0)
+    {
+        spaceDown2 = true;
+        if (spaceDown2 != spaceDownLastFrame2)
+        {
+            spaceDownLastFrame2 = false;
+            mPlayer->Stats.mHealthPoints = mPlayer->Stats.mMaxHealthPoints;
+            mAppPaused = !mAppPaused;
+            for (Bullet* bullet : mBulletList) {
+                bullet->toBeDestroyed = true;
+			}
+			Destroy();
+        }
+        spaceDownLastFrame2 = true;
+        spaceDown2 = false;
+    }
+    else
+    {
+        spaceDownLastFrame2 = false;
     }
 }
 

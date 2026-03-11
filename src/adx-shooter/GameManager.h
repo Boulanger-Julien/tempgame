@@ -44,6 +44,8 @@ private:
 	float healthBarHeight = 100;
 	bool spaceDownLastFrame = false;
 	bool spaceDown = false;
+	bool spaceDownLastFrame2 = false;
+	bool spaceDown2 = false;
 
 
 	MSG msg = { 0 };
