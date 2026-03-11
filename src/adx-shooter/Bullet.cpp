@@ -4,7 +4,13 @@
 
 Bullet::Bullet() {
 	m_entity = ECS::GetInstance().createEntity(transformComponent(), ColliderComponent());
+	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
+	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).depth = mTransform.scale.z;
+	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).width = mTransform.scale.x;
+	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).height = mTransform.scale.y;
 	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).compOwner = m_entity;
+	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).updateCollider();
+
 }
 
 Bullet::~Bullet() {

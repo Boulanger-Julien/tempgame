@@ -6,9 +6,12 @@ Enemy::Enemy() {
 	m_entity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
-	auto& col = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
-	col.compOwner = m_entity;
-	col.updateCollider();
+	mCollider.depth = mTransform.scale.z * 2;
+	mCollider.width = mTransform.scale.x * 2;
+	mCollider.height = mTransform.scale.y * 2;
+
+	mCollider.compOwner = m_entity;
+	mCollider.updateCollider();
 }
 
 Enemy::~Enemy() {

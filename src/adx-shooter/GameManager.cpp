@@ -37,7 +37,7 @@ bool GameManager::Initialize()
 		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->equippedWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"..\\..\\res\\Textures\\Diamond2.dds");
 		mEntityMesh.insert({ mPlayer->equippedWeapon->GetEntity(), weaponMesh });
     }
-	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 2.0f, 10, 10, (XMFLOAT4)Colors::Blue);
+	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
     m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"..\\..\\res\\Textures\\Diamond2.dds");
 
     //Generate random roads connected
@@ -340,7 +340,7 @@ void GameManager::AddBullet(Entity sender) {
 
         FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
 
-        ecs.getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position + (forward * 2.5f) - (right * 0.8f);
+        ecs.getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position + (forward * 2.5f);
     }
 	transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
 	bulletTrans.forward = bulletTrans.forward * -1;

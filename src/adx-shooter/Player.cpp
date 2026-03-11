@@ -9,6 +9,10 @@ Player::Player() {
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
 	equippedWeapon = new Basic_Sword();
+	mCollider.depth = mTransform.scale.z;
+	mCollider.width = mTransform.scale.x;
+	mCollider.height = mTransform.scale.y;
+	mCollider.compOwner = m_entity;
 	mCollider.updateCollider();
 }
 
