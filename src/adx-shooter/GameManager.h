@@ -40,6 +40,8 @@ private:
 	float mScore = 0.0f;
 	int offsetHBX = 20;
 	int offsetHBY = 800;
+	int offsetMBX = 20;
+	int offsetMBY = 900;
 	float healthBarWidth = 400;
 	float healthBarHeight = 100;
 	bool spaceDownLastFrame = false;
@@ -58,6 +60,7 @@ private:
 	Player* mPlayer;
 	Entity weapon;
 	Entity healthBar;
+	Entity manaBar;
 
 	MeshGeometry m_obstacleMesh;
 	MeshGeometry m_playerMesh;
@@ -84,5 +87,6 @@ private:
 
 	TextRenderer* mScoreTextRenderer;
 	TextRenderer* mLifeTextRenderer;
+	TextRenderer* mManaTextRenderer;
 
 };

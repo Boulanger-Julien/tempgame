@@ -19,6 +19,8 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
 	mPlayer = new Player();
     mLifeTextRenderer = new TextRenderer(mWindow);
     mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    mManaTextRenderer = new TextRenderer(mWindow);
+    mManaTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
     mScoreTextRenderer = new TextRenderer(mWindow);
     mScoreTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 }
@@ -74,8 +76,14 @@ bool GameManager::Initialize()
         healthBar = ECS::GetInstance().createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
         UIRenderer healthBarMesh(*mWindow, healthBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Red));
         mUIMesh.insert({ healthBar, healthBarMesh.UIQuad });
-        mLifeTextRenderer = new TextRenderer(mWindow);
-        mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    }
+    {
+        Entity manaExtBar = ECS::GetInstance().createEntity(transformComponent(offsetMBX, offsetMBY));
+        UIRenderer healthBarExtMesh(*mWindow, manaExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
+        mUIMesh.insert({ manaExtBar, healthBarExtMesh.UIQuad });
+        manaBar = ECS::GetInstance().createEntity(transformComponent(offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f));
+        UIRenderer healthBarMesh(*mWindow, manaBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Blue));
+        mUIMesh.insert({ manaBar, healthBarMesh.UIQuad });
     }
 
     mWindow->ExecuteInitCommands();
@@ -261,6 +269,7 @@ void GameManager::Draw()
 
     // Show text
     {
+		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->Stats.mManaPoints) + "/" + std::to_string((int)mPlayer->Stats.mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->Stats.mExp) , 20, 20, 24);
         mLifeTextRenderer->DrawTxt(mPlayer->Stats.mHealthPoints > 0 ? std::to_string((int)mPlayer->Stats.mHealthPoints) + "/" + std::to_string((int)mPlayer->Stats.mMaxHealthPoints) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
     }
