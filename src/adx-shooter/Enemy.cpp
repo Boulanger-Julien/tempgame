@@ -37,5 +37,5 @@ void Enemy::LookAt(Entity target)
 	float desiredYaw = atan2(direction.x, direction.z);
 	enemyTrans.rotation.y = desiredYaw;
 	//player is behind him, so look at him with the back
-	enemyTrans.rotation.y += 3.1415;
+	//enemyTrans.rotation.y += 3.1415;
 }

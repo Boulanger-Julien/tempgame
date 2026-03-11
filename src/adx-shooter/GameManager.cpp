@@ -35,8 +35,8 @@ bool GameManager::Initialize()
 		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->equippedWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"..\\..\\res\\Textures\\Diamond2.dds");
 		mEntityMesh.insert({ mPlayer->equippedWeapon->GetEntity(), weaponMesh });
     }
-	m_bulletMesh = MeshCreator::CreateBall(mWindow, 999, 2.0f, 10, 10, (XMFLOAT4)Colors::Blue);
-    m_enemyMesh = MeshCreator::CreateBox(mWindow, 998, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"..\\..\\res\\Textures\\Diamond2.dds");
+	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 2.0f, 10, 10, (XMFLOAT4)Colors::Blue);
+    m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"..\\..\\res\\Textures\\Diamond2.dds");
 
     //Generate random roads connected
     {
@@ -129,10 +129,10 @@ void GameManager::Update()
     // Tir (Bullet instantiation)
     if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
-        //if (!cDownLastFrame) {
+        if (!cDownLastFrame) {
             AddBullet(mPlayer->m_entity);
             cDownLastFrame = true;
-        //}
+        }
     }
     else {
         cDownLastFrame = false;
@@ -143,19 +143,19 @@ void GameManager::Update()
     }
 
     // --- BOUCLE DES BULLETS ET COLLISIONS ---
-    for (int i = mBulletList.size() - 1; i >= 0; i--) {
-        mBulletList[i]->Update();
+    for (int i = mPlayerbulletList.size() - 1; i >= 0; i--) {
+        mPlayerbulletList[i]->Update();
 
         // Vérification de collision avec les ennemis (si la balle n'est pas déjà marquée)
-        if (!mBulletList[i]->toBeDestroyed) {
+        if (!mPlayerbulletList[i]->toBeDestroyed) {
             for (Enemy* enemy : mEnemyList) {
                 // TRÈS IMPORTANT : On vérifie s'il n'est pas déjà mort
                 if (enemy->isDead) continue;
 
-                if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(enemy->m_entity)) {
+                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->m_entity)) {
                     enemy->isDead = true; // On le marque immédiatement
                     mDestroyEnemyList.push_back(enemy);
-                    mBulletList[i]->toBeDestroyed = true;
+                    mPlayerbulletList[i]->toBeDestroyed = true;
                     break;
                 }
             }
@@ -169,14 +169,37 @@ void GameManager::Update()
         }
 
         // Si la balle doit être détruite (sortie d'écran ou collision)
+        if (mPlayerbulletList[i]->toBeDestroyed) {
+            mDestroyBulletList.push_back(mPlayerbulletList[i]);
+            mPlayerbulletList.erase(mPlayerbulletList.begin() + i);
+        }
+    }
+    for (int i = mBulletList.size() - 1; i >= 0; i--) {
+        mBulletList[i]->Update();
+        if (!mBulletList[i]->toBeDestroyed) {
+            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->m_entity)) {
+                mPlayer->takeDamage(20);
+                mBulletList[i]->toBeDestroyed = true;
+            }
+        }
         if (mBulletList[i]->toBeDestroyed) {
             mDestroyBulletList.push_back(mBulletList[i]);
             mBulletList.erase(mBulletList.begin() + i);
         }
-    }
-    for (Enemy* enemy : mEnemyList) {
-        enemy->Update();
 	}
+    for (Enemy* enemy : mEnemyList) {
+        transformComponent& enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->m_entity);
+        enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
+		enemy->LookAt(mPlayer->m_entity);
+        // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
+        if (sqrt(pow(playerTrans.position.x - enemyTransform.position.x, 2) + pow(playerTrans.position.z - enemyTransform.position.y, 2)) < 40) {
+            if (enemy->canShoot) {
+                AddBullet(enemy->m_entity);
+                enemy->canShoot = false;
+            }
+			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
+        }
+    }
     // Nettoyage final des entités supprimées ce frame
     Destroy();
 }
@@ -295,8 +318,13 @@ void GameManager::AddBullet(Entity sender) {
     mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
     XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
     mWindow->Update(newBullet->m_entity, bulletWorld);
-
-    mBulletList.push_back(newBullet);
+    if (sender == mPlayer->m_entity) {
+        mPlayerbulletList.push_back(newBullet);
+	}
+    else
+    {
+        mBulletList.push_back(newBullet);
+    }
 }
 float GameManager::GetDeltatime() {
     return Timer::GetInstance()->GetDeltatime();
