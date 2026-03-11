@@ -37,10 +37,6 @@ void transformSystem::MoveKey(transformComponent& transform,float velo, FLOAT3 a
 		Move(transform, -rightX, 0, -rightZ);
 	if (InputSystem::isKeyDown('D'))
 		Move(transform, rightX, 0, rightZ);
-	if (InputSystem::isKeyDown(VK_SHIFT))
-		Move(transform, 0, -1, 0);
-	if (InputSystem::isKeyDown(VK_SPACE))
-		Move(transform, 0, 1, 0);
 
 	return;
 }

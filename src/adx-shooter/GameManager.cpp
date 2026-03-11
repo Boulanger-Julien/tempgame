@@ -145,6 +145,7 @@ void GameManager::Update()
     else {
         cDownLastFrame = false;
     }
+	static bool spaceDownLastFrame = false;
     if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
         AddBullet(mPlayer->m_entity);
@@ -168,6 +169,7 @@ void GameManager::Update()
                     enemy->isDead = true; // On le marque immédiatement
                     mDestroyEnemyList.push_back(enemy);
                     mPlayerbulletList[i]->toBeDestroyed = true;
+					mPlayer->Stats.mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
                     break;
                 }
             }
@@ -211,6 +213,15 @@ void GameManager::Update()
             }
 			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
         }
+    }
+    if (InputSystem::isKeyDown(VK_SPACE)) {
+        if (!spaceDownLastFrame) {
+			AddExplosionBullet(mPlayer->m_entity);
+            spaceDownLastFrame = true;
+        }
+    }
+    else {
+		spaceDownLastFrame = false;
     }
     // Nettoyage final des entités supprimées ce frame
     Destroy();
@@ -359,6 +370,46 @@ void GameManager::AddBullet(Entity sender) {
         mBulletList.push_back(newBullet);
     }
 }
+void GameManager::AddExplosionBullet(Entity sender)
+{
+    const float angleStep = (2.0f * XM_PI) / 80.0f; // 360° / 8 en radians
+    transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->m_entity);
+
+    for (int i = 0; i < 80; ++i) {
+        Bullet* newBullet = new Bullet();
+        transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
+
+        // 1. On copie l'état du joueur
+        bulletTrans = playerTrans;
+
+        // 2. On décale la rotation Y pour chaque direction (0, 45, 90, 135...)
+        bulletTrans.rotation.y = playerTrans.rotation.y + (i * angleStep);
+
+        // --- CRUCIAL : On met à jour le vecteur 'forward' à partir de la nouvelle rotation ---
+        transformSystem::UpdateForward(bulletTrans);
+
+        // 3. Positionnement : on place la balle légèrement devant le joueur 
+        // selon SA propre direction désormais unique.
+        float distFromPlayer = 2.5f;
+        bulletTrans.position.x += bulletTrans.forward.x * distFromPlayer;
+        bulletTrans.position.y += bulletTrans.forward.y * distFromPlayer;
+        bulletTrans.position.z += bulletTrans.forward.z * distFromPlayer;
+
+        // 4. On donne une impulsion de départ (vitesse de 2)
+        // Move utilise maintenant le forward mis à jour, donc chaque balle partira dans son axe.
+        transformSystem::Move(bulletTrans, 0, 0, 2);
+
+        // 5. Enregistrement graphique
+        mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
+        mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
+
+        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(bulletTrans);
+        mWindow->Update(newBullet->m_entity, bulletWorld);
+
+        mPlayerbulletList.push_back(newBullet);
+    }
+}
+
 float GameManager::GetDeltatime() {
     return Timer::GetInstance()->GetDeltatime();
 }

@@ -22,6 +22,7 @@ public:
 	void Pause();
 	void SpeedDown();
 	void AddBullet(Entity sender);
+	void AddExplosionBullet(Entity sender);
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
 	float GetDeltatime();
