@@ -215,10 +215,10 @@ void GameManager::Update()
         }
     }
     if (InputSystem::isKeyDown(VK_SPACE)) {
-        if (!spaceDownLastFrame) {
-			AddExplosionBullet(mPlayer->m_entity);
+        //if (!spaceDownLastFrame) {
+			AddExplosionBullet(mPlayer->m_entity, 9);
             spaceDownLastFrame = true;
-        }
+        //}
     }
     else {
 		spaceDownLastFrame = false;
@@ -370,12 +370,12 @@ void GameManager::AddBullet(Entity sender) {
         mBulletList.push_back(newBullet);
     }
 }
-void GameManager::AddExplosionBullet(Entity sender)
+void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
-    const float angleStep = (2.0f * XM_PI) / 80.0f; // 360° / 8 en radians
+    const float angleStep = (2.0f * XM_PI) / bullets; // 360° / 8 en radians
     transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->m_entity);
 
-    for (int i = 0; i < 80; ++i) {
+    for (int i = 0; i < bullets; ++i) {
         Bullet* newBullet = new Bullet();
         transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
 

@@ -10,7 +10,7 @@ namespace {
 	// Pile des slots de descripteurs disponibles (1 à 1023)
 	static std::vector<int> sFreeDescriptors;
 	static bool sIsInitialized = false;
-	constexpr int MaxDescriptors = 1024;
+	constexpr int MaxDescriptors = 2048;
 }
 
 Window::Window(HINSTANCE hInstance) : D3DApp(hInstance)
