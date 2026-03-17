@@ -94,7 +94,18 @@ MeshGeometry MeshCreator::CreateBox(Window* win, int index, float width, float h
 		indices.push_back(baseIndex + 3);
 	}
 	ComputeNormals(vertices, indices);
-	return win->BuildMesh(vertices, indices, index, filepath);
+	std::wstring path;
+	if (filepath != nullptr)
+	{
+		path = L"..\\..\\res\\Textures\\";
+		path += filepath;
+		return win->BuildMesh(vertices, indices, index, path.c_str());
+
+	}
+	else
+		{
+		return win->BuildMesh(vertices, indices, index, filepath);
+	}
 }
 
 Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1, int totRoad, XMFLOAT4 color, const wchar_t* filepath)
@@ -273,8 +284,16 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 		}
 	}
 	ComputeNormals(vertices, indices);
+	std::wstring path;
+	if (filepath != nullptr)
+	{
+		path = L"..\\..\\res\\Textures\\";
+		path += filepath;
+		return Road(FLOAT2(0, 0), FLOAT2(xPos, zPos), points, win->BuildMesh(vertices, indices, index, path.c_str()));
 
-	return Road(FLOAT2(0, 0), FLOAT2(xPos, zPos), points, win->BuildMesh(vertices, indices, index, filepath));
+	}
+	else
+		return Road(FLOAT2(0, 0), FLOAT2(xPos, zPos), points, win->BuildMesh(vertices, indices, index, filepath));
 }
 
 MeshGeometry MeshCreator::CreateMount(Window* win, int index, int rows, int cols, int height, XMFLOAT4 colorTop, XMFLOAT4 colorBottom)
@@ -355,8 +374,16 @@ MeshGeometry MeshCreator::CreateBall(Window* win, int index, float radius, int s
 	}
 
 	//ComputeNormals(vertices, indices);
+	std::wstring path;
+	if (filepath != nullptr)
+	{
+		path = L"..\\..\\res\\Textures\\";
+		path += filepath;
+		return win->BuildMesh(vertices, indices, index, path.c_str());
 
-	return win->BuildMesh(vertices, indices, index, filepath);
+	}
+	else 
+		return win->BuildMesh(vertices, indices, index, filepath);
 }
 
 MeshGeometry MeshCreator::CreateDiamond(Window* win, int index, float width, float height, float midHeight, float depth, int sliceCount, XMFLOAT4 color, const wchar_t* filepath)
@@ -415,8 +442,16 @@ MeshGeometry MeshCreator::CreateDiamond(Window* win, int index, float width, flo
 	}
 
 	ComputeNormals(vertices, indices);
+	std::wstring path;
+	if (filepath != nullptr)
+	{
+		path = L"..\\..\\res\\Textures\\";
+		path += filepath;
+		return win->BuildMesh(vertices, indices, index, path.c_str());
 
-	return win->BuildMesh(vertices, indices, index, filepath);
+	}
+	else
+		return win->BuildMesh(vertices, indices, index, filepath);
 }
 
 MeshGeometry MeshCreator::CreateCylinder(Window* win, int index, float bottomRadius, float topRadius, float height, int sliceCount, int stackCount, XMFLOAT4 color, const wchar_t* filepath)
@@ -467,8 +502,18 @@ MeshGeometry MeshCreator::CreateCylinder(Window* win, int index, float bottomRad
 	}
 
 	ComputeNormals(vertices, indices);
+	std::wstring path;
+	if (filepath != nullptr)
+	{
+		path = L"..\\..\\res\\Textures\\";
+		path += filepath;
+		return win->BuildMesh(vertices, indices, index, path.c_str());
 
-	return win->BuildMesh(vertices, indices, index, filepath);
+	}
+	else
+	{
+		return win->BuildMesh(vertices, indices, index, filepath);
+	}
 }
 
 MeshGeometry MeshCreator::CreateCone(Window* win, int index, float radius, float height, int sliceCount, int stackCount, XMFLOAT4 color, const wchar_t* filepath)
@@ -515,8 +560,18 @@ MeshGeometry MeshCreator::CreateCone(Window* win, int index, float radius, float
 	}
 
 	ComputeNormals(vertices, indices);
+	std::wstring path;
+	if (filepath != nullptr)
+	{
+		path = L"..\\..\\res\\Textures\\";
+		path += filepath;
+		return win->BuildMesh(vertices, indices, index, path.c_str());
 
-	return win->BuildMesh(vertices, indices, index, filepath);
+	}
+	else
+		{
+		return win->BuildMesh(vertices, indices, index, filepath);
+	}
 }
 
 MeshGeometry MeshCreator::CreateTorus(Window* win, int index, float majorRadius, float minorRadius, int majorSliceCount, int minorSliceCount, XMFLOAT4 color, const wchar_t* filepath)
@@ -553,7 +608,18 @@ MeshGeometry MeshCreator::CreateTorus(Window* win, int index, float majorRadius,
 	}
 
 	ComputeNormals(vertices, indices);
-	return win->BuildMesh(vertices, indices, index, filepath);
+	std::wstring path;
+	if (filepath != nullptr)
+	{
+		path = L"..\\..\\res\\Textures\\";
+		path += filepath;
+		return win->BuildMesh(vertices, indices, index, path.c_str());
+
+	}
+	else
+	{
+		return win->BuildMesh(vertices, indices, index, filepath);
+	}
 }
 
 MeshGeometry MeshCreator::CreatePyramid(Window* win, int index, float width, float height, float depth, XMFLOAT4 color, const wchar_t* filepath)
@@ -602,8 +668,18 @@ MeshGeometry MeshCreator::CreatePyramid(Window* win, int index, float width, flo
 	indices.push_back(1);
 
 	ComputeNormals(vertices, indices);
+	std::wstring path;
+	if (filepath != nullptr)
+	{
+		path = L"..\\..\\res\\Textures\\";
+		path += filepath;
+		return win->BuildMesh(vertices, indices, index, path.c_str());
 
-	return win->BuildMesh(vertices, indices, index, filepath);
+	}
+	else
+	{
+		return win->BuildMesh(vertices, indices, index, filepath);
+	}
 }
 
 MeshGeometry MeshCreator::CreateCustomMesh(Window* win, int index, const char* jsonpath, int numOfMesh, XMFLOAT4 color, const wchar_t* filepath)
@@ -667,12 +743,32 @@ MeshGeometry MeshCreator::CreateCustomMesh(Window* win, int index, const char* j
 		}
 
 		//ComputeNormals(vertices, indices);
+		std::wstring path;
+		if (filepath != nullptr)
+		{
+			path = L"..\\..\\res\\Textures\\";
+			path += filepath;
+			return win->BuildMesh(mergedVertices, mergedIndices, index, path.c_str());
 
-		return win->BuildMesh(mergedVertices, mergedIndices, index, filepath);
+		}
+		else
+			{
+			return win->BuildMesh(mergedVertices, mergedIndices, index, filepath);
+		}
 	}
 	else
 	{
 		ComputeNormals(vertices, indices);
-		return win->BuildMesh(vertices, indices, index, filepath);
+		std::wstring path;
+		if (filepath != nullptr)
+		{
+			path = L"..\\..\\res\\Textures\\";
+			path += filepath;
+			return win->BuildMesh(vertices, indices, index, path.c_str());
+		}
+		else
+			{
+			return win->BuildMesh(vertices, indices, index, filepath);
+		}
 	}
 }
