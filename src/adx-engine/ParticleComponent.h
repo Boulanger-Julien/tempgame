@@ -1,4 +1,5 @@
 #pragma once
+#include "IParticleSystemResource.h"
 class ParticleComponent
 {
 public:
