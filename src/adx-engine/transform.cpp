@@ -42,9 +42,13 @@ void transformSystem::MoveKey(transformComponent& transform,float velo, FLOAT3 a
 }
 
 void transformSystem::MoveForward(transformComponent& transform, float distance) {
-	transform.position.x += distance * transform.forward.x;
-	transform.position.y += distance * transform.forward.y;
-	transform.position.z += distance * transform.forward.z;
+	/**/
+	float yaw = transform.rotation.y;
+	float pitch = transform.rotation.x;
+	
+	transform.position.x += distance * cos(pitch) * sin(yaw);
+	transform.position.y += distance * sin(pitch);
+	transform.position.z += distance * cos(pitch) * cos(yaw);
 }
 
 void transformSystem::SetYPR(transformComponent& transform, float x, float y, float z)
@@ -105,13 +109,13 @@ void transformSystem::RotateAround(transformComponent& transform, transformCompo
     transform.position.z = target.position.z + radius * cp * cy;
 }
 
-void transformSystem::LookAt(transformComponent& transform, FLOAT3 target)
+void transformSystem::LookAt(transformComponent& currentTransform, FLOAT3 target)
 {
-	FLOAT3 direction = target - transform.position;
+	FLOAT3 direction = target - currentTransform.position;
 	float yaw = atan2f(direction.x, direction.z);
 	float pitch = atan2f(-direction.y, sqrtf(direction.x * direction.x + direction.z * direction.z));
-	transform.rotation.x = pitch;
-	transform.rotation.y = yaw;
+	currentTransform.rotation.x = pitch;
+	currentTransform.rotation.y = yaw;
 }
 
 void transformSystem::UpdateForward(transformComponent& transform)
@@ -129,4 +133,9 @@ void transformSystem::UpdateForward(transformComponent& transform)
 	transform.forward.x = -XMVectorGetX(normVect);
 	transform.forward.y = -XMVectorGetY(normVect);
 	transform.forward.z = -XMVectorGetZ(normVect);
+}
+//
+float transformSystem::Distance(transformComponent& currentTransform, transformComponent& targetTransform)
+{
+	return sqrt(pow(targetTransform.position.x - currentTransform.position.x, 2) + pow(targetTransform.position.y - currentTransform.position.y, 2) + pow(targetTransform.position.z - currentTransform.position.z, 2));
 }

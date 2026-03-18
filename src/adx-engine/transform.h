@@ -128,6 +128,9 @@ struct transformSystem
 	static DirectX::XMMATRIX GetWorldMatrix(transformComponent& transform);
 	static void RotateAround(transformComponent& transform, transformComponent target, float radius);
 	static void LookAt(transformComponent& transform, FLOAT3 target);
+
+	//
+	static float Distance(transformComponent& target1, transformComponent& target2);
 };
 
 #include <d2d1.h>

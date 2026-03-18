@@ -165,7 +165,7 @@ void GameManager::Update()
                 // TRÈS IMPORTANT : On vérifie s'il n'est pas déjà mort
                 if (enemy->isDead) continue;
 
-                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->m_entity)) {
+                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
                     enemy->isDead = true; // On le marque immédiatement
                     mDestroyEnemyList.push_back(enemy);
                     mPlayerbulletList[i]->toBeDestroyed = true;
@@ -202,13 +202,14 @@ void GameManager::Update()
         }
 	}
     for (Enemy* enemy : mEnemyList) {
-        transformComponent& enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->m_entity);
+        transformComponent& enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
         enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
 		enemy->LookAt(mPlayer->m_entity);
         // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
-        if (sqrt(pow(playerTrans.position.x - enemyTransform.position.x, 2) + pow(playerTrans.position.z - enemyTransform.position.y, 2)) < 40) {
+        float dist = transformSystem::Distance(enemyTransform, playerTrans);
+        if (dist <= 40) {
             if (enemy->canShoot) {
-                AddBullet(enemy->m_entity);
+                AddBullet(enemy->mEntity);
                 enemy->canShoot = false;
             }
 			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
@@ -440,10 +441,10 @@ void GameManager::Destroy() {
             }
 
             // 2. On retire les ressources DirectX
-            mWindow->RemoveEntityResources(enemy->m_entity);
+            mWindow->RemoveEntityResources(enemy->mEntity);
 
             // 3. On le retire du dictionnaire de rendu
-            mEntityMesh.erase(enemy->m_entity);
+            mEntityMesh.erase(enemy->mEntity);
 
             // 4. Supprimer l'objet C++
             delete enemy;
@@ -464,11 +465,11 @@ void GameManager::Destroy() {
 
 void GameManager::SpawnMob(float x, float z, int mob) {
     Enemy* newEnemy = new Enemy();
-    newEnemy->GetTransform() = ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity);
+    newEnemy->GetTransform() = ECS::GetInstance().getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
-    mWindow->RegisterExistingMeshForEntity(newEnemy->m_entity);
-    mEntityMesh.insert({ newEnemy->m_entity, m_enemyMesh });
-    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity));
-    mWindow->Update(newEnemy->m_entity, enemyWorld);
+    mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
+    mEntityMesh.insert({ newEnemy->mEntity, m_enemyMesh });
+    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newEnemy->mEntity));
+    mWindow->Update(newEnemy->mEntity, enemyWorld);
 	mEnemyList.push_back(newEnemy);
 }
