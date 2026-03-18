@@ -32,10 +32,10 @@ bool GameManager::Initialize()
 
     //Generate player
     {
-        MeshGeometry playerMesh = MeshCreator::CreateBox(mWindow, mPlayer->m_entity, 2, 2, 2, (XMFLOAT4)Colors::Navy, L"Diamond2.dds");
-        mEntityMesh.insert({ mPlayer->m_entity, playerMesh });
-		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->equippedWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"Diamond2.dds");
-		mEntityMesh.insert({ mPlayer->equippedWeapon->GetEntity(), weaponMesh });
+        MeshGeometry playerMesh = MeshCreator::CreateBox(mWindow, mPlayer->mEntity, 2, 2, 2, (XMFLOAT4)Colors::Navy, L"Diamond2.dds");
+        mEntityMesh.insert({ mPlayer->mEntity, playerMesh });
+		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->mWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"Diamond2.dds");
+		mEntityMesh.insert({ mPlayer->mWeapon->GetEntity(), weaponMesh });
     }
 	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
     m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
@@ -103,7 +103,7 @@ void GameManager::Update()
 
 
     // Update de la barre de vie UI
-    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetStats().mCurrentHealth / mPlayer->GetStats().mMaxHealth;
+    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
 
     // --- MISE À JOUR DES MATRICES DE RENDU ---
     // On met à jour les constantes de chaque entité dans le Window
@@ -124,7 +124,7 @@ void GameManager::Update()
     Shoot();
     if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
-        AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
+        AddBullet(mPlayer->mEntity, mPlayer->GetStats().mStrength);
     }
     if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
@@ -163,7 +163,7 @@ void GameManager::Update()
     for (int i = mBulletList.size() - 1; i >= 0; i--) {
         mBulletList[i]->Update();
         if (!mBulletList[i]->toBeDestroyed) {
-            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->m_entity)) {
+            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->mEntity)) {
                 mPlayer->takeDamage(mBulletList[i]->mDamage);
                 mBulletList[i]->toBeDestroyed = true;
             }
@@ -184,6 +184,7 @@ void GameManager::Update()
         }
 			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
     }
+
     // Nettoyage final des entités supprimées ce frame
     Destroy();
 }
@@ -241,9 +242,9 @@ void GameManager::Draw()
 
     // Show text
     {
-		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->GetStats().mManaPoints) + "/" + std::to_string((int)mPlayer->GetStats().mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
+		mManaTextRenderer->DrawTxt(0/*std::to_string((int)mPlayer->GetStats().mManaPoints)*/ + "/" + std::to_string((int)mPlayer->GetStats().mMana), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
-        mLifeTextRenderer->DrawTxt(mPlayer->GetStats().mCurrentHealth > 0 ? std::to_string((int)mPlayer->GetStats().mCurrentHealth) + "/" + std::to_string((int)mPlayer->GetStats().mMaxHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
+        mLifeTextRenderer->DrawTxt(mPlayer->GetCollider().height > 0 ? std::to_string((int)mPlayer->GetHealth()) + "/" + std::to_string((int)mPlayer->GetStats().mHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
     }
 
     firstFrame = false;
@@ -254,7 +255,8 @@ void GameManager::Pause()
 {
 	static bool spaceDown = false;
     // Toggle pause when F1 is pressed
-    if (mPlayer->GetStats().mCurrentHealth == 0)
+    float playerHealth = mPlayer->GetHealth();
+    if (playerHealth <= 0)
     {
         spaceDown = true;
         if (spaceDown != spaceDownLastFrame)
@@ -268,13 +270,13 @@ void GameManager::Pause()
     {
         spaceDownLastFrame = false;
     }
-	if (InputSystem::isKeyDown(VK_F1) && mPlayer->GetStats().mCurrentHealth == 0)
+	if (InputSystem::isKeyDown(VK_F1) && mPlayer->GetHealth() == 0)
     {
         spaceDown2 = true;
         if (spaceDown2 != spaceDownLastFrame2)
         {
             spaceDownLastFrame2 = false;
-            mPlayer->GetStats().mCurrentHealth = mPlayer->GetStats().mMaxHealth;
+            HealthSystem::RecoverHealth(mPlayer->GetHealthComponent(), 100);
             mAppPaused = !mAppPaused;
             for (Bullet* bullet : mBulletList) {
                 bullet->toBeDestroyed = true;
@@ -299,9 +301,9 @@ void GameManager::AddBullet(Entity sender, float _damage) {
     Bullet* newBullet = new Bullet();
 
     ecs.getComponent<transformComponent>(newBullet->m_entity) = ecs.getComponent<transformComponent>(sender);
-    if (sender == mPlayer->m_entity)
+    if (sender == mPlayer->mEntity)
     {
-        transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->m_entity);
+        transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->mEntity);
         float pitch = playerTrans.rotation.x;
         float yaw = playerTrans.rotation.y;
 
@@ -323,7 +325,7 @@ void GameManager::AddBullet(Entity sender, float _damage) {
     mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
     XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
     mWindow->Update(newBullet->m_entity, bulletWorld);
-    if (sender == mPlayer->m_entity) {
+    if (sender == mPlayer->mEntity) {
         newBullet->mDamage = _damage;
         mPlayerbulletList.push_back(newBullet);
 	}
@@ -336,7 +338,7 @@ void GameManager::AddBullet(Entity sender, float _damage) {
 void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
     const float angleStep = (2.0f * XM_PI) / bullets; // 360° / 8 en radians
-    transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->m_entity);
+    transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->mEntity);
 
     for (int i = 0; i < bullets; ++i) {
         Bullet* newBullet = new Bullet();
@@ -431,7 +433,7 @@ void GameManager::Shoot()
     if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
         if (!cDownLastFrame) {
-			AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
+			AddBullet(mPlayer->mEntity, mPlayer->GetStats().mStrength);
             cDownLastFrame = true;
         }
     }
@@ -440,7 +442,7 @@ void GameManager::Shoot()
     }
     if (InputSystem::isKeyDown(VK_SPACE)) {
         if (!cDownLastFrame2) {
-            AddExplosionBullet(mPlayer->m_entity, 9);
+            AddExplosionBullet(mPlayer->mEntity, 9);
             cDownLastFrame2 = true;
         }
     }
@@ -499,7 +501,7 @@ void GameManager::Destroy() {
 }
 
 void GameManager::SpawnMob(float x, float z, int mob) {
-    Enemy* newEnemy = new Enemy(mPlayer->m_entity);
+    Enemy* newEnemy = new Enemy(mPlayer->mEntity);
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
     mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
