@@ -94,26 +94,33 @@ bool GameManager::Initialize()
 void GameManager::Update()
 {
     float deltaTime = GetDeltatime();
-    UpdateBar();
+
+	// Update du joueur
     Aim();
 
-    // Mouvement du joueur et Caméra
+	// Update de la caméra pour suivre le joueur
 	UpdateCam();
 
     // Update de la barre de vie UI
+    UpdateBar();
 
+	// Update des matrices des objets
     UpdateMatrix();
+
     // Tir (Bullet instantiation)
     Shoot();
+
 	// Test mob spawn
     if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
 		SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
     }
-    // --- BOUCLE DES BULLETS ET COLLISIONS ---
+
+	// Update des bullets et des ennemis
 	BulletUpdate();
     EnemyUpdate();
-    // Nettoyage final des entités supprimées ce frame
+
+    // Nettoyage final des entités supprimées cette frame
     Destroy();
 }
 
