@@ -56,6 +56,7 @@ private:
 	bool spaceDown = false;
 	bool spaceDownLastFrame2 = false;
 	bool spaceDown2 = false;
+	float timer = 0.0f;
 
 
 	MSG msg = { 0 };
@@ -94,5 +95,6 @@ private:
 	TextRenderer* mScoreTextRenderer;
 	TextRenderer* mLifeTextRenderer;
 	TextRenderer* mManaTextRenderer;
+	TextRenderer* mTimerTextRenderer;
 
 };
