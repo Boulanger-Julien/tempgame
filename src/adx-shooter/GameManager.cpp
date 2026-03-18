@@ -358,6 +358,17 @@ void GameManager::UpdateCam()
     XMFLOAT3 camPos = mCamera.Position();
     mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
     mWindow->SetCamera(mCamera);
+
+	static bool OneDownLastFrame = false;
+    if (InputSystem::isKeyDown('1')) {
+        if (!OneDownLastFrame) {
+			mPlayer->ChangeAimType();
+            OneDownLastFrame = true;
+        }
+    }
+    else {
+        OneDownLastFrame = false;
+	}
 }
 
 void GameManager::Shoot()
@@ -365,7 +376,7 @@ void GameManager::Shoot()
     static bool cDownLastFrame = false;
     static bool cDownLastFrame2 = false;
 
-    if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    if (InputSystem::isKeyDown(VK_LBUTTON))
     {
         if (!cDownLastFrame) {
 			AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
@@ -384,7 +395,7 @@ void GameManager::Shoot()
     else {
         cDownLastFrame2 = false;
     }
-    if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    if (InputSystem::isKeyDown(VK_RBUTTON))
     {
         AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
     }
@@ -409,11 +420,8 @@ void GameManager::BulletUpdate()
 {
     for (int i = mPlayerbulletList.size() - 1; i >= 0; i--) {
         mPlayerbulletList[i]->Update();
-
-        // Vérification de collision avec les ennemis (si la balle n'est pas déjà marquée)
         if (!mPlayerbulletList[i]->toBeDestroyed) {
             for (Enemy* enemy : mEnemyList) {
-                // TRÈS IMPORTANT : On vérifie s'il n'est pas déjà mort
                 if (enemy->isDead) continue;
 
                 if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
@@ -422,7 +430,7 @@ void GameManager::BulletUpdate()
                     if (enemy->IsAlive() == true) {
                         mDestroyEnemyList.push_back(enemy);
 
-                        mPlayer->GetStats().mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
+                        mPlayer->GetStats().mExp += 10;
                         break;
                     }
                 }
