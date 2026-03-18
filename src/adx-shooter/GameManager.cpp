@@ -42,12 +42,12 @@ bool GameManager::Initialize()
 
     //Generate random roads connected
     {
-        Entity road1 = ECS::GetInstance().createEntity(transformComponent(0, 0, 0));
+        Entity road1 = ecs.createEntity(transformComponent(0, 0, 0));
         MeshGeometry road = MeshCreator::CreateBox(mWindow, road1, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
         mEntityMesh.insert({ road1, road });
     }
 
-    Entity cloud = ECS::GetInstance().createEntity(transformComponent(0, 10, 0));
+    Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
     MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
     mEntityMesh.insert({ cloud, cloudMesh });
     //Setup camera
@@ -70,18 +70,18 @@ bool GameManager::Initialize()
 
     //Generate health bar
     {
-        Entity healthExtBar = ECS::GetInstance().createEntity(transformComponent(offsetHBX, offsetHBY));
+        Entity healthExtBar = ecs.createEntity(transformComponent(offsetHBX, offsetHBY));
         UIRenderer healthBarExtMesh(*mWindow, healthExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
         mUIMesh.insert({ healthExtBar, healthBarExtMesh.UIQuad });
-        healthBar = ECS::GetInstance().createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
+        healthBar = ecs.createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
         UIRenderer healthBarMesh(*mWindow, healthBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Red));
         mUIMesh.insert({ healthBar, healthBarMesh.UIQuad });
     }
     {
-        Entity manaExtBar = ECS::GetInstance().createEntity(transformComponent(offsetMBX, offsetMBY));
+        Entity manaExtBar = ecs.createEntity(transformComponent(offsetMBX, offsetMBY));
         UIRenderer healthBarExtMesh(*mWindow, manaExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
         mUIMesh.insert({ manaExtBar, healthBarExtMesh.UIQuad });
-        manaBar = ECS::GetInstance().createEntity(transformComponent(offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f));
+        manaBar = ecs.createEntity(transformComponent(offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f));
         UIRenderer healthBarMesh(*mWindow, manaBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Blue));
         mUIMesh.insert({ manaBar, healthBarMesh.UIQuad });
     }
@@ -97,17 +97,18 @@ void GameManager::Update()
     static bool cDownLastFrame = false;
 
     // Input & Player Update
-    POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
-    ScreenToClient(mWindow->MainWnd(), &mousePos);
-    float finalMouseX = static_cast<float>(mousePos.x);
-    float finalMouseY = static_cast<float>(mousePos.y);
+    {
+        POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
+        ScreenToClient(mWindow->MainWnd(), &mousePos);
+        float finalMouseX = static_cast<float>(mousePos.x);
+        float finalMouseY = static_cast<float>(mousePos.y);
 
-    Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
-    mPlayer->Update(ray);
+        Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
+        mPlayer->Update(ray);
+    }
 
     // Mouvement du joueur et Caméra
     transformComponent& playerTrans = mPlayer->GetTransform();
-    transformSystem::MoveKey(playerTrans, mPlayer->Stats.mMoveSpeed, FLOAT3(0, -45, 0), deltaTime);
 
     mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
 	XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
@@ -117,20 +118,20 @@ void GameManager::Update()
     mWindow->SetCamera(mCamera);
 
     // Update de la barre de vie UI
-    ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = mPlayer->Stats.mHealthPoints / mPlayer->Stats.mMaxHealthPoints;
+    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->Stats.mHealthPoints / mPlayer->Stats.mMaxHealthPoints;
 
     // --- MISE À JOUR DES MATRICES DE RENDU ---
     // On met à jour les constantes de chaque entité dans le Window
     for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
     {
         int entityID = it->first;
-        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
         mWindow->Update(entityID, entityWorld);
     }
     for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
     {
         int entityID = it->first;
-        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
         mWindow->UpdateUI(entityID, entityWorld);
     }
 
@@ -202,10 +203,9 @@ void GameManager::Update()
         }
 	}
     for (Enemy* enemy : mEnemyList) {
-        transformComponent& enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->m_entity);
-        enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
-		enemy->LookAt(mPlayer->m_entity);
-        // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
+        transformComponent& enemyTransform = ecs.getComponent<transformComponent>(enemy->m_entity);
+        enemy->Update();
+        // If (canShoot) and Player is nearby // TODO
         if (sqrt(pow(playerTrans.position.x - enemyTransform.position.x, 2) + pow(playerTrans.position.z - enemyTransform.position.y, 2)) < 40) {
             if (enemy->canShoot) {
                 AddBullet(enemy->m_entity);
@@ -463,12 +463,12 @@ void GameManager::Destroy() {
 }
 
 void GameManager::SpawnMob(float x, float z, int mob) {
-    Enemy* newEnemy = new Enemy();
-    newEnemy->GetTransform() = ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity);
+    Enemy* newEnemy = new Enemy(mPlayer->m_entity);
+    newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->m_entity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
     mWindow->RegisterExistingMeshForEntity(newEnemy->m_entity);
     mEntityMesh.insert({ newEnemy->m_entity, m_enemyMesh });
-    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newEnemy->m_entity));
+    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->m_entity));
     mWindow->Update(newEnemy->m_entity, enemyWorld);
 	mEnemyList.push_back(newEnemy);
 }

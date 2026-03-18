@@ -13,11 +13,11 @@ void transformSystem::Move(transformComponent& transform, float x, float y, floa
 	return;
 }
 
-void transformSystem::MoveKey(transformComponent& transform,float velo, FLOAT3 angle, float deltaTime)
+void transformSystem::MoveByKey(transformComponent& transform,float velo, float yAngle, float deltaTime)
 {
 	// On convertit l'angle de degrés en radians si nécessaire
 	// float rad = angle.y * (3.14159f / 180.0f); 
-	float rad = angle.y * XM_PI / 180.0f;
+	float rad = yAngle * XM_PI / 180.0f;
 
 	// Calcul des vecteurs forward (Z) et right (X)
 	float forwardX = sin(rad) * deltaTime * velo;

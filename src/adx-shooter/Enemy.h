@@ -8,14 +8,14 @@ private:
 	float m_currentShootCooldown = 0;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
-
+	int mPlayerIndex;
 public:
 	Entity m_entity;
 
 	bool canShoot = false;
 
 	bool isDead = false;
-	Enemy();
+	Enemy(int _playerIndex);
 	~Enemy();
 	void Update(); 
 	void LookAt(Entity target);

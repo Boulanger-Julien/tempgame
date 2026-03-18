@@ -55,6 +55,8 @@ void Player::Update(const Ray& mouseRay) {
 	transformComponent weaponTransform = mTransform;
 	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
 	ECS::GetInstance().getComponent<transformComponent>(equippedWeapon->GetEntity()) = weaponTransform;
+	transformSystem::MoveByKey(mTransform, Stats.mMoveSpeed, -45, deltatime);
+
 }
 
 void Player::takeDamage(int damage) {

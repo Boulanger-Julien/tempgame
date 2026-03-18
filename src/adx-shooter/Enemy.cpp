@@ -2,7 +2,7 @@
 #include "Enemy.h"
 #include "adx-core/Timer.h"
 
-Enemy::Enemy() {
+Enemy::Enemy(int _playerIndex) {
 	m_entity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
@@ -12,6 +12,7 @@ Enemy::Enemy() {
 
 	mCollider.compOwner = m_entity;
 	mCollider.updateCollider();
+	mPlayerIndex = _playerIndex;
 }
 
 Enemy::~Enemy() {
@@ -30,6 +31,8 @@ void Enemy::Update() {
 	}
 	ECS::GetInstance().getComponent<transformComponent>(m_entity) = mTransform;
 	ECS::GetInstance().getComponent<ColliderComponent>(m_entity) = mCollider;
+	LookAt(mPlayerIndex);
+
 }
 
 void Enemy::LookAt(Entity target)
