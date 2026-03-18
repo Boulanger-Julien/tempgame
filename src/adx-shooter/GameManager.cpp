@@ -116,6 +116,7 @@ void GameManager::Update()
     if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
 		SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+
     }
     if (InputSystem::isKeyUp('E')&& mEnemyList.size() <=0) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
@@ -492,6 +493,7 @@ void GameManager::UpdateBar()
 {
     ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
     //ecs.getComponent<transformComponent>(manaBar).scale.x = 0/*mPlayer->GetStats().mMana*/ / mPlayer->GetStats().mMana;
+}
 void GameManager::GenerateRoom()
 {
     //mWindow->RemoveEntityResources(currentRoom.ground);
