@@ -4,6 +4,7 @@
 #include "adx-engine\framework.h"
 #include "Basic_Sword.h"
 
+
 Player::Player() {
 	m_entity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
@@ -55,8 +56,26 @@ void Player::Update(const Ray& mouseRay) {
 	transformComponent weaponTransform = mTransform;
 	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
 	ECS::GetInstance().getComponent<transformComponent>(equippedWeapon->GetEntity()) = weaponTransform;
-}
+	transformSystem::MoveByKey(mTransform, Stats.mMoveSpeed, -45, deltatime);
 
+}
+void Player::Update() {
+	float deltatime = Timer::GetInstance()->GetDeltatime();
+
+	// Health Regen (1hp/s)
+	if (Stats.mCurrentHealthRegenCooldown >= Stats.mHealthRegenCooldown && Stats.mHealthPoints < Stats.mMaxHealthPoints) {
+		Stats.mHealthPoints += 1;
+		Stats.mCurrentHealthRegenCooldown = 0;
+	}
+	Stats.mCurrentHealthRegenCooldown += deltatime;
+
+	ECS::GetInstance().getComponent<transformComponent>(m_entity) = mTransform;
+	transformComponent weaponTransform = mTransform;
+	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
+	ECS::GetInstance().getComponent<transformComponent>(equippedWeapon->GetEntity()) = weaponTransform;
+	transformSystem::MoveByKey(mTransform, Stats.mMoveSpeed, -45, deltatime);
+
+}
 void Player::takeDamage(int damage) {
 	Stats.mCurrentHealth -= (damage - Stats.mDefense) > 0 ? (damage - Stats.mDefense) : 0;
 	if (Stats.mCurrentHealth <= 0) {

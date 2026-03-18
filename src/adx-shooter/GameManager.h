@@ -26,12 +26,12 @@ public:
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
 	float GetDeltatime();
-
+	void Aim();
+	void UpdateCam(transformComponent& playerTrans);
+	void Shoot();
 
 private:
 	bool firstFrame = true;
-	bool F1DownLastFrame = false;
-	bool F1Down = false;
 	bool mAppPaused = false;
 	float mSpeedDownCd = 10.0f;
 	float mSpeedDownTimer = 0.0f;

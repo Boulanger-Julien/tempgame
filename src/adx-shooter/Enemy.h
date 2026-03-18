@@ -13,14 +13,14 @@ private:
 	ColliderComponent mCollider;
 	float mStrength = 5;
 
+	int mPlayerIndex;
 public:
 	Entity mEntity;
 	Player* mPlayer;
 
 	bool canShoot = false;
 	bool isDead = false;
-
-	Enemy(Player* _player);
+	Enemy(int _playerIndex);
 	~Enemy();
 
 	void Update(); 

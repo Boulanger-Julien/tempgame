@@ -2,8 +2,8 @@
 #include "Enemy.h"
 #include "adx-core/Timer.h"
 
-Enemy::Enemy(Player* _player) {
-	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
+Enemy::Enemy(int _playerIndex) {
+	m_entity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 	mCollider.depth = mTransform.scale.z * 2;
@@ -12,8 +12,7 @@ Enemy::Enemy(Player* _player) {
 
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
-
-	mPlayer = _player;
+	mPlayerIndex = _playerIndex;
 }
 
 Enemy::~Enemy() {
@@ -34,7 +33,7 @@ void Enemy::Update() {
 		}
 	}
 
-	//Toujours à la fin
+	//Toujours ï¿½ la fin
 	UpdateComponent();
 }
 void Enemy::Move(float _deltaTime)
@@ -67,7 +66,7 @@ void Enemy::LookPlayer()
 {
 	//transformComponent& targetTransform = mPlayer->GetTransform();
 
-	transformSystem::LookAt(mTransform, mPlayer->GetTransform().position);
+	transformSystem::LookAt(mTransform, mPlayerIndex);
 
 }
 

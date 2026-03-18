@@ -42,12 +42,12 @@ bool GameManager::Initialize()
 
     //Generate random roads connected
     {
-        Entity road1 = ECS::GetInstance().createEntity(transformComponent(0, 0, 0));
+        Entity road1 = ecs.createEntity(transformComponent(0, 0, 0));
         MeshGeometry road = MeshCreator::CreateBox(mWindow, road1, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
         mEntityMesh.insert({ road1, road });
     }
 
-    Entity cloud = ECS::GetInstance().createEntity(transformComponent(0, 10, 0));
+    Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
     MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
     mEntityMesh.insert({ cloud, cloudMesh });
     //Setup camera
@@ -70,18 +70,18 @@ bool GameManager::Initialize()
 
     //Generate health bar
     {
-        Entity healthExtBar = ECS::GetInstance().createEntity(transformComponent(offsetHBX, offsetHBY));
+        Entity healthExtBar = ecs.createEntity(transformComponent(offsetHBX, offsetHBY));
         UIRenderer healthBarExtMesh(*mWindow, healthExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
         mUIMesh.insert({ healthExtBar, healthBarExtMesh.UIQuad });
-        healthBar = ECS::GetInstance().createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
+        healthBar = ecs.createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
         UIRenderer healthBarMesh(*mWindow, healthBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Red));
         mUIMesh.insert({ healthBar, healthBarMesh.UIQuad });
     }
     {
-        Entity manaExtBar = ECS::GetInstance().createEntity(transformComponent(offsetMBX, offsetMBY));
+        Entity manaExtBar = ecs.createEntity(transformComponent(offsetMBX, offsetMBY));
         UIRenderer healthBarExtMesh(*mWindow, manaExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
         mUIMesh.insert({ manaExtBar, healthBarExtMesh.UIQuad });
-        manaBar = ECS::GetInstance().createEntity(transformComponent(offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f));
+        manaBar = ecs.createEntity(transformComponent(offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f));
         UIRenderer healthBarMesh(*mWindow, manaBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Blue));
         mUIMesh.insert({ manaBar, healthBarMesh.UIQuad });
     }
@@ -94,58 +94,34 @@ bool GameManager::Initialize()
 void GameManager::Update()
 {
     float deltaTime = GetDeltatime();
-    static bool cDownLastFrame = false;
 
-    // Input & Player Update
-    POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
-    ScreenToClient(mWindow->MainWnd(), &mousePos);
-    float finalMouseX = static_cast<float>(mousePos.x);
-    float finalMouseY = static_cast<float>(mousePos.y);
-
-    Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
-    mPlayer->Update(ray);
+    Aim();
 
     // Mouvement du joueur et Caméra
     transformComponent& playerTrans = mPlayer->GetTransform();
-    transformSystem::MoveKey(playerTrans, mPlayer->Stats.mMoveSpeed, FLOAT3(0, -45, 0), deltaTime);
+	UpdateCam(playerTrans);
 
-    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
-	XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
-    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
-	XMFLOAT3 camPos = mCamera.Position();
-    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
-    mWindow->SetCamera(mCamera);
 
     // Update de la barre de vie UI
-    ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = mPlayer->Stats.mCurrentHealth / mPlayer->Stats.mMaxHealth;
+    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetStats().mCurrentHealth / mPlayer->GetStats().mMaxHealth;
 
     // --- MISE À JOUR DES MATRICES DE RENDU ---
     // On met à jour les constantes de chaque entité dans le Window
     for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
     {
         int entityID = it->first;
-        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
         mWindow->Update(entityID, entityWorld);
     }
     for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
     {
         int entityID = it->first;
-        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entityID));
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
         mWindow->UpdateUI(entityID, entityWorld);
     }
 
     // Tir (Bullet instantiation)
-    if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
-    {
-        if (!cDownLastFrame) {
-            AddBullet(mPlayer->m_entity, mPlayer->Stats.mStrength);
-            cDownLastFrame = true;
-        }
-    }
-    else {
-        cDownLastFrame = false;
-    }
-	static bool spaceDownLastFrame = false;
+    Shoot();
     if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
         AddBullet(mPlayer->m_entity, mPlayer->Stats.mStrength);
@@ -208,15 +184,6 @@ void GameManager::Update()
         }
 			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
     }
-    if (InputSystem::isKeyDown(VK_SPACE)) {
-        //if (!spaceDownLastFrame) {
-			AddExplosionBullet(mPlayer->m_entity, 9);
-            spaceDownLastFrame = true;
-        //}
-    }
-    else {
-		spaceDownLastFrame = false;
-    }
     // Nettoyage final des entités supprimées ce frame
     Destroy();
 }
@@ -274,9 +241,9 @@ void GameManager::Draw()
 
     // Show text
     {
-		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->Stats.mManaPoints) + "/" + std::to_string((int)mPlayer->Stats.mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
-        mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->Stats.mExp) , 20, 20, 24);
-        mLifeTextRenderer->DrawTxt(mPlayer->Stats.mCurrentHealth > 0 ? std::to_string((int)mPlayer->Stats.mMaxHealth) + "/" + std::to_string((int)mPlayer->Stats.mMaxHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
+		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->GetStats().mManaPoints) + "/" + std::to_string((int)mPlayer->GetStats().mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
+        mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
+        mLifeTextRenderer->DrawTxt(mPlayer->GetStats().mCurrentHealth > 0 ? std::to_string((int)mPlayer->GetStats().mMaxHealth) + "/" + std::to_string((int)mPlayer->GetStats().mMaxHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
     }
 
     firstFrame = false;
@@ -285,8 +252,9 @@ void GameManager::Draw()
 
 void GameManager::Pause()
 {
+	static bool spaceDown = false;
     // Toggle pause when F1 is pressed
-    if (mPlayer->Stats.mCurrentHealth == 0)
+    if (mPlayer->GetStats().mCurrentHealth == 0)
     {
         spaceDown = true;
         if (spaceDown != spaceDownLastFrame)
@@ -300,13 +268,13 @@ void GameManager::Pause()
     {
         spaceDownLastFrame = false;
     }
-	if (InputSystem::isKeyDown(VK_F1) && mPlayer->Stats.mCurrentHealth == 0)
+	if (InputSystem::isKeyDown(VK_F1) && mPlayer->GetStats().mCurrentHealth == 0)
     {
         spaceDown2 = true;
         if (spaceDown2 != spaceDownLastFrame2)
         {
             spaceDownLastFrame2 = false;
-            mPlayer->Stats.mCurrentHealth = mPlayer->Stats.mMaxHealth;
+            mPlayer->GetStats().mCurrentHealth = mPlayer->GetStats().mMaxHealth;
             mAppPaused = !mAppPaused;
             for (Bullet* bullet : mBulletList) {
                 bullet->toBeDestroyed = true;
@@ -409,6 +377,81 @@ float GameManager::GetDeltatime() {
     return Timer::GetInstance()->GetDeltatime();
 }
 
+void GameManager::Aim()
+{
+    if (mPlayer->aimType == AimType::Mouse)
+    {
+        POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
+        ScreenToClient(mWindow->MainWnd(), &mousePos);
+        float finalMouseX = static_cast<float>(mousePos.x);
+        float finalMouseY = static_cast<float>(mousePos.y);
+
+        Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
+        mPlayer->Update(ray);
+    }
+    else if (mPlayer->aimType == AimType::Auto)
+    {
+        mPlayer->Update();
+        float closestDistance = FLT_MAX;
+        transformComponent& playerTrans = mPlayer->GetTransform();
+
+        for (Enemy* enemy : mEnemyList) {
+            transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->m_entity);
+            float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
+            if (distance < closestDistance) {
+                closestDistance = distance;
+            }
+            else
+            {
+                continue;
+            }
+            if (distance < 70) {
+                float dx = enemyTrans.position.x - playerTrans.position.x;
+                float dz = enemyTrans.position.z - playerTrans.position.z;
+                float angle = atan2f(dx, dz);
+                playerTrans.rotation.y = angle;
+            }
+        }
+    }
+}
+
+void GameManager::UpdateCam(transformComponent& playerTrans)
+{
+    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
+    XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
+    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
+    XMFLOAT3 camPos = mCamera.Position();
+    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
+    mWindow->SetCamera(mCamera);
+}
+
+void GameManager::Shoot()
+{
+    static bool cDownLastFrame = false;
+    static bool cDownLastFrame2 = false;
+
+    if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    {
+        if (!cDownLastFrame) {
+            AddBullet(mPlayer->m_entity);
+            cDownLastFrame = true;
+        }
+    }
+    else {
+        cDownLastFrame = false;
+    }
+    if (InputSystem::isKeyDown(VK_SPACE)) {
+        if (!cDownLastFrame2) {
+            AddExplosionBullet(mPlayer->m_entity, 9);
+            cDownLastFrame2 = true;
+        }
+    }
+    else {
+        cDownLastFrame2 = false;
+    }
+
+}
+
 void GameManager::Destroy() {
     // NETTOYAGE DES BULLETS
     if (!mDestroyBulletList.empty()) {
@@ -458,12 +501,12 @@ void GameManager::Destroy() {
 }
 
 void GameManager::SpawnMob(float x, float z, int mob) {
-    Enemy* newEnemy = new Enemy(mPlayer);
-    newEnemy->GetTransform() = ECS::GetInstance().getComponent<transformComponent>(newEnemy->mEntity);
+    Enemy* newEnemy = new Enemy(mPlayer->m_entity);
+    newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
     mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
     mEntityMesh.insert({ newEnemy->mEntity, m_enemyMesh });
-    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newEnemy->mEntity));
+    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
 	mEnemyList.push_back(newEnemy);
 }
