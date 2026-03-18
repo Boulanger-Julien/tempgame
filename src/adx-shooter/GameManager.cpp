@@ -94,31 +94,16 @@ bool GameManager::Initialize()
 void GameManager::Update()
 {
     float deltaTime = GetDeltatime();
-    static bool cDownLastFrame = false;
 
-    // Input & Player Update
-    {
-        POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
-        ScreenToClient(mWindow->MainWnd(), &mousePos);
-        float finalMouseX = static_cast<float>(mousePos.x);
-        float finalMouseY = static_cast<float>(mousePos.y);
-
-        Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
-        mPlayer->Update(ray);
-    }
+    Aim();
 
     // Mouvement du joueur et Caméra
     transformComponent& playerTrans = mPlayer->GetTransform();
+	UpdateCam(playerTrans);
 
-    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
-	XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
-    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
-	XMFLOAT3 camPos = mCamera.Position();
-    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
-    mWindow->SetCamera(mCamera);
 
     // Update de la barre de vie UI
-    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->Stats.mHealthPoints / mPlayer->Stats.mMaxHealthPoints;
+    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetStats().mHealthPoints / mPlayer->GetStats().mMaxHealthPoints;
 
     // --- MISE À JOUR DES MATRICES DE RENDU ---
     // On met à jour les constantes de chaque entité dans le Window
@@ -136,17 +121,7 @@ void GameManager::Update()
     }
 
     // Tir (Bullet instantiation)
-    if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
-    {
-        if (!cDownLastFrame) {
-            AddBullet(mPlayer->m_entity);
-            cDownLastFrame = true;
-        }
-    }
-    else {
-        cDownLastFrame = false;
-    }
-	static bool spaceDownLastFrame = false;
+    Shoot();
     if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
         AddBullet(mPlayer->m_entity);
@@ -170,7 +145,7 @@ void GameManager::Update()
                     enemy->isDead = true; // On le marque immédiatement
                     mDestroyEnemyList.push_back(enemy);
                     mPlayerbulletList[i]->toBeDestroyed = true;
-					mPlayer->Stats.mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
+					mPlayer->GetStats().mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
                     break;
                 }
             }
@@ -213,15 +188,6 @@ void GameManager::Update()
             }
 			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
         }
-    }
-    if (InputSystem::isKeyDown(VK_SPACE)) {
-        //if (!spaceDownLastFrame) {
-			AddExplosionBullet(mPlayer->m_entity, 9);
-            spaceDownLastFrame = true;
-        //}
-    }
-    else {
-		spaceDownLastFrame = false;
     }
     // Nettoyage final des entités supprimées ce frame
     Destroy();
@@ -280,9 +246,9 @@ void GameManager::Draw()
 
     // Show text
     {
-		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->Stats.mManaPoints) + "/" + std::to_string((int)mPlayer->Stats.mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
-        mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->Stats.mExp) , 20, 20, 24);
-        mLifeTextRenderer->DrawTxt(mPlayer->Stats.mHealthPoints > 0 ? std::to_string((int)mPlayer->Stats.mHealthPoints) + "/" + std::to_string((int)mPlayer->Stats.mMaxHealthPoints) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
+		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->GetStats().mManaPoints) + "/" + std::to_string((int)mPlayer->GetStats().mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
+        mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
+        mLifeTextRenderer->DrawTxt(mPlayer->GetStats().mHealthPoints > 0 ? std::to_string((int)mPlayer->GetStats().mHealthPoints) + "/" + std::to_string((int)mPlayer->GetStats().mMaxHealthPoints) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
     }
 
     firstFrame = false;
@@ -291,8 +257,9 @@ void GameManager::Draw()
 
 void GameManager::Pause()
 {
+	static bool spaceDown = false;
     // Toggle pause when F1 is pressed
-    if (mPlayer->Stats.mHealthPoints == 0)
+    if (mPlayer->GetStats().mHealthPoints == 0)
     {
         spaceDown = true;
         if (spaceDown != spaceDownLastFrame)
@@ -306,13 +273,13 @@ void GameManager::Pause()
     {
         spaceDownLastFrame = false;
     }
-	if (InputSystem::isKeyDown(VK_F1) && mPlayer->Stats.mHealthPoints == 0)
+	if (InputSystem::isKeyDown(VK_F1) && mPlayer->GetStats().mHealthPoints == 0)
     {
         spaceDown2 = true;
         if (spaceDown2 != spaceDownLastFrame2)
         {
             spaceDownLastFrame2 = false;
-            mPlayer->Stats.mHealthPoints = mPlayer->Stats.mMaxHealthPoints;
+            mPlayer->GetStats().mHealthPoints = mPlayer->GetStats().mMaxHealthPoints;
             mAppPaused = !mAppPaused;
             for (Bullet* bullet : mBulletList) {
                 bullet->toBeDestroyed = true;
@@ -412,6 +379,81 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
 
 float GameManager::GetDeltatime() {
     return Timer::GetInstance()->GetDeltatime();
+}
+
+void GameManager::Aim()
+{
+    if (mPlayer->aimType == AimType::Mouse)
+    {
+        POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
+        ScreenToClient(mWindow->MainWnd(), &mousePos);
+        float finalMouseX = static_cast<float>(mousePos.x);
+        float finalMouseY = static_cast<float>(mousePos.y);
+
+        Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
+        mPlayer->Update(ray);
+    }
+    else if (mPlayer->aimType == AimType::Auto)
+    {
+        mPlayer->Update();
+        float closestDistance = FLT_MAX;
+        transformComponent& playerTrans = mPlayer->GetTransform();
+
+        for (Enemy* enemy : mEnemyList) {
+            transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->m_entity);
+            float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
+            if (distance < closestDistance) {
+                closestDistance = distance;
+            }
+            else
+            {
+                continue;
+            }
+            if (distance < 70) {
+                float dx = enemyTrans.position.x - playerTrans.position.x;
+                float dz = enemyTrans.position.z - playerTrans.position.z;
+                float angle = atan2f(dx, dz);
+                playerTrans.rotation.y = angle;
+            }
+        }
+    }
+}
+
+void GameManager::UpdateCam(transformComponent& playerTrans)
+{
+    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
+    XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
+    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
+    XMFLOAT3 camPos = mCamera.Position();
+    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
+    mWindow->SetCamera(mCamera);
+}
+
+void GameManager::Shoot()
+{
+    static bool cDownLastFrame = false;
+    static bool cDownLastFrame2 = false;
+
+    if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    {
+        if (!cDownLastFrame) {
+            AddBullet(mPlayer->m_entity);
+            cDownLastFrame = true;
+        }
+    }
+    else {
+        cDownLastFrame = false;
+    }
+    if (InputSystem::isKeyDown(VK_SPACE)) {
+        if (!cDownLastFrame2) {
+            AddExplosionBullet(mPlayer->m_entity, 9);
+            cDownLastFrame2 = true;
+        }
+    }
+    else {
+        cDownLastFrame2 = false;
+    }
+
 }
 
 void GameManager::Destroy() {
