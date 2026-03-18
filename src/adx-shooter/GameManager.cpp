@@ -124,7 +124,7 @@ void GameManager::Update()
     Shoot();
     if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
-        AddBullet(mPlayer->m_entity, mPlayer->Stats.mStrength);
+        AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
     }
     if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
@@ -147,7 +147,7 @@ void GameManager::Update()
                     if (enemy->IsAlive() == true) {
                         mDestroyEnemyList.push_back(enemy);
 
-                        mPlayer->Stats.mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
+                        mPlayer->GetStats().mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
                         break;
                     }
                 }
@@ -243,7 +243,7 @@ void GameManager::Draw()
     {
 		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->GetStats().mManaPoints) + "/" + std::to_string((int)mPlayer->GetStats().mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
-        mLifeTextRenderer->DrawTxt(mPlayer->GetStats().mCurrentHealth > 0 ? std::to_string((int)mPlayer->GetStats().mMaxHealth) + "/" + std::to_string((int)mPlayer->GetStats().mMaxHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
+        mLifeTextRenderer->DrawTxt(mPlayer->GetStats().mCurrentHealth > 0 ? std::to_string((int)mPlayer->GetStats().mCurrentHealth) + "/" + std::to_string((int)mPlayer->GetStats().mMaxHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
     }
 
     firstFrame = false;
@@ -353,10 +353,8 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
 
         // 3. Positionnement : on place la balle légèrement devant le joueur 
         // selon SA propre direction désormais unique.
-        float distFromPlayer = 2.5f;
-        bulletTrans.position.x += bulletTrans.forward.x * distFromPlayer;
-        bulletTrans.position.y += bulletTrans.forward.y * distFromPlayer;
-        bulletTrans.position.z += bulletTrans.forward.z * distFromPlayer;
+        float distFromPlayer = 5.0f;
+		transformSystem::MoveForward(bulletTrans, distFromPlayer);
 
         // 4. On donne une impulsion de départ (vitesse de 2)
         // Move utilise maintenant le forward mis à jour, donc chaque balle partira dans son axe.
@@ -396,7 +394,7 @@ void GameManager::Aim()
         transformComponent& playerTrans = mPlayer->GetTransform();
 
         for (Enemy* enemy : mEnemyList) {
-            transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->m_entity);
+            transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->mEntity);
             float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
             if (distance < closestDistance) {
                 closestDistance = distance;
@@ -433,7 +431,7 @@ void GameManager::Shoot()
     if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
         if (!cDownLastFrame) {
-            AddBullet(mPlayer->m_entity);
+			AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
             cDownLastFrame = true;
         }
     }

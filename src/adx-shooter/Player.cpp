@@ -63,8 +63,8 @@ void Player::Update() {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
 	// Health Regen (1hp/s)
-	if (Stats.mCurrentHealthRegenCooldown >= Stats.mHealthRegenCooldown && Stats.mHealthPoints < Stats.mMaxHealthPoints) {
-		Stats.mHealthPoints += 1;
+	if (Stats.mCurrentHealthRegenCooldown >= Stats.mHealthRegenCooldown && Stats.mCurrentHealth < Stats.mMaxHealth) {
+		Stats.mCurrentHealth += 1;
 		Stats.mCurrentHealthRegenCooldown = 0;
 	}
 	Stats.mCurrentHealthRegenCooldown += deltatime;

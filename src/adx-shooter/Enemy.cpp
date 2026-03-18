@@ -3,7 +3,7 @@
 #include "adx-core/Timer.h"
 
 Enemy::Enemy(int _playerIndex) {
-	m_entity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
+	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 	mCollider.depth = mTransform.scale.z * 2;
@@ -22,7 +22,7 @@ Enemy::~Enemy() {
 void Enemy::Update() {
 	float deltaTime = Timer::GetInstance()->GetDeltatime();
 	
-	float dist = transformSystem::GetDistance(mTransform, mPlayer->GetTransform());
+	float dist = transformSystem::GetDistance(mTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex));
 	if (dist <= 60) {
 		LookPlayer();
 		if (dist >= 35) {
@@ -66,7 +66,7 @@ void Enemy::LookPlayer()
 {
 	//transformComponent& targetTransform = mPlayer->GetTransform();
 
-	transformSystem::LookAt(mTransform, mPlayerIndex);
+	transformSystem::LookAt(mTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex).position);
 
 }
 
