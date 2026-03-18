@@ -23,6 +23,8 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
     mManaTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
     mScoreTextRenderer = new TextRenderer(mWindow);
     mScoreTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    mTimerTextRenderer = new TextRenderer(mWindow);
+    mTimerTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 }
 
 
@@ -174,11 +176,18 @@ void GameManager::Draw()
 
         mWindow->DrawUI(meshRef, entityID);
     }
+	timer += Timer::GetInstance()->GetDeltatime();
+    int hours = (int)timer / 3600;
+    int minutes = ((int)timer % 3600) / 60;
+    int seconds = (int)timer % 60;
+    int centiemes = (int)(timer * 100) % 100;
 
-    // Show text
+    std::string timerStr = std::format("Timer : {:02}:{:02}:{:02}.{:02}",
+        hours, minutes, seconds, centiemes); 
     {
 		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->GetStats().mManaPoints) + "/" + std::to_string((int)mPlayer->GetStats().mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
+        mTimerTextRenderer->DrawTxt(timerStr, 20, 60, 24);
         mLifeTextRenderer->DrawTxt(mPlayer->GetStats().mCurrentHealth > 0 ? std::to_string((int)mPlayer->GetStats().mCurrentHealth) + "/" + std::to_string((int)mPlayer->GetStats().mMaxHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
     }
 
