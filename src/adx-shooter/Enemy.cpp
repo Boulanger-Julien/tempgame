@@ -2,7 +2,7 @@
 #include "Enemy.h"
 #include "adx-core/Timer.h"
 
-Enemy::Enemy() {
+Enemy::Enemy(Player* _player) {
 	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
@@ -12,6 +12,8 @@ Enemy::Enemy() {
 
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
+
+	mPlayer = _player;
 }
 
 Enemy::~Enemy() {
@@ -21,8 +23,16 @@ Enemy::~Enemy() {
 void Enemy::Update() {
 	float deltaTime = Timer::GetInstance()->GetDeltatime();
 	
-	Attack(deltaTime);
-	Move(deltaTime);
+	float dist = transformSystem::Distance(mTransform, mPlayer->GetTransform());
+	if (dist <= 60) {
+		LookPlayer();
+		if (dist >= 35) {
+			Move(deltaTime);
+		}
+		if (dist <= 40) {
+			Attack(deltaTime);
+		}
+	}
 
 	//?
 	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
@@ -41,13 +51,24 @@ void Enemy::Attack(float _deltaTime)
 		mCurrentShootCooldown = 0;
 	}
 }
+void Enemy::TakeDamage(int _damage) {
+	mHealth -= _damage;
+}
 
-
-void Enemy::LookAt(Entity target)
+bool Enemy::IsAlive()
 {
-	transformComponent& targetTransform = ECS::GetInstance().getComponent<transformComponent>(target);
+	if (mHealth <= 0) {
+		isDead = true;
+	}
 
-	transformSystem::LookAt(mTransform, targetTransform.position);
+	return isDead;
+}
+
+void Enemy::LookPlayer()
+{
+	//transformComponent& targetTransform = mPlayer->GetTransform();
+
+	transformSystem::LookAt(mTransform, mPlayer->GetTransform().position);
 
 }
 

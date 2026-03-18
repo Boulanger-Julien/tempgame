@@ -166,11 +166,14 @@ void GameManager::Update()
                 if (enemy->isDead) continue;
 
                 if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
-                    enemy->isDead = true; // On le marque immédiatement
-                    mDestroyEnemyList.push_back(enemy);
+                    enemy->TakeDamage(10);
                     mPlayerbulletList[i]->toBeDestroyed = true;
-					mPlayer->Stats.mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
-                    break;
+                    if (enemy->IsAlive() == true) {
+                        mDestroyEnemyList.push_back(enemy);
+
+                        mPlayer->Stats.mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
+                        break;
+                    }
                 }
             }
         
@@ -204,16 +207,13 @@ void GameManager::Update()
     for (Enemy* enemy : mEnemyList) {
         transformComponent& enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
         enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
-		enemy->LookAt(mPlayer->m_entity);
         // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
-        float dist = transformSystem::Distance(enemyTransform, playerTrans);
-        if (dist <= 40) {
-            if (enemy->canShoot) {
-                AddBullet(enemy->mEntity);
-                enemy->canShoot = false;
-            }
-			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
+
+        if (enemy->canShoot) {
+            AddBullet(enemy->mEntity);
+            enemy->canShoot = false;
         }
+			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
     }
     if (InputSystem::isKeyDown(VK_SPACE)) {
         //if (!spaceDownLastFrame) {
@@ -464,7 +464,7 @@ void GameManager::Destroy() {
 }
 
 void GameManager::SpawnMob(float x, float z, int mob) {
-    Enemy* newEnemy = new Enemy();
+    Enemy* newEnemy = new Enemy(mPlayer);
     newEnemy->GetTransform() = ECS::GetInstance().getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
     mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
