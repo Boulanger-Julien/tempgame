@@ -3,9 +3,13 @@
 #include "adx-core/Timer.h"
 
 Enemy::Enemy(int _playerIndex) {
-	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent());
+	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent(), StatsComponent(), HealthComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
+
+	mStats = ECS::GetInstance().getComponent<StatsComponent>(mEntity);
+	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);
+
 	mCollider.depth = mTransform.scale.z * 2;
 	mCollider.width = mTransform.scale.x * 2;
 	mCollider.height = mTransform.scale.y * 2;
@@ -13,10 +17,18 @@ Enemy::Enemy(int _playerIndex) {
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
 	mPlayerIndex = _playerIndex;
+
+	InitStats();
 }
 
 Enemy::~Enemy() {
 	ECS::GetInstance().Release(mEntity);
+}
+
+void Enemy::InitStats()
+{
+	mStats.SetStats(100, 0, 0, 0, 5, 0, 22, 0, 0);
+	mHealthComponent.mHealth = mStats.mHealth;
 }
 
 void Enemy::Update() {
@@ -38,7 +50,7 @@ void Enemy::Update() {
 }
 void Enemy::Move(float _deltaTime)
 {
-	transformSystem::MoveForward(mTransform, mSpeed * _deltaTime);
+	transformSystem::MoveForward(mTransform, mStats.mSpeed * _deltaTime);
 	//mTransform.position.x += mSpeed * _deltaTime;
 }
 void Enemy::Attack(float _deltaTime)
@@ -50,12 +62,12 @@ void Enemy::Attack(float _deltaTime)
 	}
 }
 void Enemy::TakeDamage(int _damage) {
-	mHealth -= _damage;
+	HealthSystem::TakeDamage(mHealthComponent, _damage);
 }
 
 bool Enemy::IsAlive()
 {
-	if (mHealth <= 0) {
+	if (GetHealth() <= 0) {
 		isDead = true;
 	}
 

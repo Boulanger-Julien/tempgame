@@ -5,24 +5,24 @@
 class Enemy
 {
 private:
-	int mHealth = 100;
 	int mShootCooldown = 1;
-	float mSpeed = 5;
 	float mCurrentShootCooldown = 0;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
-	float mStrength = 5;
 
 	int mPlayerIndex;
 public:
 	Entity mEntity;
 	Player* mPlayer;
+	StatsComponent mStats;
+	HealthComponent mHealthComponent;
+	//TO DO : voir ou est include HealthComponent
 
 	bool canShoot = false;
 	bool isDead = false;
 	Enemy(int _playerIndex);
 	~Enemy();
-
+	void InitStats();
 	void Update(); 
 
 	void Move(float _deltaTime);
@@ -33,9 +33,10 @@ public:
 	void LookPlayer();
 
 	void UpdateComponent();
-
+	HealthComponent& GetHealthComponent() { return mHealthComponent; }
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
 
-	float GetStrength() { return mStrength; }
+	float GetStrength() { return mStats.mStrength; }
+	float GetHealth() { return mHealthComponent.mHealth; }
 };

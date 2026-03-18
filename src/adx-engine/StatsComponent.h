@@ -2,41 +2,43 @@
 
 struct StatsComponent
 {
-	StatsComponent(
-		float hp = 100.0f, 
-		float strength = 10.0f, 
-		float defense = 0.0f, 
-		float moveSpeed = 35.0f, 
-		float exp = 0.0f, 
-		float healthRegenCooldown = 5.0f,
-		float manaPoints = 50.0f, 
-		float manaRegenCooldown = 5.0f, 
-		float magicPower = 10.0f)	
-		:
-		mMaxHealth(hp),
-		mCurrentHealth(hp),
-		mStrength(strength), 
-		mDefense(defense), 
-		mMoveSpeed(moveSpeed), 
-		mExp(exp), 
-		mHealthRegenCooldown(healthRegenCooldown),
-		mManaPoints(manaPoints), 
-		mMaxManaPoints(manaPoints), 
-		mManaRegenCooldown(manaRegenCooldown), 
-		mMagicPower(magicPower){}
+	void SetStats(
+		float _health,
+		float _healthRegen,
+		float _mana,
+		float _manaRegen,
+		float _strength,
+		float _defense,
+		float _moveSpeed,
+		float _exp,
+		float _magicPower)	
+	{
+		mHealth = _health;
+		mHealthRegen = _healthRegen;
 
-	float mCurrentHealth;
-	float mMaxHealth;
-	float mHealthRegenCooldown;
-	float mExp;
+		mMana = _mana;
+		mManaRegen = _manaRegen;
+
+		mStrength = _strength;
+
+		mDefense = _defense;
+		mSpeed = _moveSpeed;
+		mExp = _exp;
+		mMagicPower = _magicPower;
+	}
+
+	float mHealth;
+	float mHealthRegen;
+
+	float mMana;
+	float mManaRegen;
+
+	float mSpeed;
+
 	float mStrength;
+
 	float mDefense;
-	float mMoveSpeed;
-	float mManaPoints;
-	float mMaxManaPoints;
-	float mManaRegenCooldown;
+	float mExp;
 	float mMagicPower;
-	float mCurrentHealthRegenCooldown = 0.0f;
-	float mCurrentManaRegenCooldown = 0.0f;
 	float mLevel = 1.0f;
 };

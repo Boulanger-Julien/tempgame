@@ -6,26 +6,30 @@
 
 
 Player::Player() {
-	m_entity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent());
-	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(m_entity);
-	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
-	equippedWeapon = new Basic_Sword();
+	mEntity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent(), HealthComponent());
+	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
+	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
+	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);
+	mWeapon = new Basic_Sword();
 	mCollider.depth = mTransform.scale.z;
 	mCollider.width = mTransform.scale.x;
 	mCollider.height = mTransform.scale.y;
-	mCollider.compOwner = m_entity;
+	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
+
+	mStats.SetStats(100, 0, 0, 0, 10, 0, 35, 0, 0);
+	mHealthComponent.mHealth = mStats.mHealth;
 }
 
 void Player::ChooseClass(int classID) {
 	switch (classID) {
 	case 0: // Warrior
-		ECS::GetInstance().addComponent(m_entity, StatsComponent(10, 5, 2, 55, 0, 4.0f, 4, 5, 2));
-		Stats = ECS::GetInstance().getComponent<StatsComponent>(m_entity);
+		ECS::GetInstance().addComponent(mEntity, StatsComponent(10, 5, 2, 55, 0, 4.0f, 4, 5, 2));
+		mStats = ECS::GetInstance().getComponent<StatsComponent>(mEntity);
 		break;
 	case 1: // Mage
-		ECS::GetInstance().addComponent(m_entity, StatsComponent(5, 2, 1, 35, 0, 5.0f, 20, 4, 5));
-		Stats = ECS::GetInstance().getComponent<StatsComponent>(m_entity);
+		ECS::GetInstance().addComponent(mEntity, StatsComponent(5, 2, 1, 35, 0, 5.0f, 20, 4, 5));
+		mStats = ECS::GetInstance().getComponent<StatsComponent>(mEntity);
 		break;
 	case 2: // Rogue
 		break;
@@ -37,12 +41,9 @@ void Player::ChooseClass(int classID) {
 void Player::Update(const Ray& mouseRay) {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
-	// Health Regen (1hp/s)
-	if (Stats.mCurrentHealthRegenCooldown >= Stats.mHealthRegenCooldown && Stats.mCurrentHealth < Stats.mMaxHealth) {
-		Stats.mCurrentHealth += 1;
-		Stats.mCurrentHealthRegenCooldown = 0;
-	}
-	Stats.mCurrentHealthRegenCooldown += deltatime;
+	OnUpdate(deltatime);
+
+
 
 	float t = (mTransform.position.y - XMVectorGetY(mouseRay.origin)) / XMVectorGetY(mouseRay.direction);
 	XMVECTOR intersectPoint = XMVectorAdd(mouseRay.origin, XMVectorScale(mouseRay.direction, t));
@@ -52,33 +53,22 @@ void Player::Update(const Ray& mouseRay) {
 	float dz = targetZ - mTransform.position.z;
 	float angle = atan2f(dx, dz);
 	mTransform.rotation.y = angle;
-	ECS::GetInstance().getComponent<transformComponent>(m_entity) = mTransform;
-	transformComponent weaponTransform = mTransform;
-	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
-	ECS::GetInstance().getComponent<transformComponent>(equippedWeapon->GetEntity()) = weaponTransform;
-	transformSystem::MoveByKey(mTransform, Stats.mMoveSpeed, -45, deltatime);
-
 }
 void Player::Update() {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
-	// Health Regen (1hp/s)
-	if (Stats.mCurrentHealthRegenCooldown >= Stats.mHealthRegenCooldown && Stats.mCurrentHealth < Stats.mMaxHealth) {
-		Stats.mCurrentHealth += 1;
-		Stats.mCurrentHealthRegenCooldown = 0;
-	}
-	Stats.mCurrentHealthRegenCooldown += deltatime;
+	OnUpdate(deltatime);
+}
+void Player::OnUpdate(float _deltatime)
+{
+	HealthSystem::RecoverHealth(mHealthComponent, mStats.mHealthRegen);
 
-	ECS::GetInstance().getComponent<transformComponent>(m_entity) = mTransform;
+	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
 	transformComponent weaponTransform = mTransform;
 	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
-	ECS::GetInstance().getComponent<transformComponent>(equippedWeapon->GetEntity()) = weaponTransform;
-	transformSystem::MoveByKey(mTransform, Stats.mMoveSpeed, -45, deltatime);
-
+	ECS::GetInstance().getComponent<transformComponent>(mWeapon->GetEntity()) = weaponTransform;
+	transformSystem::MoveByKey(mTransform, mStats.mSpeed, -45, _deltatime);
 }
-void Player::takeDamage(int damage) {
-	Stats.mCurrentHealth -= (damage - Stats.mDefense) > 0 ? (damage - Stats.mDefense) : 0;
-	if (Stats.mCurrentHealth <= 0) {
-		Stats.mCurrentHealth = 0;
-	}
+void Player::takeDamage(int _damage) {
+	HealthSystem::TakeDamage(mHealthComponent, _damage);
 }
