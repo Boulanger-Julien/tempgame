@@ -3,6 +3,7 @@
 #include "Bullet.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "Rooms.h"
 #include "Obstacle.h"
 #include "MeshCreator.h"
 #include "adx-render/framework.h"
@@ -26,6 +27,7 @@ public:
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
 	float GetDeltatime();
+	void GenerateRoom();
 
 
 private:
@@ -62,6 +64,7 @@ private:
 	Entity weapon;
 	Entity healthBar;
 	Entity manaBar;
+	Rooms currentRoom;
 
 	MeshGeometry m_obstacleMesh;
 	MeshGeometry m_playerMesh;
