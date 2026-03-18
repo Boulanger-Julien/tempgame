@@ -23,7 +23,7 @@ Enemy::~Enemy() {
 void Enemy::Update() {
 	float deltaTime = Timer::GetInstance()->GetDeltatime();
 	
-	float dist = transformSystem::Distance(mTransform, mPlayer->GetTransform());
+	float dist = transformSystem::GetDistance(mTransform, mPlayer->GetTransform());
 	if (dist <= 60) {
 		LookPlayer();
 		if (dist >= 35) {
@@ -34,9 +34,8 @@ void Enemy::Update() {
 		}
 	}
 
-	//?
-	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
-	ECS::GetInstance().getComponent<ColliderComponent>(mEntity) = mCollider;
+	//Toujours à la fin
+	UpdateComponent();
 }
 void Enemy::Move(float _deltaTime)
 {
@@ -70,5 +69,11 @@ void Enemy::LookPlayer()
 
 	transformSystem::LookAt(mTransform, mPlayer->GetTransform().position);
 
+}
+
+void Enemy::UpdateComponent()
+{
+	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity) = mCollider;
 }
 

@@ -21,7 +21,7 @@ public:
 	void Draw();
 	void Pause();
 	void SpeedDown();
-	void AddBullet(Entity sender);
+	void AddBullet(Entity sender, float _damage);
 	void AddExplosionBullet(Entity sender, float bullets);
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);

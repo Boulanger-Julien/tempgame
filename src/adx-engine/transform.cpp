@@ -135,7 +135,10 @@ void transformSystem::UpdateForward(transformComponent& transform)
 	transform.forward.z = -XMVectorGetZ(normVect);
 }
 //
-float transformSystem::Distance(transformComponent& currentTransform, transformComponent& targetTransform)
+float transformSystem::GetDistance(transformComponent& currentTransform, transformComponent& targetTransform)
 {
-	return sqrt(pow(targetTransform.position.x - currentTransform.position.x, 2) + pow(targetTransform.position.y - currentTransform.position.y, 2) + pow(targetTransform.position.z - currentTransform.position.z, 2));
+	return sqrt(
+		pow(targetTransform.position.x - currentTransform.position.x, 2) + 
+		pow(targetTransform.position.y - currentTransform.position.y, 2) + 
+		pow(targetTransform.position.z - currentTransform.position.z, 2));
 }

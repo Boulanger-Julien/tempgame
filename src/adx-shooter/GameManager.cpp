@@ -117,7 +117,7 @@ void GameManager::Update()
     mWindow->SetCamera(mCamera);
 
     // Update de la barre de vie UI
-    ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = mPlayer->Stats.mHealthPoints / mPlayer->Stats.mMaxHealthPoints;
+    ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = mPlayer->Stats.mCurrentHealth / mPlayer->Stats.mMaxHealth;
 
     // --- MISE À JOUR DES MATRICES DE RENDU ---
     // On met à jour les constantes de chaque entité dans le Window
@@ -138,7 +138,7 @@ void GameManager::Update()
     if (InputSystem::isKeyDown(VK_LBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
         if (!cDownLastFrame) {
-            AddBullet(mPlayer->m_entity);
+            AddBullet(mPlayer->m_entity, mPlayer->Stats.mStrength);
             cDownLastFrame = true;
         }
     }
@@ -148,7 +148,7 @@ void GameManager::Update()
 	static bool spaceDownLastFrame = false;
     if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
-        AddBullet(mPlayer->m_entity);
+        AddBullet(mPlayer->m_entity, mPlayer->Stats.mStrength);
     }
     if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
@@ -176,13 +176,6 @@ void GameManager::Update()
                     }
                 }
             }
-        
-            //{
-            //    if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->m_entity)) {
-            //        mPlayer->takeDamage(2);
-            //        mBulletList[i]->toBeDestroyed = true;
-            //    }
-            //}
         }
 
         // Si la balle doit être détruite (sortie d'écran ou collision)
@@ -210,7 +203,7 @@ void GameManager::Update()
         // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
 
         if (enemy->canShoot) {
-            AddBullet(enemy->mEntity);
+            AddBullet(enemy->mEntity, enemy->GetStrength());
             enemy->canShoot = false;
         }
 			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
@@ -283,7 +276,7 @@ void GameManager::Draw()
     {
 		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->Stats.mManaPoints) + "/" + std::to_string((int)mPlayer->Stats.mMaxManaPoints), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->Stats.mExp) , 20, 20, 24);
-        mLifeTextRenderer->DrawTxt(mPlayer->Stats.mHealthPoints > 0 ? std::to_string((int)mPlayer->Stats.mHealthPoints) + "/" + std::to_string((int)mPlayer->Stats.mMaxHealthPoints) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
+        mLifeTextRenderer->DrawTxt(mPlayer->Stats.mCurrentHealth > 0 ? std::to_string((int)mPlayer->Stats.mMaxHealth) + "/" + std::to_string((int)mPlayer->Stats.mMaxHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
     }
 
     firstFrame = false;
@@ -293,7 +286,7 @@ void GameManager::Draw()
 void GameManager::Pause()
 {
     // Toggle pause when F1 is pressed
-    if (mPlayer->Stats.mHealthPoints == 0)
+    if (mPlayer->Stats.mCurrentHealth == 0)
     {
         spaceDown = true;
         if (spaceDown != spaceDownLastFrame)
@@ -307,13 +300,13 @@ void GameManager::Pause()
     {
         spaceDownLastFrame = false;
     }
-	if (InputSystem::isKeyDown(VK_F1) && mPlayer->Stats.mHealthPoints == 0)
+	if (InputSystem::isKeyDown(VK_F1) && mPlayer->Stats.mCurrentHealth == 0)
     {
         spaceDown2 = true;
         if (spaceDown2 != spaceDownLastFrame2)
         {
             spaceDownLastFrame2 = false;
-            mPlayer->Stats.mHealthPoints = mPlayer->Stats.mMaxHealthPoints;
+            mPlayer->Stats.mCurrentHealth = mPlayer->Stats.mMaxHealth;
             mAppPaused = !mAppPaused;
             for (Bullet* bullet : mBulletList) {
                 bullet->toBeDestroyed = true;
@@ -331,7 +324,7 @@ void GameManager::Pause()
 
 /////////////////////////
 
-void GameManager::AddBullet(Entity sender) {
+void GameManager::AddBullet(Entity sender, float _damage) {
     // Prevent Outdaded forward of Sender
     transformSystem::UpdateForward(ecs.getComponent<transformComponent>(sender));
 
@@ -363,12 +356,12 @@ void GameManager::AddBullet(Entity sender) {
     XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
     mWindow->Update(newBullet->m_entity, bulletWorld);
     if (sender == mPlayer->m_entity) {
-        newBullet->mDamage = 20;
+        newBullet->mDamage = _damage;
         mPlayerbulletList.push_back(newBullet);
 	}
     else
     {
-        newBullet->mDamage = 5;
+        newBullet->mDamage = _damage;
         mBulletList.push_back(newBullet);
     }
 }

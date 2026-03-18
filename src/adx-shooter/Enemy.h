@@ -11,6 +11,7 @@ private:
 	float mCurrentShootCooldown = 0;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
+	float mStrength = 5;
 
 public:
 	Entity mEntity;
@@ -31,6 +32,10 @@ public:
 
 	void LookPlayer();
 
+	void UpdateComponent();
+
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
+
+	float GetStrength() { return mStrength; }
 };

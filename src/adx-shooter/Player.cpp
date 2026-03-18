@@ -37,8 +37,8 @@ void Player::Update(const Ray& mouseRay) {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
 	// Health Regen (1hp/s)
-	if (Stats.mCurrentHealthRegenCooldown >= Stats.mHealthRegenCooldown && Stats.mHealthPoints < Stats.mMaxHealthPoints) {
-		Stats.mHealthPoints += 1;
+	if (Stats.mCurrentHealthRegenCooldown >= Stats.mHealthRegenCooldown && Stats.mCurrentHealth < Stats.mMaxHealth) {
+		Stats.mCurrentHealth += 1;
 		Stats.mCurrentHealthRegenCooldown = 0;
 	}
 	Stats.mCurrentHealthRegenCooldown += deltatime;
@@ -58,8 +58,8 @@ void Player::Update(const Ray& mouseRay) {
 }
 
 void Player::takeDamage(int damage) {
-	Stats.mHealthPoints -= (damage - Stats.mDefense) > 0 ? (damage - Stats.mDefense) : 0;
-	if (Stats.mHealthPoints <= 0) {
-		Stats.mHealthPoints = 0;
+	Stats.mCurrentHealth -= (damage - Stats.mDefense) > 0 ? (damage - Stats.mDefense) : 0;
+	if (Stats.mCurrentHealth <= 0) {
+		Stats.mCurrentHealth = 0;
 	}
 }
