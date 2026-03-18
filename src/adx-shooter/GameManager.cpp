@@ -399,7 +399,7 @@ void GameManager::Shoot()
     }
     if (InputSystem::isKeyDown(VK_RBUTTON))
     {
-        AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
+        AddBullet(mPlayer->mEntity, mPlayer->GetStats().mStrength);
     }
 }
 
@@ -448,7 +448,7 @@ void GameManager::BulletUpdate()
     for (int i = mBulletList.size() - 1; i >= 0; i--) {
         mBulletList[i]->Update();
         if (!mBulletList[i]->toBeDestroyed) {
-            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->m_entity)) {
+            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->mEntity)) {
                 mPlayer->takeDamage(mBulletList[i]->mDamage);
                 mBulletList[i]->toBeDestroyed = true;
             }
@@ -478,8 +478,8 @@ void GameManager::UpdateMatrix()
 
 void GameManager::UpdateBar()
 {
-    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetStats().mCurrentHealth / mPlayer->GetStats().mMaxHealth;
-    ecs.getComponent<transformComponent>(manaBar).scale.x = mPlayer->GetStats().mManaPoints / mPlayer->GetStats().mMaxManaPoints;
+    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
+    //ecs.getComponent<transformComponent>(manaBar).scale.x = 0/*mPlayer->GetStats().mMana*/ / mPlayer->GetStats().mMana;
 }
 
 void GameManager::Destroy() {
