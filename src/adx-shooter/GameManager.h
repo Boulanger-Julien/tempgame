@@ -3,6 +3,7 @@
 #include "Bullet.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "Rooms.h"
 #include "Obstacle.h"
 #include "MeshCreator.h"
 #include "adx-render/framework.h"
@@ -33,6 +34,8 @@ public:
 	void BulletUpdate();
 	void UpdateMatrix();
 	void UpdateBar();
+	void GenerateRoom();
+
 
 private:
 	bool firstFrame = true;
@@ -66,6 +69,7 @@ private:
 	Entity weapon;
 	Entity healthBar;
 	Entity manaBar;
+	Rooms currentRoom;
 
 	MeshGeometry m_obstacleMesh;
 	MeshGeometry m_playerMesh;

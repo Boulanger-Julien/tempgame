@@ -5,6 +5,7 @@
 #include <random>
 #include "MeshCreator.h"
 #include <string>
+#include "Rooms.h"
 
 using namespace DirectX;
 
@@ -28,6 +29,7 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
 
 bool GameManager::Initialize()
 {
+    srand(time(NULL));
     ecs = ECS::GetInstance();
 
     //Generate player
@@ -37,15 +39,12 @@ bool GameManager::Initialize()
 		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->mWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"Diamond2.dds");
 		mEntityMesh.insert({ mPlayer->mWeapon->GetEntity(), weaponMesh });
     }
+	
 	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
     m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
-    //Generate random roads connected
-    {
-        Entity road1 = ecs.createEntity(transformComponent(0, 0, 0));
-        MeshGeometry road = MeshCreator::CreateBox(mWindow, road1, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
-        mEntityMesh.insert({ road1, road });
-    }
+    GenerateRoom(); 
+
 
     Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
     MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
@@ -115,6 +114,10 @@ void GameManager::Update()
     if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
 		SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+    }
+    if (InputSystem::isKeyUp('E')&& mEnemyList.size() <=0) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    {
+		GenerateRoom();
     }
 
 	// Update des bullets et des ennemis
@@ -480,6 +483,63 @@ void GameManager::UpdateBar()
 {
     ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
     //ecs.getComponent<transformComponent>(manaBar).scale.x = 0/*mPlayer->GetStats().mMana*/ / mPlayer->GetStats().mMana;
+void GameManager::GenerateRoom()
+{
+    //mWindow->RemoveEntityResources(currentRoom.ground);
+    mWindow->RemoveEntityResources(currentRoom.door.m_entity);
+    currentRoom.Initialize();
+	int color = rand() % 5;
+    currentRoom.door.doorMesh = MeshCreator::CreateBox(mWindow, currentRoom.door.m_entity, 10.0f, 4, 20, (XMFLOAT4)Colors::Violet);
+    //if (currentRoom.generated == false)
+    //{
+    //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
+    //    currentRoom.generated = true;
+    //}
+	mPlayer->GetTransform().position = FLOAT3(0, 2, 0);
+    switch (color)
+    {
+        case 0:
+            currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
+            //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
+            for (int i = 0; i < 3; i++) {
+                SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+            }
+            break;
+            case 1:
+            currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkGreen);
+            //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
+            for (int i = 0; i < 7; i++) {
+                SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+            }
+            break;
+        case 2:
+            //currentRoom.door.mTransform.position = FLOAT3(50, 0, 50);
+            currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkBlue);
+            for (int i = 0; i < 5; i++) {
+                SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+            }
+            break;
+        case 3:
+            //currentRoom.door.mTransform.position = FLOAT3(0, 0, 0);
+            currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkRed);
+            for (int i = 0; i < 20; i++) {
+                SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+            }
+            break;
+		case 4:
+            //currentRoom.door.mTransform.position = FLOAT3(50, 0, -50);
+			currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkViolet);
+            break;
+         default:
+             //currentRoom.door.mTransform.position = FLOAT3(0, 0, 25);
+             for (int i = 0; i < 10; i++) {
+                 SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+             }
+            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::SkyBlue);
+			break;
+    }
+
+    mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
 }
 
 void GameManager::Destroy() {
