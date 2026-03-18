@@ -94,96 +94,25 @@ bool GameManager::Initialize()
 void GameManager::Update()
 {
     float deltaTime = GetDeltatime();
-
+    UpdateBar();
     Aim();
 
     // Mouvement du joueur et Caméra
-    transformComponent& playerTrans = mPlayer->GetTransform();
-	UpdateCam(playerTrans);
-
+	UpdateCam();
 
     // Update de la barre de vie UI
-    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetStats().mCurrentHealth / mPlayer->GetStats().mMaxHealth;
 
-    // --- MISE À JOUR DES MATRICES DE RENDU ---
-    // On met à jour les constantes de chaque entité dans le Window
-    for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
-    {
-        int entityID = it->first;
-        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
-        mWindow->Update(entityID, entityWorld);
-    }
-    for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
-    {
-        int entityID = it->first;
-        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
-        mWindow->UpdateUI(entityID, entityWorld);
-    }
-
+    UpdateMatrix();
     // Tir (Bullet instantiation)
     Shoot();
-    if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
-    {
-        AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
-    }
+	// Test mob spawn
     if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
     {
 		SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
     }
-
     // --- BOUCLE DES BULLETS ET COLLISIONS ---
-    for (int i = mPlayerbulletList.size() - 1; i >= 0; i--) {
-        mPlayerbulletList[i]->Update();
-
-        // Vérification de collision avec les ennemis (si la balle n'est pas déjà marquée)
-        if (!mPlayerbulletList[i]->toBeDestroyed) {
-            for (Enemy* enemy : mEnemyList) {
-                // TRÈS IMPORTANT : On vérifie s'il n'est pas déjà mort
-                if (enemy->isDead) continue;
-
-                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
-                    enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
-                    mPlayerbulletList[i]->toBeDestroyed = true;
-                    if (enemy->IsAlive() == true) {
-                        mDestroyEnemyList.push_back(enemy);
-
-                        mPlayer->GetStats().mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Si la balle doit être détruite (sortie d'écran ou collision)
-        if (mPlayerbulletList[i]->toBeDestroyed) {
-            mDestroyBulletList.push_back(mPlayerbulletList[i]);
-            mPlayerbulletList.erase(mPlayerbulletList.begin() + i);
-        }
-    }
-    for (int i = mBulletList.size() - 1; i >= 0; i--) {
-        mBulletList[i]->Update();
-        if (!mBulletList[i]->toBeDestroyed) {
-            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->m_entity)) {
-                mPlayer->takeDamage(mBulletList[i]->mDamage);
-                mBulletList[i]->toBeDestroyed = true;
-            }
-        }
-        if (mBulletList[i]->toBeDestroyed) {
-            mDestroyBulletList.push_back(mBulletList[i]);
-            mBulletList.erase(mBulletList.begin() + i);
-        }
-	}
-    for (Enemy* enemy : mEnemyList) {
-        transformComponent& enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
-        enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
-        // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
-
-        if (enemy->canShoot) {
-            AddBullet(enemy->mEntity, enemy->GetStrength());
-            enemy->canShoot = false;
-        }
-			//transformSystem::Move(enemyTransform, 0, 0, 0.5f);
-    }
+	BulletUpdate();
+    EnemyUpdate();
     // Nettoyage final des entités supprimées ce frame
     Destroy();
 }
@@ -413,8 +342,9 @@ void GameManager::Aim()
     }
 }
 
-void GameManager::UpdateCam(transformComponent& playerTrans)
+void GameManager::UpdateCam()
 {
+    transformComponent& playerTrans = mPlayer->GetTransform();
     mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
     XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
     XMVECTOR targetVect = XMLoadFloat3(&playerPos);
@@ -447,7 +377,92 @@ void GameManager::Shoot()
     else {
         cDownLastFrame2 = false;
     }
+    if (InputSystem::isKeyDown(VK_RBUTTON)) // Utilisation de VK_LBUTTON pour plus de fiabilité
+    {
+        AddBullet(mPlayer->m_entity, mPlayer->GetStats().mStrength);
+    }
+}
 
+void GameManager::EnemyUpdate()
+{
+    for (Enemy* enemy : mEnemyList) {
+        transformComponent& enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
+        enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
+        // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
+
+        if (enemy->canShoot) {
+            AddBullet(enemy->mEntity, enemy->GetStrength());
+            enemy->canShoot = false;
+        }
+        //transformSystem::Move(enemyTransform, 0, 0, 0.5f);
+    }
+}
+
+void GameManager::BulletUpdate()
+{
+    for (int i = mPlayerbulletList.size() - 1; i >= 0; i--) {
+        mPlayerbulletList[i]->Update();
+
+        // Vérification de collision avec les ennemis (si la balle n'est pas déjà marquée)
+        if (!mPlayerbulletList[i]->toBeDestroyed) {
+            for (Enemy* enemy : mEnemyList) {
+                // TRÈS IMPORTANT : On vérifie s'il n'est pas déjà mort
+                if (enemy->isDead) continue;
+
+                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
+                    enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
+                    mPlayerbulletList[i]->toBeDestroyed = true;
+                    if (enemy->IsAlive() == true) {
+                        mDestroyEnemyList.push_back(enemy);
+
+                        mPlayer->GetStats().mExp += 10; // Récompense d'EXP pour avoir tué un ennemi
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Si la balle doit être détruite (sortie d'écran ou collision)
+        if (mPlayerbulletList[i]->toBeDestroyed) {
+            mDestroyBulletList.push_back(mPlayerbulletList[i]);
+            mPlayerbulletList.erase(mPlayerbulletList.begin() + i);
+        }
+    }
+    for (int i = mBulletList.size() - 1; i >= 0; i--) {
+        mBulletList[i]->Update();
+        if (!mBulletList[i]->toBeDestroyed) {
+            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->m_entity)) {
+                mPlayer->takeDamage(mBulletList[i]->mDamage);
+                mBulletList[i]->toBeDestroyed = true;
+            }
+        }
+        if (mBulletList[i]->toBeDestroyed) {
+            mDestroyBulletList.push_back(mBulletList[i]);
+            mBulletList.erase(mBulletList.begin() + i);
+        }
+    }
+}
+
+void GameManager::UpdateMatrix()
+{
+    for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
+    {
+        int entityID = it->first;
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
+        mWindow->Update(entityID, entityWorld);
+    }
+    for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
+    {
+        int entityID = it->first;
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
+        mWindow->UpdateUI(entityID, entityWorld);
+    }
+}
+
+void GameManager::UpdateBar()
+{
+    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetStats().mCurrentHealth / mPlayer->GetStats().mMaxHealth;
+    ecs.getComponent<transformComponent>(manaBar).scale.x = mPlayer->GetStats().mManaPoints / mPlayer->GetStats().mMaxManaPoints;
 }
 
 void GameManager::Destroy() {
@@ -485,16 +500,6 @@ void GameManager::Destroy() {
             delete enemy;
         }
         mDestroyEnemyList.clear();
-    }
-
-    // NETTOYAGE DES OBSTACLES
-    if (!mDestroyObstacleList.empty()) {
-        for (Obstacle* obstacle : mDestroyObstacleList) {
-            mWindow->RemoveEntityResources(obstacle->m_entity);
-            mEntityMesh.erase(obstacle->m_entity);
-            delete obstacle;
-        }
-        mDestroyObstacleList.clear();
     }
 }
 

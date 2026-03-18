@@ -27,8 +27,12 @@ public:
 	void SpawnMob(float x, float z, int mob);
 	float GetDeltatime();
 	void Aim();
-	void UpdateCam(transformComponent& playerTrans);
+	void UpdateCam();
 	void Shoot();
+	void EnemyUpdate();
+	void BulletUpdate();
+	void UpdateMatrix();
+	void UpdateBar();
 
 private:
 	bool firstFrame = true;
@@ -72,9 +76,6 @@ private:
 	Camera mCamera;
 
 	Road road;
-
-	std::vector<Obstacle*> mObstacleList;
-	std::vector<Obstacle*> mDestroyObstacleList;
 
 	std::vector<Enemy*> mEnemyList;
 	std::vector<Enemy*> mDestroyEnemyList;
