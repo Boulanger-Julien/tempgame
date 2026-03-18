@@ -13,6 +13,7 @@ public:
 	int maxLifetime = 1;			// in Seconds
 	float currentLifetime = 0;
 	bool toBeDestroyed = false;
+	int mDamage;
 
 	Bullet();
 	~Bullet();

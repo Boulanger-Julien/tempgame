@@ -166,7 +166,7 @@ void GameManager::Update()
                 if (enemy->isDead) continue;
 
                 if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
-                    enemy->TakeDamage(10);
+                    enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
                     mPlayerbulletList[i]->toBeDestroyed = true;
                     if (enemy->IsAlive() == true) {
                         mDestroyEnemyList.push_back(enemy);
@@ -195,7 +195,7 @@ void GameManager::Update()
         mBulletList[i]->Update();
         if (!mBulletList[i]->toBeDestroyed) {
             if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->m_entity)) {
-                mPlayer->takeDamage(20);
+                mPlayer->takeDamage(mBulletList[i]->mDamage);
                 mBulletList[i]->toBeDestroyed = true;
             }
         }
@@ -351,7 +351,6 @@ void GameManager::AddBullet(Entity sender) {
         };
 
         FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
-
         ecs.getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position + (forward * 2.5f);
     }
 	transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
@@ -364,10 +363,12 @@ void GameManager::AddBullet(Entity sender) {
     XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
     mWindow->Update(newBullet->m_entity, bulletWorld);
     if (sender == mPlayer->m_entity) {
+        newBullet->mDamage = 20;
         mPlayerbulletList.push_back(newBullet);
 	}
     else
     {
+        newBullet->mDamage = 5;
         mBulletList.push_back(newBullet);
     }
 }
