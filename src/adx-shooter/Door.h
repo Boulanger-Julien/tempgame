@@ -4,7 +4,7 @@
 #include "adx-render/framework.h"
 #include "adx-engine/framework.h"
 #include "MeshCreator.h" 
-#include "Enemy.h"
+#include "Enemy\Enemy.h"
 
 class Door
 {

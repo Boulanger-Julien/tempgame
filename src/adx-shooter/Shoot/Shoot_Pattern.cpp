@@ -11,7 +11,7 @@ Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender)
 
     Bullet* newBullet = new Bullet();
 
-    ECS::GetInstance().getComponent<transformComponent>(newBullet->m_entity) = ECS::GetInstance().getComponent<transformComponent>(sender);
+    ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = ECS::GetInstance().getComponent<transformComponent>(sender);
     if (sender == GetInstance().mPlayerIndex)
     {
         transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(instance->mPlayerIndex);
@@ -25,12 +25,12 @@ Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender)
         };
 
         FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
-        ECS::GetInstance().getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position + (forward * 2.5f);
+        ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity).position = playerTrans.position + (forward * 2.5f);
     }
-    transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->m_entity);
+    transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
     bulletTrans.forward = bulletTrans.forward * -1;
 
-    transformSystem::Move(ECS::GetInstance().getComponent<transformComponent>(newBullet->m_entity), 0, 0, 2);
+    transformSystem::Move(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity), 0, 0, 2);
 
 	return newBullet;
 }
@@ -47,7 +47,7 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
 
     for (int i = 0; i < bullets; ++i) {
         Bullet* newBullet = new Bullet();
-        transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->m_entity);
+        transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
 
         bulletTrans = playerTrans;
 
@@ -60,10 +60,10 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
 
         transformSystem::Move(bulletTrans, 0, 0, 2);
 
-        window->RegisterExistingMeshForEntity(newBullet->m_entity);
+        window->RegisterExistingMeshForEntity(newBullet->mEntity);
 
         XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(bulletTrans);
-        window->Update(newBullet->m_entity, bulletWorld);
+        window->Update(newBullet->mEntity, bulletWorld);
 
         newBullet->mDamage = _damage;
 		newShot->bulletList.push_back(newBullet);

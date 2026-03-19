@@ -257,10 +257,10 @@ void GameManager::Pause()
 
 void GameManager::AddBullet(Entity sender, float _damage) {
 	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(sender);
-    mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
-    mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
-    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
-    mWindow->Update(newBullet->m_entity, bulletWorld);
+    mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
+    mEntityMesh.insert({ newBullet->mEntity, m_bulletMesh });
+    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
+    mWindow->Update(newBullet->mEntity, bulletWorld);
     if (sender == mPlayer->mEntity) {
         newBullet->mDamage = _damage;
         mPlayerbulletList.push_back(newBullet);
@@ -276,7 +276,7 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
 	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
     {
-		mEntityMesh.insert({ newShot->bulletList[i]->m_entity, m_bulletMesh });
+		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, m_bulletMesh });
         mPlayerbulletList.push_back(newShot->bulletList[i]);
     }
 }
@@ -435,7 +435,7 @@ void GameManager::BulletUpdate()
             }
 			for (Boss* boss : mBossList) {
 				if (boss->IsAlive() == false) continue;
-                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(boss->GetEntity())) {
+                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->mEntity).collisionCheck(boss->GetEntity())) {
                     boss->TakeDamage(mPlayerbulletList[i]->mDamage);
                     mPlayerbulletList[i]->toBeDestroyed = true;
                     if (boss->IsAlive() == false) {
