@@ -483,7 +483,7 @@ void GameManager::GenerateRoom()
     //mWindow->RemoveEntityResources(currentRoom.ground);
     mWindow->RemoveEntityResources(currentRoom.door.m_entity);
     currentRoom.Initialize();
-	int color = /*rand() % */5;
+	int color = rand() % 6;
     currentRoom.door.doorMesh = MeshCreator::CreateBox(mWindow, currentRoom.door.m_entity, 10.0f, 4, 20, (XMFLOAT4)Colors::Violet);
     //if (currentRoom.generated == false)
     //{
@@ -613,7 +613,7 @@ void GameManager::SpawnMob(float x, float z, int mob) {
 void GameManager::SpawnBoss(float x, float z) {
     Boss* newBoss = new Makhina_Boss(mPlayer->mEntity);
     newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
-	MeshGeometry bossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
+	MeshGeometry bossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed);
     newBoss->GetTransform().position = FLOAT3(x, 13.5, z);
     mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
     mEntityMesh.insert({ newBoss->GetEntity(), bossMesh});
