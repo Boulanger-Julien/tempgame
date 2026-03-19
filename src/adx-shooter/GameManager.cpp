@@ -15,7 +15,7 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
     //Initialize window
     {
         mWindow = new Window(mhInstance);
-        mWindow->Initialize(winW, winH);
+        mWindow->Initialize(1920, 1080);
     }
 	mPlayer = new Player();
     mLifeTextRenderer = new TextRenderer(mWindow);
@@ -26,8 +26,8 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
     mScoreTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
     mTimerTextRenderer = new TextRenderer(mWindow);
     mTimerTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-}
 
+}
 
 bool GameManager::Initialize()
 {
@@ -45,7 +45,13 @@ bool GameManager::Initialize()
 	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
     m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
-    GenerateRoom(); 
+	currentRoom.Initialize(mWindow);
+    mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
+    mEntityMesh.insert({ currentRoom.wall1Entity, currentRoom.wall1 });
+    mEntityMesh.insert({ currentRoom.wall2Entity, currentRoom.wall2 });
+    mEntityMesh.insert({ currentRoom.door.mEntity , currentRoom.door.doorMesh });
+	currentRoom.door.mPlayer = mPlayer->mEntity;
+    
 
 
     Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
@@ -101,7 +107,6 @@ void GameManager::Update()
 
 	// Update de la caméra pour suivre le joueur
 	UpdateCam();
-
     // Update de la barre de vie UI
     UpdateBar();
     ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
@@ -118,15 +123,21 @@ void GameManager::Update()
 		SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
 
     }
-    if (InputSystem::isKeyUp('E')&& mEnemyList.size() <=0) // Utilisation de VK_LBUTTON pour plus de fiabilité
-    {
-		GenerateRoom();
-    }
+  //  if (InputSystem::isKeyUp('E')&& mEnemyList.size() <=0) // Utilisation de VK_LBUTTON pour plus de fiabilité
+  //  {
+		//GenerateRoom();
+  //  }
+
 
 	// Update des bullets et des ennemis
 	BulletUpdate();
     EnemyUpdate();
 
+	currentRoom.door.Update(mEnemyList.size());
+    if (currentRoom.door.changeRoom) {
+        currentRoom.door.changeRoom = false;
+        GenerateRoom();
+    }
     // Nettoyage final des entités supprimées cette frame
     Destroy();
 }
@@ -249,7 +260,7 @@ void GameManager::AddBullet(Entity sender, float _damage) {
 
     Bullet* newBullet = new Bullet();
 
-    ecs.getComponent<transformComponent>(newBullet->m_entity) = ecs.getComponent<transformComponent>(sender);
+    ecs.getComponent<transformComponent>(newBullet->mEntity) = ecs.getComponent<transformComponent>(sender);
     if (sender == mPlayer->mEntity)
     {
         transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->mEntity);
@@ -263,17 +274,17 @@ void GameManager::AddBullet(Entity sender, float _damage) {
         };
 
         FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
-        ecs.getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position + (forward * 2.5f);
+        ecs.getComponent<transformComponent>(newBullet->mEntity).position = playerTrans.position + (forward * 2.5f);
     }
-	transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
+	transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->mEntity);
 	bulletTrans.forward = bulletTrans.forward * -1;
 
-    transformSystem::Move(ecs.getComponent<transformComponent>(newBullet->m_entity), 0, 0, 2);
+    transformSystem::Move(ecs.getComponent<transformComponent>(newBullet->mEntity), 0, 0, 2);
 
-    mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
-    mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
-    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
-    mWindow->Update(newBullet->m_entity, bulletWorld);
+    mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
+    mEntityMesh.insert({ newBullet->mEntity, m_bulletMesh });
+    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
+    mWindow->Update(newBullet->mEntity, bulletWorld);
     if (sender == mPlayer->mEntity) {
         newBullet->mDamage = _damage;
         mPlayerbulletList.push_back(newBullet);
@@ -291,7 +302,7 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
 
     for (int i = 0; i < bullets; ++i) {
         Bullet* newBullet = new Bullet();
-        transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
+        transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->mEntity);
 
         // 1. On copie l'état du joueur
         bulletTrans = playerTrans;
@@ -312,11 +323,11 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
         transformSystem::Move(bulletTrans, 0, 0, 2);
 
         // 5. Enregistrement graphique
-        mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
-        mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
+        mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
+        mEntityMesh.insert({ newBullet->mEntity, m_bulletMesh });
 
         XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(bulletTrans);
-        mWindow->Update(newBullet->m_entity, bulletWorld);
+        mWindow->Update(newBullet->mEntity, bulletWorld);
 
         mPlayerbulletList.push_back(newBullet);
     }
@@ -439,7 +450,7 @@ void GameManager::BulletUpdate()
             for (Enemy* enemy : mEnemyList) {
                 if (enemy->isDead) continue;
 
-                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
+                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->mEntity).collisionCheck(enemy->mEntity)) {
                     enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
                     mPlayerbulletList[i]->toBeDestroyed = true;
                     if (enemy->IsAlive() == true) {
@@ -461,7 +472,7 @@ void GameManager::BulletUpdate()
     for (int i = mBulletList.size() - 1; i >= 0; i--) {
         mBulletList[i]->Update();
         if (!mBulletList[i]->toBeDestroyed) {
-            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->m_entity).collisionCheck(mPlayer->mEntity)) {
+            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->mEntity).collisionCheck(mPlayer->mEntity)) {
                 mPlayer->takeDamage(mBulletList[i]->mDamage);
                 mBulletList[i]->toBeDestroyed = true;
             }
@@ -497,27 +508,26 @@ void GameManager::UpdateBar()
 void GameManager::GenerateRoom()
 {
     //mWindow->RemoveEntityResources(currentRoom.ground);
-    mWindow->RemoveEntityResources(currentRoom.door.m_entity);
-    currentRoom.Initialize();
+    mWindow->RemoveEntityResources(currentRoom.door.mEntity);
+    currentRoom.Initialize(mWindow);
 	int color = rand() % 5;
-    currentRoom.door.doorMesh = MeshCreator::CreateBox(mWindow, currentRoom.door.m_entity, 10.0f, 4, 20, (XMFLOAT4)Colors::Violet);
     //if (currentRoom.generated == false)
     //{
     //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
     //    currentRoom.generated = true;
     //}
-	mPlayer->GetTransform().position = FLOAT3(0, 2, 0);
+	mPlayer->GetTransform().position = FLOAT3(0, 2, -45);
     switch (color)
     {
         case 0:
-            currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
+            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
             //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
             for (int i = 0; i < 3; i++) {
                 SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
             }
             break;
             case 1:
-            currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkGreen);
+            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkGreen);
             //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
             for (int i = 0; i < 7; i++) {
                 SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
@@ -525,21 +535,21 @@ void GameManager::GenerateRoom()
             break;
         case 2:
             //currentRoom.door.mTransform.position = FLOAT3(50, 0, 50);
-            currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkBlue);
+            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkBlue);
             for (int i = 0; i < 5; i++) {
                 SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
             }
             break;
         case 3:
             //currentRoom.door.mTransform.position = FLOAT3(0, 0, 0);
-            currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkRed);
+            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkRed);
             for (int i = 0; i < 20; i++) {
                 SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
             }
             break;
 		case 4:
             //currentRoom.door.mTransform.position = FLOAT3(50, 0, -50);
-			currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkViolet);
+			//currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkViolet);
             break;
          default:
              //currentRoom.door.mTransform.position = FLOAT3(0, 0, 25);
@@ -558,10 +568,10 @@ void GameManager::Destroy() {
     if (!mDestroyBulletList.empty()) {
         for (Bullet* bullet : mDestroyBulletList) {
             // 1. Libérer les ressources DirectX (Slots de descripteurs)
-            mWindow->RemoveEntityResources(bullet->m_entity);
+            mWindow->RemoveEntityResources(bullet->mEntity);
 
             // 2. Retirer du système de rendu
-            mEntityMesh.erase(bullet->m_entity);
+            mEntityMesh.erase(bullet->mEntity);
 
             // 4. Supprimer l'objet C++
             delete bullet;

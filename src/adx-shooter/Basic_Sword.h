@@ -15,7 +15,7 @@ class Basic_Sword : public Sword
 	}
 	~Basic_Sword() {}
 	void Attack() override {
-		transformComponent& Trans = ECS::GetInstance().getComponent<transformComponent>(m_entity);
+		transformComponent& Trans = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 		Trans.rotation.y += 0.5f;
 	}
 	void Update() override {

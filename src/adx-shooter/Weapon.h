@@ -5,12 +5,12 @@ class Weapon
 {
 	public:
 	Weapon() {
-		m_entity = ECS::GetInstance().createEntity(transformComponent());}
+		mEntity = ECS::GetInstance().createEntity(transformComponent());}
 	virtual ~Weapon() {}
 	virtual void Attack() = 0;
 	virtual void Update() = 0;
 	virtual const wchar_t* GetName() { return mName; }
-	virtual float GetEntity() { return m_entity; }
+	virtual float GetEntity() { return mEntity; }
 protected:
 	const wchar_t* mName;
 	float Substat;
@@ -18,5 +18,5 @@ protected:
 	float mRange;
 	float mRarity;
 	float mBaseDamage;
-	Entity m_entity;
+	Entity mEntity;
 };
