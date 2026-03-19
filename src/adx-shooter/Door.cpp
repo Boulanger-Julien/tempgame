@@ -7,7 +7,8 @@ Door::Door()
 	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 1, 0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
-	mTransform.scale = FLOAT3(10,2,10);
+	mTransform.scale = FLOAT3(10,5,10);
+	mTransform.position.z = 48;
 	mCollider.depth = mTransform.scale.z; 
 	mCollider.width = mTransform.scale.x;
 	mCollider.height = mTransform.scale.y;

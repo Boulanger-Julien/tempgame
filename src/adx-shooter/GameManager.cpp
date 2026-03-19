@@ -302,6 +302,7 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
 
     for (int i = 0; i < bullets; ++i) {
         Bullet* newBullet = new Bullet();
+        newBullet->mDamage = 500;
         transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->mEntity);
 
         // 1. On copie l'état du joueur
@@ -414,7 +415,7 @@ void GameManager::Shoot()
     }
     if (InputSystem::isKeyDown(VK_SPACE)) {
         if (!cDownLastFrame2) {
-            AddExplosionBullet(mPlayer->mEntity, 9);
+            AddExplosionBullet(mPlayer->mEntity, 20);
             cDownLastFrame2 = true;
         }
     }
