@@ -46,8 +46,9 @@ bool GameManager::Initialize()
 	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
     m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
+	newBoss = new Makhina_Boss(mPlayer->mEntity);
+    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed);
     GenerateRoom(); 
-
 
     Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
     MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Json\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
@@ -611,13 +612,13 @@ void GameManager::SpawnMob(float x, float z, int mob) {
 }
 
 void GameManager::SpawnBoss(float x, float z) {
-    Boss* newBoss = new Makhina_Boss(mPlayer->mEntity);
+    newBoss = new Makhina_Boss(mPlayer->mEntity);
+
     newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
-	MeshGeometry bossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed);
     newBoss->GetTransform().position = FLOAT3(x, 13.5, z);
     mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
-    mEntityMesh.insert({ newBoss->GetEntity(), bossMesh});
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBoss->GetEntity()));
+    mEntityMesh.insert({ newBoss->GetEntity(), MakhinaBossMesh });
     mWindow->Update(newBoss->GetEntity(), enemyWorld);
     mBossList.push_back(newBoss);
 }
