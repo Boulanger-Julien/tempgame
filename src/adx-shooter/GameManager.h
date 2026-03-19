@@ -1,9 +1,12 @@
 #pragma once
 #include <vector>
-#include "Bullet.h"
+#include "Shoot\Bullet.h"
 #include "Player.h"
-#include "Enemy.h"
-#include "EnemyMarksman.h"
+
+#include "Enemy\Enemy.h"
+#include "Enemy\EnemyMarksman.h"
+#include "Enemy\Makhina_Boss.h"
+
 #include "Rooms.h"
 #include "Obstacle.h"
 #include "MeshCreator.h"
@@ -11,6 +14,7 @@
 #include "adx-render/Window.h"
 #include "adx-render/TextRenderer.h"
 #include "adx-render/UIRenderer.h"
+#include "Shoot\Shoot_Pattern.h"
 
 class GameManager
 {
@@ -27,6 +31,7 @@ public:
 	void AddExplosionBullet(Entity sender, float bullets);
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
+	void SpawnBoss(float x, float z);
 	float GetDeltatime();
 	void Aim();
 	void UpdateCam();
@@ -85,6 +90,8 @@ private:
 
 	std::vector<EnemyMarksman*> mEnemyList;
 	std::vector<EnemyMarksman*> mDestroyEnemyList;
+	std::vector<Boss*> mBossList;
+	std::vector<Boss*> mDestroyBossList;
 
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;

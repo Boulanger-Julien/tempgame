@@ -2,7 +2,7 @@
 #include "Player.h"
 #include "adx-core/Timer.h"
 #include "adx-engine\framework.h"
-#include "Basic_Sword.h"
+#include "Weapon/Basic_Sword.h"
 
 
 Player::Player() {

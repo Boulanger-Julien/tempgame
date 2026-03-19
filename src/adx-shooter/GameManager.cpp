@@ -41,7 +41,8 @@ bool GameManager::Initialize()
 		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->mWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"Diamond2.dds");
 		mEntityMesh.insert({ mPlayer->mWeapon->GetEntity(), weaponMesh });
     }
-	
+	Shoot_Pattern_Explosion::GetInstance().SetPlayerIndex(mPlayer->mEntity);
+	Shoot_Pattern_Single_Shot::GetInstance().SetPlayerIndex(mPlayer->mEntity);
 	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
     m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
@@ -49,7 +50,7 @@ bool GameManager::Initialize()
 
 
     Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
-    MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
+    MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Json\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
     mEntityMesh.insert({ cloud, cloudMesh });
     //Setup camera
     {
@@ -244,32 +245,7 @@ void GameManager::Pause()
 /////////////////////////
 
 void GameManager::AddBullet(Entity sender, float _damage) {
-    // Prevent Outdaded forward of Sender
-    transformSystem::UpdateForward(ecs.getComponent<transformComponent>(sender));
-
-    Bullet* newBullet = new Bullet();
-
-    ecs.getComponent<transformComponent>(newBullet->m_entity) = ecs.getComponent<transformComponent>(sender);
-    if (sender == mPlayer->mEntity)
-    {
-        transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->mEntity);
-        float pitch = playerTrans.rotation.x;
-        float yaw = playerTrans.rotation.y;
-
-        FLOAT3 forward = {
-            sin(yaw) * cos(pitch),
-            -sin(pitch),
-            cos(yaw) * cos(pitch)
-        };
-
-        FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
-        ecs.getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position + (forward * 2.5f);
-    }
-	transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
-	bulletTrans.forward = bulletTrans.forward * -1;
-
-    transformSystem::Move(ecs.getComponent<transformComponent>(newBullet->m_entity), 0, 0, 2);
-
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(sender);
     mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
     mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
     XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
@@ -286,39 +262,11 @@ void GameManager::AddBullet(Entity sender, float _damage) {
 }
 void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
-    const float angleStep = (2.0f * XM_PI) / bullets; // 360° / 8 en radians
-    transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->mEntity);
-
-    for (int i = 0; i < bullets; ++i) {
-        Bullet* newBullet = new Bullet();
-        transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
-
-        // 1. On copie l'état du joueur
-        bulletTrans = playerTrans;
-
-        // 2. On décale la rotation Y pour chaque direction (0, 45, 90, 135...)
-        bulletTrans.rotation.y = playerTrans.rotation.y + (i * angleStep);
-
-        // --- CRUCIAL : On met à jour le vecteur 'forward' à partir de la nouvelle rotation ---
-        transformSystem::UpdateForward(bulletTrans);
-
-        // 3. Positionnement : on place la balle légèrement devant le joueur 
-        // selon SA propre direction désormais unique.
-        float distFromPlayer = 5.0f;
-		transformSystem::MoveForward(bulletTrans, distFromPlayer);
-
-        // 4. On donne une impulsion de départ (vitesse de 2)
-        // Move utilise maintenant le forward mis à jour, donc chaque balle partira dans son axe.
-        transformSystem::Move(bulletTrans, 0, 0, 2);
-
-        // 5. Enregistrement graphique
-        mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
-        mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
-
-        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(bulletTrans);
-        mWindow->Update(newBullet->m_entity, bulletWorld);
-
-        mPlayerbulletList.push_back(newBullet);
+	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
+	for (int i = 0; i < newShot->bulletList.size(); ++i)
+    {
+		mEntityMesh.insert({ newShot->bulletList[i]->m_entity, m_bulletMesh });
+        mPlayerbulletList.push_back(newShot->bulletList[i]);
     }
 }
 
@@ -343,6 +291,23 @@ void GameManager::Aim()
         mPlayer->Update();
         float closestDistance = FLT_MAX;
         transformComponent& playerTrans = mPlayer->GetTransform();
+        for (Boss* enemy : mBossList) {
+            transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->GetEntity());
+            float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
+            if (distance < closestDistance) {
+                closestDistance = distance;
+            }
+            else
+            {
+                continue;
+            }
+            if (distance < 70) {
+                float dx = enemyTrans.position.x - playerTrans.position.x;
+                float dz = enemyTrans.position.z - playerTrans.position.z;
+                float angle = atan2f(dx, dz);
+                playerTrans.rotation.y = angle;
+            }
+        }
 
         for (EnemyMarksman* enemy : mEnemyList) {
             transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->mEntity);
@@ -426,6 +391,16 @@ void GameManager::EnemyUpdate()
             enemy->canShoot = false;
         }
     }
+    for (Boss* boss : mBossList) {
+        transformComponent& bossTransform = ECS::GetInstance().getComponent<transformComponent>(boss->GetEntity());
+        boss->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
+        // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
+        //if (boss->canShoot) {
+        //    AddBullet(boss->GetEntity(), boss->GetStats().mStrength);
+        //    boss->canShoot = false;
+        //}
+        //transformSystem::Move(enemyTransform, 0, 0, 0.5f);
+	}
 }
 
 void GameManager::BulletUpdate()
@@ -439,7 +414,7 @@ void GameManager::BulletUpdate()
                 if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
                     enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
                     mPlayerbulletList[i]->toBeDestroyed = true;
-                    if (enemy->IsAlive() == true) {
+                    if (enemy->IsAlive() == false) {
                         mDestroyEnemyList.push_back(enemy);
 
                         mPlayer->GetStats().mExp += 10;
@@ -447,6 +422,18 @@ void GameManager::BulletUpdate()
                     }
                 }
             }
+			for (Boss* boss : mBossList) {
+				if (boss->IsAlive() == false) continue;
+                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(boss->GetEntity())) {
+                    boss->TakeDamage(mPlayerbulletList[i]->mDamage);
+                    mPlayerbulletList[i]->toBeDestroyed = true;
+                    if (boss->IsAlive() == false) {
+						mDestroyBossList.push_back(boss);
+                        mPlayer->GetStats().mExp += 50;
+                        break;
+                    }
+				}
+			}
         }
 
         // Si la balle doit être détruite (sortie d'écran ou collision)
@@ -496,7 +483,7 @@ void GameManager::GenerateRoom()
     //mWindow->RemoveEntityResources(currentRoom.ground);
     mWindow->RemoveEntityResources(currentRoom.door.m_entity);
     currentRoom.Initialize();
-	int color = rand() % 5;
+	int color = /*rand() % */5;
     currentRoom.door.doorMesh = MeshCreator::CreateBox(mWindow, currentRoom.door.m_entity, 10.0f, 4, 20, (XMFLOAT4)Colors::Violet);
     //if (currentRoom.generated == false)
     //{
@@ -538,6 +525,13 @@ void GameManager::GenerateRoom()
             //currentRoom.door.mTransform.position = FLOAT3(50, 0, -50);
 			currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkViolet);
             break;
+        case 5:
+             //currentRoom.door.mTransform.position = FLOAT3(-50, 0, -50);
+             currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkCyan);
+             for (int i = 0; i < 1; i++) {
+                 SpawnBoss(rand() % 100 - 50, rand() % 100 - 50);
+             }
+			 break;
          default:
              //currentRoom.door.mTransform.position = FLOAT3(0, 0, 25);
              for (int i = 0; i < 10; i++) {
@@ -553,7 +547,7 @@ void GameManager::GenerateRoom()
 void GameManager::Destroy() {
     // NETTOYAGE DES BULLETS
     if (!mDestroyBulletList.empty()) {
-        for (Bullet* bullet : mDestroyBulletList) {
+         for (Bullet* bullet : mDestroyBulletList) {
             // 1. Libérer les ressources DirectX (Slots de descripteurs)
             mWindow->RemoveEntityResources(bullet->m_entity);
 
@@ -586,6 +580,22 @@ void GameManager::Destroy() {
         }
         mDestroyEnemyList.clear();
     }
+    if (!mDestroyBossList.empty()) {
+        for (Boss* boss : mDestroyBossList) {
+            // 1. On le retire de la liste de l'Update LOGIQUE
+            auto it = std::find(mBossList.begin(), mBossList.end(), boss);
+            if (it != mBossList.end()) {
+                mBossList.erase(it);
+            }
+            // 2. On retire les ressources DirectX
+            mWindow->RemoveEntityResources(boss->GetEntity());
+            // 3. On le retire du dictionnaire de rendu
+            mEntityMesh.erase(boss->GetEntity());
+            // 4. Supprimer l'objet C++
+            delete boss;
+        }
+        mDestroyBossList.clear();
+	}
 }
 
 void GameManager::SpawnMob(float x, float z, int mob) {
@@ -598,4 +608,16 @@ void GameManager::SpawnMob(float x, float z, int mob) {
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
 	mEnemyList.push_back(newEnemy);
+}
+
+void GameManager::SpawnBoss(float x, float z) {
+    Boss* newBoss = new Makhina_Boss(mPlayer->mEntity);
+    newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
+	MeshGeometry bossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
+    newBoss->GetTransform().position = FLOAT3(x, 13.5, z);
+    mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
+    mEntityMesh.insert({ newBoss->GetEntity(), bossMesh});
+    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBoss->GetEntity()));
+    mWindow->Update(newBoss->GetEntity(), enemyWorld);
+    mBossList.push_back(newBoss);
 }

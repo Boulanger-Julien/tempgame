@@ -1,8 +1,7 @@
 #pragma once
 #include "adx-render/framework.h"
 #include "adx-engine/framework.h"
-#include "Weapon.h"
-#include "Health.h"
+#include "Weapon/Weapon.h"
 enum AimType {
 	Auto,
 	Mouse

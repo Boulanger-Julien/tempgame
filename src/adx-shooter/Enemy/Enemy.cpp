@@ -77,7 +77,7 @@ bool Enemy::IsAlive()
 		isDead = true;
 	}
 
-	return isDead;
+	return !isDead;
 }
 
 void Enemy::LookPlayer()
@@ -92,5 +92,9 @@ void Enemy::UpdateComponent()
 {
 	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
 	ECS::GetInstance().getComponent<ColliderComponent>(mEntity) = mCollider;
+	if (mHealthComponent.mHealth > mStats.mHealth) {
+		mHealthComponent.mHealth = mStats.mHealth;
+	}
+	ECS::GetInstance().getComponent<HealthComponent>(mEntity) = mHealthComponent;
 }
 
