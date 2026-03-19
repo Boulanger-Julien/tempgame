@@ -47,7 +47,7 @@ bool GameManager::Initialize()
     m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
 	newBoss = new Makhina_Boss(mPlayer->mEntity);
-    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed);
+    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
     GenerateRoom(); 
 
     Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
@@ -221,7 +221,7 @@ void GameManager::Pause()
     {
         spaceDownLastFrame = false;
     }
-	if (InputSystem::isKeyDown(VK_F1) && mPlayer->GetHealth() == 0)
+	if (InputSystem::isKeyDown(VK_F1) && mAppPaused)
     {
         spaceDown2 = true;
         if (spaceDown2 != spaceDownLastFrame2)
