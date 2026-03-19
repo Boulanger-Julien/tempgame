@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
-#include "Bullet.h"
+#include "Shoot\Bullet.h"
 #include "Player.h"
-#include "Enemy.h"
+#include "Enemy\Enemy.h"
+#include "Enemy\Makhina_Boss.h"
 #include "Rooms.h"
 #include "Obstacle.h"
 #include "MeshCreator.h"
@@ -26,6 +27,7 @@ public:
 	void AddExplosionBullet(Entity sender, float bullets);
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
+	void SpawnBoss(float x, float z);
 	float GetDeltatime();
 	void Aim();
 	void UpdateCam();
@@ -83,7 +85,9 @@ private:
 	Road road;
 
 	std::vector<Enemy*> mEnemyList;
+	std::vector<Boss*> mBossList;
 	std::vector<Enemy*> mDestroyEnemyList;
+	std::vector<Boss*> mDestroyBossList;
 
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;
