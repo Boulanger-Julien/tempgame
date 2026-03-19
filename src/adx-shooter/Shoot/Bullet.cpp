@@ -3,18 +3,18 @@
 #include "adx-core/Timer.h"
 
 Bullet::Bullet() {
-	m_entity = ECS::GetInstance().createEntity(transformComponent(), ColliderComponent());
-	mTransform = ECS::GetInstance().getComponent<transformComponent>(m_entity);
-	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).depth = mTransform.scale.z;
-	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).width = mTransform.scale.x;
-	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).height = mTransform.scale.y;
-	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).compOwner = m_entity;
-	ECS::GetInstance().getComponent<ColliderComponent>(m_entity).updateCollider();
+	mEntity = ECS::GetInstance().createEntity(transformComponent(), ColliderComponent());
+	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).depth = mTransform.scale.z;
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).width = mTransform.scale.x;
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).height = mTransform.scale.y;
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).compOwner = mEntity;
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).updateCollider();
 
 }
 
 Bullet::~Bullet() {
-	ECS::GetInstance().Release(m_entity);
+	ECS::GetInstance().Release(mEntity);
 }
 
 void Bullet::Update() {
@@ -26,5 +26,5 @@ void Bullet::Update() {
 	}
 	currentLifetime += deltaTime;
 
-	transformSystem::MoveForward(ECS::GetInstance().getComponent<transformComponent>(m_entity), m_speed*deltaTime);
+	transformSystem::MoveForward(ECS::GetInstance().getComponent<transformComponent>(mEntity), m_speed*deltaTime);
 }

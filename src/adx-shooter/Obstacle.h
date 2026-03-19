@@ -4,7 +4,7 @@
 class Obstacle
 {
 public:
-	Entity m_entity;
+	Entity mEntity;
 
 	Obstacle();
 	~Obstacle();

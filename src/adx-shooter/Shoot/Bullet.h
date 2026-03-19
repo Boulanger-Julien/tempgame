@@ -6,7 +6,7 @@
 class Bullet
 {
 public:
-	Entity m_entity;
+	Entity mEntity;
 	ColliderComponent mCollider;
 	transformComponent mTransform;
 	float m_speed = 50;
