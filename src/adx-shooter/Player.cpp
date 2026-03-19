@@ -17,7 +17,8 @@ Player::Player() {
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
 
-	mStats.SetStats(100, 0, 0, 0, 10, 0, 35, 0, 0);
+	mStats.SetStats(100, 2, 0, 0, 10, 0, 35, 0, 0);
+	mHealthComponent.mMaxHealth = mStats.mHealth;
 	mHealthComponent.mHealth = mStats.mHealth;
 }
 
@@ -61,7 +62,7 @@ void Player::Update() {
 }
 void Player::OnUpdate(float _deltatime)
 {
-	HealthSystem::RecoverHealth(mHealthComponent, mStats.mHealthRegen);
+	HealthSystem::RecoverHealth(mHealthComponent, mStats.mHealthRegen * _deltatime);
 
 	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
 	transformComponent weaponTransform = mTransform;

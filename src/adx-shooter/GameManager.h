@@ -3,6 +3,7 @@
 #include "Bullet.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "EnemyMarksman.h"
 #include "Rooms.h"
 #include "Obstacle.h"
 #include "MeshCreator.h"
@@ -82,8 +83,8 @@ private:
 
 	Road road;
 
-	std::vector<Enemy*> mEnemyList;
-	std::vector<Enemy*> mDestroyEnemyList;
+	std::vector<EnemyMarksman*> mEnemyList;
+	std::vector<EnemyMarksman*> mDestroyEnemyList;
 
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;

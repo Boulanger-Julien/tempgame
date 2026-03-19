@@ -344,7 +344,7 @@ void GameManager::Aim()
         float closestDistance = FLT_MAX;
         transformComponent& playerTrans = mPlayer->GetTransform();
 
-        for (Enemy* enemy : mEnemyList) {
+        for (EnemyMarksman* enemy : mEnemyList) {
             transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->mEntity);
             float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
             if (distance < closestDistance) {
@@ -418,16 +418,13 @@ void GameManager::Shoot()
 
 void GameManager::EnemyUpdate()
 {
-    for (Enemy* enemy : mEnemyList) {
-        transformComponent& enemyTransform = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
+    for (EnemyMarksman* enemy : mEnemyList) {
         enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
-        // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
 
         if (enemy->canShoot) {
             AddBullet(enemy->mEntity, enemy->GetStrength());
             enemy->canShoot = false;
         }
-        //transformSystem::Move(enemyTransform, 0, 0, 0.5f);
     }
 }
 
@@ -436,7 +433,7 @@ void GameManager::BulletUpdate()
     for (int i = mPlayerbulletList.size() - 1; i >= 0; i--) {
         mPlayerbulletList[i]->Update();
         if (!mPlayerbulletList[i]->toBeDestroyed) {
-            for (Enemy* enemy : mEnemyList) {
+            for (EnemyMarksman* enemy : mEnemyList) {
                 if (enemy->isDead) continue;
 
                 if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->m_entity).collisionCheck(enemy->mEntity)) {
@@ -571,7 +568,7 @@ void GameManager::Destroy() {
 
     // NETTOYAGE DES ENNEMIS (Même logique)
     if (!mDestroyEnemyList.empty()) {
-        for (Enemy* enemy : mDestroyEnemyList) {
+        for (EnemyMarksman* enemy : mDestroyEnemyList) {
             // 1. On le retire de la liste de l'Update LOGIQUE
             auto it = std::find(mEnemyList.begin(), mEnemyList.end(), enemy);
             if (it != mEnemyList.end()) {
@@ -592,7 +589,8 @@ void GameManager::Destroy() {
 }
 
 void GameManager::SpawnMob(float x, float z, int mob) {
-    Enemy* newEnemy = new Enemy(mPlayer->mEntity);
+    EnemyMarksman* newEnemy = new EnemyMarksman();
+    newEnemy->Init(mPlayer->mEntity);
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
     mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);

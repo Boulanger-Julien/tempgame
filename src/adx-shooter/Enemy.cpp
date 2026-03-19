@@ -2,7 +2,20 @@
 #include "Enemy.h"
 #include "adx-core/Timer.h"
 
-Enemy::Enemy(int _playerIndex) {
+//Protected
+bool Enemy::CheckDistanceToFollowPlayer()
+{
+	return transformSystem::GetDistance(mTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex)) <= distFollowPlayer;
+}
+
+bool Enemy::CheckDistanceToAttackPlayer()
+{
+	return transformSystem::GetDistance(mTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex)) <= distAttackPlayer;
+}
+
+//
+void Enemy::Init(int _playerIndex)
+{
 	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent(), StatsComponent(), HealthComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
@@ -18,37 +31,30 @@ Enemy::Enemy(int _playerIndex) {
 	mCollider.updateCollider();
 	mPlayerIndex = _playerIndex;
 
-	InitStats();
+	OnInit();
 }
 
-Enemy::~Enemy() {
-	ECS::GetInstance().Release(mEntity);
-}
-
-void Enemy::InitStats()
+void Enemy::InitStats(float _health, float _healthRegen, float _mana, float _manaRegen, float _strength, float _defense, float _moveSpeed, float _exp, float _magicPower)
 {
-	mStats.SetStats(100, 0, 0, 0, 5, 0, 22, 0, 0);
+	mStats.SetStats(_health, _healthRegen, _mana, _manaRegen, _strength, _defense, _moveSpeed, _exp, _magicPower);
 	mHealthComponent.mHealth = mStats.mHealth;
 }
 
 void Enemy::Update() {
 	float deltaTime = Timer::GetInstance()->GetDeltatime();
 	
-	float dist = transformSystem::GetDistance(mTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex));
-	if (dist <= 60) {
-		LookPlayer();
-		if (dist >= 35) {
-			Move(deltaTime);
-		}
-		if (dist <= 40) {
-			Attack(deltaTime);
-		}
-	}
+	OnUpdate(deltaTime);
 
-	//Toujours � la fin
 	UpdateComponent();
 }
-void Enemy::Move(float _deltaTime)
+void Enemy::OnUpdate(float _deltaTime) {
+
+}
+void Enemy::OnInit()
+{
+
+}
+void Enemy::MoveTowardPlayer(float _deltaTime)
 {
 	transformSystem::MoveForward(mTransform, mStats.mSpeed * _deltaTime);
 	//mTransform.position.x += mSpeed * _deltaTime;

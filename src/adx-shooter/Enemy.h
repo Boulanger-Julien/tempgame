@@ -4,13 +4,32 @@
 
 class Enemy
 {
+protected:
+	float distFollowPlayer = 0;
+	float distAttackPlayer = 0;
+	float mShootCooldown = 1;
+	int mPlayerIndex;
+
+	virtual void OnUpdate(float _deltaTime);
+	virtual void OnInit();
+
+	bool CheckDistanceToFollowPlayer();
+	bool CheckDistanceToAttackPlayer();
+	void InitStats(float _health, float _healthRegen, float _mana, float _manaRegen, float _strength, float _defense, float _moveSpeed, float _exp, float _magicPower);
+
+	enum EnemyState {
+		None,
+		FollowPlayer,
+		AttackPlayer
+	};
+	int currentEnemyState = 0;
 private:
-	int mShootCooldown = 1;
+
 	float mCurrentShootCooldown = 0;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
 
-	int mPlayerIndex;
+
 public:
 	Entity mEntity;
 	Player* mPlayer;
@@ -20,13 +39,12 @@ public:
 
 	bool canShoot = false;
 	bool isDead = false;
-	Enemy(int _playerIndex);
-	~Enemy();
-	void InitStats();
+
+	void Init(int _playerIndex);
 	void Update(); 
 
-	void Move(float _deltaTime);
-	void Attack(float _deltaTime);
+	void MoveTowardPlayer(float _deltaTime);
+	virtual void Attack(float _deltaTime);
 	void TakeDamage(int _damage);
 	bool IsAlive();
 
@@ -39,4 +57,6 @@ public:
 
 	float GetStrength() { return mStats.mStrength; }
 	float GetHealth() { return mHealthComponent.mHealth; }
+
+
 };

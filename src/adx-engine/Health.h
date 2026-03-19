@@ -1,6 +1,7 @@
 #pragma once
 
 struct HealthComponent {
+	float mMaxHealth;
 	float mHealth;
 };
 struct HealthSystem {
