@@ -78,11 +78,13 @@ private:
 	Entity healthBar;
 	Entity manaBar;
 	Rooms currentRoom;
+	Boss* newBoss;
 
 	MeshGeometry m_obstacleMesh;
 	MeshGeometry m_playerMesh;
 	MeshGeometry m_enemyMesh;
 	MeshGeometry m_bulletMesh;
+	MeshGeometry MakhinaBossMesh;
 
 	Light mLight;
 	Camera mCamera;
