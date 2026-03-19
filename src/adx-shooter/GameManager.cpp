@@ -41,7 +41,8 @@ bool GameManager::Initialize()
 		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->mWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"Diamond2.dds");
 		mEntityMesh.insert({ mPlayer->mWeapon->GetEntity(), weaponMesh });
     }
-	
+	Shoot_Pattern_Explosion::GetInstance().SetPlayerIndex(mPlayer->mEntity);
+	Shoot_Pattern_Single_Shot::GetInstance().SetPlayerIndex(mPlayer->mEntity);
 	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
     m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
@@ -244,32 +245,7 @@ void GameManager::Pause()
 /////////////////////////
 
 void GameManager::AddBullet(Entity sender, float _damage) {
-    // Prevent Outdaded forward of Sender
-    transformSystem::UpdateForward(ecs.getComponent<transformComponent>(sender));
-
-    Bullet* newBullet = new Bullet();
-
-    ecs.getComponent<transformComponent>(newBullet->m_entity) = ecs.getComponent<transformComponent>(sender);
-    if (sender == mPlayer->mEntity)
-    {
-        transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->mEntity);
-        float pitch = playerTrans.rotation.x;
-        float yaw = playerTrans.rotation.y;
-
-        FLOAT3 forward = {
-            sin(yaw) * cos(pitch),
-            -sin(pitch),
-            cos(yaw) * cos(pitch)
-        };
-
-        FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
-        ecs.getComponent<transformComponent>(newBullet->m_entity).position = playerTrans.position + (forward * 2.5f);
-    }
-	transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
-	bulletTrans.forward = bulletTrans.forward * -1;
-
-    transformSystem::Move(ecs.getComponent<transformComponent>(newBullet->m_entity), 0, 0, 2);
-
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(sender);
     mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
     mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
     XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->m_entity));
@@ -286,41 +262,11 @@ void GameManager::AddBullet(Entity sender, float _damage) {
 }
 void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
-    const float angleStep = (2.0f * XM_PI) / bullets; // 360° / 8 en radians
-    transformComponent& playerTrans = ecs.getComponent<transformComponent>(mPlayer->mEntity);
-
-    for (int i = 0; i < bullets; ++i) {
-        Bullet* newBullet = new Bullet();
-        transformComponent& bulletTrans = ecs.getComponent<transformComponent>(newBullet->m_entity);
-
-        // 1. On copie l'état du joueur
-        bulletTrans = playerTrans;
-
-        // 2. On décale la rotation Y pour chaque direction (0, 45, 90, 135...)
-        bulletTrans.rotation.y = playerTrans.rotation.y + (i * angleStep);
-
-        // --- CRUCIAL : On met à jour le vecteur 'forward' à partir de la nouvelle rotation ---
-        transformSystem::UpdateForward(bulletTrans);
-
-        // 3. Positionnement : on place la balle légèrement devant le joueur 
-        // selon SA propre direction désormais unique.
-        float distFromPlayer = 5.0f;
-        transformSystem::MoveForward(bulletTrans, distFromPlayer);
-
-        // 4. On donne une impulsion de départ (vitesse de 2)
-        // Move utilise maintenant le forward mis à jour, donc chaque balle partira dans son axe.
-        transformSystem::Move(bulletTrans, 0, 0, 2);
-
-        // 5. Enregistrement graphique
-        mWindow->RegisterExistingMeshForEntity(newBullet->m_entity);
-        mEntityMesh.insert({ newBullet->m_entity, m_bulletMesh });
-
-        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(bulletTrans);
-        mWindow->Update(newBullet->m_entity, bulletWorld);
-
-        newBullet->mDamage = mPlayer->GetStats().mStrength;
-        mPlayerbulletList.push_back(newBullet);
-
+	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
+	for (int i = 0; i < newShot->bulletList.size(); ++i)
+    {
+		mEntityMesh.insert({ newShot->bulletList[i]->m_entity, m_bulletMesh });
+        mPlayerbulletList.push_back(newShot->bulletList[i]);
     }
 }
 

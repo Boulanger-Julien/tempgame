@@ -11,6 +11,7 @@
 #include "adx-render/Window.h"
 #include "adx-render/TextRenderer.h"
 #include "adx-render/UIRenderer.h"
+#include "Shoot\Shoot_Pattern.h"
 
 class GameManager
 {
