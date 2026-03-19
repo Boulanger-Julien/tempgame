@@ -118,18 +118,6 @@ void GameManager::Update()
     // Tir (Bullet instantiation)
     Shoot();
 
-	// Test mob spawn
-    if (InputSystem::isKeyDown('C')) // Utilisation de VK_LBUTTON pour plus de fiabilité
-    {
-		SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-
-    }
-  //  if (InputSystem::isKeyUp('E')&& mEnemyList.size() <=0) // Utilisation de VK_LBUTTON pour plus de fiabilité
-  //  {
-		//GenerateRoom();
-  //  }
-
-
 	// Update des bullets et des ennemis
 	BulletUpdate();
     EnemyUpdate();
@@ -214,6 +202,10 @@ void GameManager::Draw()
 
 void GameManager::Pause()
 {
+    if (mPlayer->GetHealth() <= 0) {
+        mAppPaused = true;
+    }
+
 	static bool spaceDown = false;
     // Toggle pause when F1 is pressed
     float playerHealth = mPlayer->GetHealth();
@@ -231,26 +223,7 @@ void GameManager::Pause()
     {
         spaceDownLastFrame = false;
     }
-	if (InputSystem::isKeyDown(VK_F1) && mPlayer->GetHealth() == 0)
-    {
-        spaceDown2 = true;
-        if (spaceDown2 != spaceDownLastFrame2)
-        {
-            spaceDownLastFrame2 = false;
-            HealthSystem::RecoverHealth(mPlayer->GetHealthComponent(), 100);
-            mAppPaused = !mAppPaused;
-            for (Bullet* bullet : mBulletList) {
-                bullet->toBeDestroyed = true;
-			}
-			Destroy();
-        }
-        spaceDownLastFrame2 = true;
-        spaceDown2 = false;
-    }
-    else
-    {
-        spaceDownLastFrame2 = false;
-    }
+    CheckInput();
 }
 
 /////////////////////////
@@ -405,12 +378,6 @@ void GameManager::EnemyUpdate()
     for (Boss* boss : mBossList) {
         transformComponent& bossTransform = ECS::GetInstance().getComponent<transformComponent>(boss->GetEntity());
         boss->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
-        // If (canShoot) and Player is nearby (positionEnemy-positionPlayer<= or somethn idk)
-        //if (boss->canShoot) {
-        //    AddBullet(boss->GetEntity(), boss->GetStats().mStrength);
-        //    boss->canShoot = false;
-        //}
-        //transformSystem::Move(enemyTransform, 0, 0, 0.5f);
 	}
 }
 
@@ -630,4 +597,24 @@ void GameManager::SpawnBoss(float x, float z) {
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBoss->GetEntity()));
     mWindow->Update(newBoss->GetEntity(), enemyWorld);
     mBossList.push_back(newBoss);
+}
+void GameManager::CheckInput()
+{
+    if (InputSystem::isKeyDown(VK_F1) && mAppPaused)
+    {
+        HealthSystem::RecoverHealth(mPlayer->GetHealthComponent(), mPlayer->GetHealthComponent().mMaxHealth);
+        mAppPaused = !mAppPaused;
+        for (Bullet* bullet : mBulletList) {
+            bullet->toBeDestroyed = true;
+        }
+        Destroy();
+    }
+    if (InputSystem::isKeyDown('C'))
+    {
+        SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+    }
+    if (InputSystem::isKeyUp('E') && mEnemyList.size() <= 0)
+    {
+        GenerateRoom();
+    }
 }

@@ -41,6 +41,7 @@ public:
 	void UpdateMatrix();
 	void UpdateBar();
 	void GenerateRoom();
+	void CheckInput();
 
 
 private:
