@@ -389,15 +389,18 @@ void GameManager::BulletUpdate()
         if (!mPlayerbulletList[i]->toBeDestroyed) {
             for (EnemyMarksman* enemy : mEnemyList) {
                 if (enemy->isDead) continue;
+				float dx = mPlayerbulletList[i]->mTransform.position.x - enemy->GetTransform().position.x;
+				float dz = mPlayerbulletList[i]->mTransform.position.z - enemy->GetTransform().position.z;
+                if ((dx * dx + dz * dz) < 4.0f) {
+                    if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->mEntity).collisionCheck(enemy->mEntity)) {
+                        enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
+                        mPlayerbulletList[i]->toBeDestroyed = true;
+                        if (enemy->IsAlive() == false) {
+                            mDestroyEnemyList.push_back(enemy);
 
-                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->mEntity).collisionCheck(enemy->mEntity)) {
-                    enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
-                    mPlayerbulletList[i]->toBeDestroyed = true;
-                    if (enemy->IsAlive() == false) {
-                        mDestroyEnemyList.push_back(enemy);
-
-                        mPlayer->GetStats().mExp += 10;
-                        break;
+                            mPlayer->GetStats().mExp += 10;
+                            break;
+                        }
                     }
                 }
             }
@@ -418,15 +421,21 @@ void GameManager::BulletUpdate()
         // Si la balle doit être détruite (sortie d'écran ou collision)
         if (mPlayerbulletList[i]->toBeDestroyed) {
             mDestroyBulletList.push_back(mPlayerbulletList[i]);
-            mPlayerbulletList.erase(mPlayerbulletList.begin() + i);
+            mPlayerbulletList[i] = mPlayerbulletList.back();
+            mPlayerbulletList.pop_back();
         }
     }
     for (int i = mBulletList.size() - 1; i >= 0; i--) {
         mBulletList[i]->Update();
         if (!mBulletList[i]->toBeDestroyed) {
-            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->mEntity).collisionCheck(mPlayer->mEntity)) {
-                mPlayer->takeDamage(mBulletList[i]->mDamage);
-                mBulletList[i]->toBeDestroyed = true;
+            float dx = mBulletList[i]->mTransform.position.x - mPlayer->GetTransform().position.x;
+            float dz = mBulletList[i]->mTransform.position.z - mPlayer->GetTransform().position.z;
+            if ((dx * dx + dz * dz) < 4.0f) {
+
+                if (ecs.getComponent<ColliderComponent>(mBulletList[i]->mEntity).collisionCheck(mPlayer->mEntity)) {
+                    mPlayer->takeDamage(mBulletList[i]->mDamage);
+                    mBulletList[i]->toBeDestroyed = true;
+                }
             }
         }
         if (mBulletList[i]->toBeDestroyed) {

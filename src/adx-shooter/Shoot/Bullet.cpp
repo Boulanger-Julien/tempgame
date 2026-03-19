@@ -27,4 +27,11 @@ void Bullet::Update() {
 	currentLifetime += deltaTime;
 
 	transformSystem::MoveForward(ECS::GetInstance().getComponent<transformComponent>(mEntity), m_speed*deltaTime);
+	UpdateComponent();
+}
+
+void Bullet::UpdateComponent() {
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).updateCollider();
+	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
+	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 }

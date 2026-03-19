@@ -19,5 +19,6 @@ public:
 	~Bullet();
 
 	void Update();
+	void UpdateComponent();
 };
 

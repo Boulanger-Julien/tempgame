@@ -70,3 +70,13 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
     }
     return newShot;
 }
+
+Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Window* window)
+{
+	return nullptr;
+}
+
+Line* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, Window* window)
+{
+	return nullptr;
+}
