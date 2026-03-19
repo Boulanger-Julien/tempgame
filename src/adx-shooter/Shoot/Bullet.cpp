@@ -10,6 +10,7 @@ Bullet::Bullet() {
 	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).height = mTransform.scale.y;
 	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).compOwner = mEntity;
 	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).updateCollider();
+	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 
 }
 
@@ -31,7 +32,8 @@ void Bullet::Update() {
 }
 
 void Bullet::UpdateComponent() {
-	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).updateCollider();
-	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
-	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
+
+	mCollider.updateCollider();
+	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity) = mCollider;
 }

@@ -28,6 +28,7 @@ public:
 	void Pause();
 	void SpeedDown();
 	void AddBullet(Entity sender, float _damage);
+	void AddLineBullet(Entity sender, float _damage);
 	void AddExplosionBullet(Entity sender, float bullets);
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
@@ -80,10 +81,11 @@ private:
 	Rooms currentRoom;
 	Boss* newBoss;
 
-	MeshGeometry m_obstacleMesh;
-	MeshGeometry m_playerMesh;
-	MeshGeometry m_enemyMesh;
-	MeshGeometry m_bulletMesh;
+	MeshGeometry mObstacleMesh;
+	MeshGeometry mPlayerMesh;
+	MeshGeometry mEnemyMesh;
+	MeshGeometry mBulletMesh;
+	MeshGeometry mLineBulletMesh;
 	MeshGeometry MakhinaBossMesh;
 
 	Light mLight;

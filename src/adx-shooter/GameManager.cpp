@@ -43,8 +43,10 @@ bool GameManager::Initialize()
     }
 	Shoot_Pattern_Explosion::GetInstance().SetPlayerIndex(mPlayer->mEntity);
 	Shoot_Pattern_Single_Shot::GetInstance().SetPlayerIndex(mPlayer->mEntity);
-	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
-    m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
+	Shoot_Pattern_Line::GetInstance().SetPlayerIndex(mPlayer->mEntity);
+	mBulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
+	mLineBulletMesh = MeshCreator::CreateBox(mWindow, 5, 1, 1, 1, (XMFLOAT4)Colors::Blue, L"Diamond2.dds");
+    mEnemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
 	currentRoom.Initialize(mWindow);
     mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
@@ -230,9 +232,9 @@ void GameManager::Pause()
 /////////////////////////
 
 void GameManager::AddBullet(Entity sender, float _damage) {
-	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(sender);
+	Bullet* newBullet = Shoot_Pattern_Line::Shoot(sender, _damage, mWindow);
     mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
-    mEntityMesh.insert({ newBullet->mEntity, m_bulletMesh });
+    mEntityMesh.insert({ newBullet->mEntity, mLineBulletMesh });
     XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
     mWindow->Update(newBullet->mEntity, bulletWorld);
     if (sender == mPlayer->mEntity) {
@@ -245,12 +247,17 @@ void GameManager::AddBullet(Entity sender, float _damage) {
         mBulletList.push_back(newBullet);
     }
 }
+void GameManager::AddLineBullet(Entity sender, float _damage)
+{
+	Bullet* newLine = Shoot_Pattern_Line::Shoot(sender, _damage, mWindow);
+
+}
 void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
 	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
     {
-		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, m_bulletMesh });
+		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });
         mPlayerbulletList.push_back(newShot->bulletList[i]);
     }
 }
@@ -389,9 +396,9 @@ void GameManager::BulletUpdate()
         if (!mPlayerbulletList[i]->toBeDestroyed) {
             for (EnemyMarksman* enemy : mEnemyList) {
                 if (enemy->isDead) continue;
-				float dx = mPlayerbulletList[i]->mTransform.position.x - enemy->GetTransform().position.x;
-				float dz = mPlayerbulletList[i]->mTransform.position.z - enemy->GetTransform().position.z;
-                if ((dx * dx + dz * dz) < 4.0f) {
+				//float dx = mPlayerbulletList[i]->mTransform.position.x - enemy->GetTransform().position.x;
+				//float dz = mPlayerbulletList[i]->mTransform.position.z - enemy->GetTransform().position.z;
+    //            if ((dx * dx + dz * dz) < 4.0f) {
                     if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->mEntity).collisionCheck(enemy->mEntity)) {
                         enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
                         mPlayerbulletList[i]->toBeDestroyed = true;
@@ -400,7 +407,7 @@ void GameManager::BulletUpdate()
 
                             mPlayer->GetStats().mExp += 10;
                             break;
-                        }
+                        //}
                     }
                 }
             }
@@ -428,15 +435,15 @@ void GameManager::BulletUpdate()
     for (int i = mBulletList.size() - 1; i >= 0; i--) {
         mBulletList[i]->Update();
         if (!mBulletList[i]->toBeDestroyed) {
-            float dx = mBulletList[i]->mTransform.position.x - mPlayer->GetTransform().position.x;
-            float dz = mBulletList[i]->mTransform.position.z - mPlayer->GetTransform().position.z;
-            if ((dx * dx + dz * dz) < 4.0f) {
+            //float dx = mBulletList[i]->mTransform.position.x - mPlayer->GetTransform().position.x;
+            //float dz = mBulletList[i]->mTransform.position.z - mPlayer->GetTransform().position.z;
+            //if ((dx * dx + dz * dz) < 4.0f) {
 
                 if (ecs.getComponent<ColliderComponent>(mBulletList[i]->mEntity).collisionCheck(mPlayer->mEntity)) {
                     mPlayer->takeDamage(mBulletList[i]->mDamage);
                     mBulletList[i]->toBeDestroyed = true;
                 }
-            }
+            //}
         }
         if (mBulletList[i]->toBeDestroyed) {
             mDestroyBulletList.push_back(mBulletList[i]);
@@ -591,7 +598,7 @@ void GameManager::SpawnMob(float x, float z, int mob) {
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
     mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
-    mEntityMesh.insert({ newEnemy->mEntity, m_enemyMesh });
+    mEntityMesh.insert({ newEnemy->mEntity, mEnemyMesh });
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
 	mEnemyList.push_back(newEnemy);

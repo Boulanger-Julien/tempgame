@@ -10,10 +10,11 @@ public:
 	ColliderComponent mCollider;
 	transformComponent mTransform;
 	float m_speed = 50;
-	int maxLifetime = 1;			// in Seconds
+	float maxLifetime = 1;			// in Seconds
 	float currentLifetime = 0;
 	bool toBeDestroyed = false;
 	int mDamage;
+	bool isLineBullet = false;
 
 	Bullet();
 	~Bullet();
