@@ -462,7 +462,7 @@ void GameManager::GenerateRoom()
     //mWindow->RemoveEntityResources(currentRoom.ground);
     mWindow->RemoveEntityResources(currentRoom.door.mEntity);
     currentRoom.Initialize(mWindow);
-	int color = rand() % 5;
+	int color = rand() % 6;
     //if (currentRoom.generated == false)
     //{
     //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
