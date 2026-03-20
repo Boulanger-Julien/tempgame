@@ -18,7 +18,7 @@ Player::Player() {
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
 
-	mStats.SetStats(100, 2, 0, 0, 10, 0, 35, 0, 0);
+	mStats.SetStats(100, 2, 0, 0, 20, 0, 35, 0, 0);
 	mHealthComponent.mMaxHealth = mStats.mHealth;
 	mHealthComponent.mHealth = mStats.mHealth;
 }
@@ -148,6 +148,7 @@ void Player::Aim()
 			}
 		}
 	}
+}
 void Player::AddLineBullet() {
 
 	Bullet* newBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 25,1,GameManager::GetInstance().GetWindow());
@@ -177,7 +178,13 @@ void Player::TestShootPattern()
 		AddBullet();
 		break;
 	case 1:
+		AddExplosionBullet();
+		break;
+	case 2:
+		AddLineBullet();
+		break;
+	default:
 		break;
 	}
-	patternIndex = (patternIndex + 1) % ShootPatternType::Amount;
+	patternIndex = (patternIndex + 1) % (ShootPatternType::Amount - 1);
 }

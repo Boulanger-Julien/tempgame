@@ -264,6 +264,7 @@ void GameManager::Shoot()
     static bool cDownLastFrame = false;
     static bool cDownLastFrame2 = false;
 	static bool cDownLastFrame3 = false;
+	static bool cDownLastFrame4 = false;
     if (InputSystem::isKeyDown(VK_LBUTTON))
     {
         if (!cDownLastFrame) {
@@ -293,6 +294,15 @@ void GameManager::Shoot()
     else {
         cDownLastFrame3 = false;
     }
+    if (InputSystem::isKeyDown('W')) {
+        if (!cDownLastFrame4) {
+            mPlayer->TestShootPattern();
+            cDownLastFrame4 = true;
+        }
+    }
+    else {
+        cDownLastFrame4 = false;
+	}
 }
 
 //?
