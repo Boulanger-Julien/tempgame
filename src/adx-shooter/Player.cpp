@@ -63,8 +63,6 @@ void Player::Update() {
 }
 void Player::OnUpdate(float _deltatime)
 {
-	GameManager::GetInstance().AddBullet(mEntity, 1000);
-
 	HealthSystem::RecoverHealth(mHealthComponent, mStats.mHealthRegen * _deltatime);
 
 	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
@@ -75,4 +73,16 @@ void Player::OnUpdate(float _deltatime)
 }
 void Player::takeDamage(int _damage) {
 	HealthSystem::TakeDamage(mHealthComponent, _damage);
+}
+void Player::AddBullet() {
+
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity);
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().m_bulletMesh });
+	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+
+	newBullet->mDamage = mStats.mStrength;
+	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
+
 }

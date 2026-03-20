@@ -28,7 +28,6 @@ public:
 	void Draw();
 	void Pause();
 	void SpeedDown();
-	void AddBullet(Entity sender, float _damage);
 	void AddExplosionBullet(Entity sender, float bullets);
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
@@ -44,6 +43,12 @@ public:
 	void GenerateRoom();
 	void CheckInput();
 
+	Window* GetWindow() { return mWindow; }
+
+	std::unordered_map<int, MeshGeometry> mEntityMesh;
+	MeshGeometry m_bulletMesh;
+	std::vector<Bullet*> mBulletList;
+	std::vector<Bullet*> mPlayerbulletList;
 
 private:
 	static GameManager* instance;//SINGELTON
@@ -86,7 +91,6 @@ private:
 	MeshGeometry m_obstacleMesh;
 	MeshGeometry m_playerMesh;
 	MeshGeometry m_enemyMesh;
-	MeshGeometry m_bulletMesh;
 	MeshGeometry MakhinaBossMesh;
 
 	Light mLight;
@@ -99,12 +103,10 @@ private:
 	std::vector<Boss*> mBossList;
 	std::vector<Boss*> mDestroyBossList;
 
-	std::vector<Bullet*> mBulletList;
-	std::vector<Bullet*> mPlayerbulletList;
 	std::vector<Bullet*> mDestroyBulletList;
 
 	std::unordered_map<int, MeshGeometry> mUIMesh;
-	std::unordered_map<int, MeshGeometry> mEntityMesh;
+
 
 	TextRenderer* mScoreTextRenderer;
 	TextRenderer* mLifeTextRenderer;

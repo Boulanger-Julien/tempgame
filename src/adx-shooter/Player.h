@@ -27,6 +27,7 @@ public:
 			aimType = AimType::Auto;
 		}
 	}
+	void AddBullet();
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
 	StatsComponent& GetStats() { return mStats; }

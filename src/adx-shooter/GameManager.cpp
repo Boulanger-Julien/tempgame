@@ -13,6 +13,7 @@ GameManager* GameManager::instance = nullptr;
 GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
 {
     instance = this;
+
     mhInstance = hInstance;
     //Initialize window
     {
@@ -231,22 +232,6 @@ void GameManager::Pause()
 
 /////////////////////////
 
-void GameManager::AddBullet(Entity sender, float _damage) {
-	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(sender);
-    mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
-    mEntityMesh.insert({ newBullet->mEntity, m_bulletMesh });
-    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
-    mWindow->Update(newBullet->mEntity, bulletWorld);
-    if (sender == mPlayer->mEntity) {
-        newBullet->mDamage = _damage;
-        mPlayerbulletList.push_back(newBullet);
-	}
-    else
-    {
-        newBullet->mDamage = _damage;
-        mBulletList.push_back(newBullet);
-    }
-}
 void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
 	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
@@ -256,11 +241,6 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
         mPlayerbulletList.push_back(newShot->bulletList[i]);
     }
 }
-
-float GameManager::GetDeltatime() {
-    return Timer::GetInstance()->GetDeltatime();
-}
-
 void GameManager::Aim()
 {
     if (mPlayer->aimType == AimType::Mouse)
@@ -315,29 +295,6 @@ void GameManager::Aim()
         }
     }
 }
-
-void GameManager::UpdateCam()
-{
-    transformComponent& playerTrans = mPlayer->GetTransform();
-    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
-    XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
-    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
-    XMFLOAT3 camPos = mCamera.Position();
-    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
-    mWindow->SetCamera(mCamera);
-
-	static bool OneDownLastFrame = false;
-    if (InputSystem::isKeyDown('1')) {
-        if (!OneDownLastFrame) {
-			mPlayer->ChangeAimType();
-            OneDownLastFrame = true;
-        }
-    }
-    else {
-        OneDownLastFrame = false;
-	}
-}
-
 void GameManager::Shoot()
 {
     static bool cDownLastFrame = false;
@@ -346,7 +303,7 @@ void GameManager::Shoot()
     if (InputSystem::isKeyDown(VK_LBUTTON))
     {
         if (!cDownLastFrame) {
-			AddBullet(mPlayer->mEntity, mPlayer->GetStats().mStrength);
+            mPlayer->AddBullet();
             cDownLastFrame = true;
         }
     }
@@ -364,7 +321,133 @@ void GameManager::Shoot()
     }
     if (InputSystem::isKeyDown(VK_RBUTTON))
     {
-        AddBullet(mPlayer->mEntity, mPlayer->GetStats().mStrength);
+        mPlayer->AddBullet();
+    }
+}
+
+//?
+void GameManager::SpawnBoss(float x, float z) {
+    newBoss = new Makhina_Boss(mPlayer->mEntity);
+
+    newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
+    newBoss->GetTransform().position = FLOAT3(x, 13.5, z);
+    mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
+    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBoss->GetEntity()));
+    mEntityMesh.insert({ newBoss->GetEntity(), MakhinaBossMesh });
+    mWindow->Update(newBoss->GetEntity(), enemyWorld);
+    mBossList.push_back(newBoss);
+}
+
+void GameManager::CheckInput()
+{
+    if (InputSystem::isKeyDown(VK_F1) && mAppPaused)
+    {
+        HealthSystem::RecoverHealth(mPlayer->GetHealthComponent(), mPlayer->GetHealthComponent().mMaxHealth);
+        mAppPaused = !mAppPaused;
+        for (Bullet* bullet : mBulletList) {
+            bullet->toBeDestroyed = true;
+        }
+        Destroy();
+    }
+    if (InputSystem::isKeyDown('C'))
+    {
+        SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+    }
+    if (InputSystem::isKeyUp('E') && mEnemyList.size() <= 0)
+    {
+        GenerateRoom();
+    }
+}
+
+void GameManager::GenerateRoom()
+{
+    //mWindow->RemoveEntityResources(currentRoom.ground);
+    mWindow->RemoveEntityResources(currentRoom.door.mEntity);
+    currentRoom.Initialize(mWindow);
+    int color = rand() % 6;
+    //if (currentRoom.generated == false)
+    //{
+    //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
+    //    currentRoom.generated = true;
+    //}
+    mPlayer->GetTransform().position = FLOAT3(0, 2, -45);
+    switch (color)
+    {
+    case 0:
+        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
+        //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
+        for (int i = 0; i < 3; i++) {
+            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+        }
+        break;
+    case 1:
+        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkGreen);
+        //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
+        for (int i = 0; i < 7; i++) {
+            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+        }
+        break;
+    case 2:
+        //currentRoom.door.mTransform.position = FLOAT3(50, 0, 50);
+        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkBlue);
+        for (int i = 0; i < 5; i++) {
+            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+        }
+        break;
+    case 3:
+        //currentRoom.door.mTransform.position = FLOAT3(0, 0, 0);
+        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkRed);
+        for (int i = 0; i < 20; i++) {
+            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+        }
+        break;
+    case 4:
+        //currentRoom.door.mTransform.position = FLOAT3(50, 0, -50);
+        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkViolet);
+        break;
+    case 5:
+        //currentRoom.door.mTransform.position = FLOAT3(-50, 0, -50);
+        currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkCyan);
+        for (int i = 0; i < 1; i++) {
+            SpawnBoss(rand() % 100 - 50, rand() % 100 - 50);
+        }
+        break;
+    default:
+        //currentRoom.door.mTransform.position = FLOAT3(0, 0, 25);
+        for (int i = 0; i < 10; i++) {
+            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
+        }
+        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::SkyBlue);
+        break;
+    }
+
+    mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
+}
+
+//
+float GameManager::GetDeltatime() {
+    return Timer::GetInstance()->GetDeltatime();
+}
+
+void GameManager::UpdateCam()
+{
+    transformComponent& playerTrans = mPlayer->GetTransform();
+    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
+    XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
+    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
+    XMFLOAT3 camPos = mCamera.Position();
+    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
+    mWindow->SetCamera(mCamera);
+
+    static bool OneDownLastFrame = false;
+    if (InputSystem::isKeyDown('1')) {
+        if (!OneDownLastFrame) {
+            mPlayer->ChangeAimType();
+            OneDownLastFrame = true;
+        }
+    }
+    else {
+        OneDownLastFrame = false;
     }
 }
 
@@ -372,16 +455,12 @@ void GameManager::EnemyUpdate()
 {
     for (EnemyMarksman* enemy : mEnemyList) {
         enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
-
-        if (enemy->canShoot) {
-            AddBullet(enemy->mEntity, enemy->GetStrength());
-            enemy->canShoot = false;
-        }
     }
+    //Julien
     for (Boss* boss : mBossList) {
         transformComponent& bossTransform = ECS::GetInstance().getComponent<transformComponent>(boss->GetEntity());
         boss->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
-	}
+    }
 }
 
 void GameManager::BulletUpdate()
@@ -403,18 +482,18 @@ void GameManager::BulletUpdate()
                     }
                 }
             }
-			for (Boss* boss : mBossList) {
-				if (boss->IsAlive() == false) continue;
+            for (Boss* boss : mBossList) {
+                if (boss->IsAlive() == false) continue;
                 if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->mEntity).collisionCheck(boss->GetEntity())) {
                     boss->TakeDamage(mPlayerbulletList[i]->mDamage);
                     mPlayerbulletList[i]->toBeDestroyed = true;
                     if (boss->IsAlive() == false) {
-						mDestroyBossList.push_back(boss);
+                        mDestroyBossList.push_back(boss);
                         mPlayer->GetStats().mExp += 50;
                         break;
                     }
-				}
-			}
+                }
+            }
         }
 
         // Si la balle doit être détruite (sortie d'écran ou collision)
@@ -459,75 +538,11 @@ void GameManager::UpdateBar()
     ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
     //ecs.getComponent<transformComponent>(manaBar).scale.x = 0/*mPlayer->GetStats().mMana*/ / mPlayer->GetStats().mMana;
 }
-void GameManager::GenerateRoom()
-{
-    //mWindow->RemoveEntityResources(currentRoom.ground);
-    mWindow->RemoveEntityResources(currentRoom.door.mEntity);
-    currentRoom.Initialize(mWindow);
-	int color = rand() % 6;
-    //if (currentRoom.generated == false)
-    //{
-    //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
-    //    currentRoom.generated = true;
-    //}
-	mPlayer->GetTransform().position = FLOAT3(0, 2, -45);
-    switch (color)
-    {
-        case 0:
-            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
-            //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
-            for (int i = 0; i < 3; i++) {
-                SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-            }
-            break;
-            case 1:
-            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkGreen);
-            //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
-            for (int i = 0; i < 7; i++) {
-                SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-            }
-            break;
-        case 2:
-            //currentRoom.door.mTransform.position = FLOAT3(50, 0, 50);
-            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkBlue);
-            for (int i = 0; i < 5; i++) {
-                SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-            }
-            break;
-        case 3:
-            //currentRoom.door.mTransform.position = FLOAT3(0, 0, 0);
-            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkRed);
-            for (int i = 0; i < 20; i++) {
-                SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-            }
-            break;
-		case 4:
-            //currentRoom.door.mTransform.position = FLOAT3(50, 0, -50);
-			//currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkViolet);
-            break;
-        case 5:
-             //currentRoom.door.mTransform.position = FLOAT3(-50, 0, -50);
-             currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkCyan);
-             for (int i = 0; i < 1; i++) {
-                 SpawnBoss(rand() % 100 - 50, rand() % 100 - 50);
-             }
-			 break;
-         default:
-             //currentRoom.door.mTransform.position = FLOAT3(0, 0, 25);
-             for (int i = 0; i < 10; i++) {
-                 SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-             }
-            //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::SkyBlue);
-			break;
-    }
-
-    mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
-}
 
 void GameManager::Destroy() {
     // NETTOYAGE DES BULLETS
     if (!mDestroyBulletList.empty()) {
-         for (Bullet* bullet : mDestroyBulletList) {
+        for (Bullet* bullet : mDestroyBulletList) {
             // 1. Libérer les ressources DirectX (Slots de descripteurs)
             mWindow->RemoveEntityResources(bullet->mEntity);
 
@@ -575,7 +590,7 @@ void GameManager::Destroy() {
             delete boss;
         }
         mDestroyBossList.clear();
-	}
+    }
 }
 
 void GameManager::SpawnMob(float x, float z, int mob) {
@@ -587,37 +602,5 @@ void GameManager::SpawnMob(float x, float z, int mob) {
     mEntityMesh.insert({ newEnemy->mEntity, m_enemyMesh });
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
-	mEnemyList.push_back(newEnemy);
-}
-
-void GameManager::SpawnBoss(float x, float z) {
-    newBoss = new Makhina_Boss(mPlayer->mEntity);
-
-    newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
-    newBoss->GetTransform().position = FLOAT3(x, 13.5, z);
-    mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
-    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBoss->GetEntity()));
-    mEntityMesh.insert({ newBoss->GetEntity(), MakhinaBossMesh });
-    mWindow->Update(newBoss->GetEntity(), enemyWorld);
-    mBossList.push_back(newBoss);
-}
-void GameManager::CheckInput()
-{
-    if (InputSystem::isKeyDown(VK_F1) && mAppPaused)
-    {
-        HealthSystem::RecoverHealth(mPlayer->GetHealthComponent(), mPlayer->GetHealthComponent().mMaxHealth);
-        mAppPaused = !mAppPaused;
-        for (Bullet* bullet : mBulletList) {
-            bullet->toBeDestroyed = true;
-        }
-        Destroy();
-    }
-    if (InputSystem::isKeyDown('C'))
-    {
-        SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-    }
-    if (InputSystem::isKeyUp('E') && mEnemyList.size() <= 0)
-    {
-        GenerateRoom();
-    }
+    mEnemyList.push_back(newEnemy);
 }

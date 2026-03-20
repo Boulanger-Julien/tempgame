@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "Enemy.h"
 #include "adx-core/Timer.h"
+#include "GameManager.h"
+//
+#include "Shoot\Bullet.h"
+#include "Shoot\Shoot_Pattern.h"
 
 //Protected
 bool Enemy::CheckDistanceToFollowPlayer()
@@ -63,9 +67,11 @@ void Enemy::Attack(float _deltaTime)
 {
 	mCurrentShootCooldown += _deltaTime;
 	if (mCurrentShootCooldown >= mShootCooldown) {
-		canShoot = true;
+		AddBullet();
 		mCurrentShootCooldown = 0;
 	}
+	//
+
 }
 void Enemy::TakeDamage(int _damage) {
 	HealthSystem::TakeDamage(mHealthComponent, _damage);
@@ -98,3 +104,15 @@ void Enemy::UpdateComponent()
 	ECS::GetInstance().getComponent<HealthComponent>(mEntity) = mHealthComponent;
 }
 
+void Enemy::AddBullet() {
+
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity);
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().m_bulletMesh });
+	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+
+	newBullet->mDamage = mStats.mStrength;
+	GameManager::GetInstance().mBulletList.push_back(newBullet);
+
+}

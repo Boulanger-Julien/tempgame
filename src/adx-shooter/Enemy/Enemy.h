@@ -45,6 +45,7 @@ public:
 
 	void MoveTowardPlayer(float _deltaTime);
 	virtual void Attack(float _deltaTime);
+	void AddBullet();
 	void TakeDamage(int _damage);
 	bool IsAlive();
 
