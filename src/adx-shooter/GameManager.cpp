@@ -124,10 +124,7 @@ void GameManager::Update()
     EnemyUpdate();
 
 	currentRoom.door.Update(mEnemyList.size());
-    if (currentRoom.door.changeRoom) {
-        currentRoom.door.changeRoom = false;
-        GenerateRoom();
-    }
+
     // Nettoyage final des entités supprimées cette frame
     Destroy();
 }
@@ -614,7 +611,7 @@ void GameManager::CheckInput()
     {
         SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
     }
-    if (InputSystem::isKeyUp('E') && mEnemyList.size() <= 0)
+    if (InputSystem::isKeyDown('E') && currentRoom.door.changeRoom == true)
     {
         GenerateRoom();
     }
