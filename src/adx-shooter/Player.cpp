@@ -3,6 +3,7 @@
 #include "adx-core/Timer.h"
 #include "adx-engine\framework.h"
 #include "Weapon/Basic_Sword.h"
+#include "GameManager.h"
 
 
 Player::Player() {
@@ -62,6 +63,8 @@ void Player::Update() {
 }
 void Player::OnUpdate(float _deltatime)
 {
+	//GameManager::GetInstance().AddBullet(mEntity, 1000);
+
 	HealthSystem::RecoverHealth(mHealthComponent, mStats.mHealthRegen * _deltatime);
 
 	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;

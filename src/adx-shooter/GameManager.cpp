@@ -8,9 +8,11 @@
 #include "Rooms.h"
 
 using namespace DirectX;
+GameManager* GameManager::instance = nullptr;
 
 GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
 {
+    instance = this;
     mhInstance = hInstance;
     //Initialize window
     {
