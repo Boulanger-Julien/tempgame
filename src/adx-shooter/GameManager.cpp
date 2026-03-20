@@ -228,34 +228,6 @@ void GameManager::Pause()
 
 /////////////////////////
 
-void GameManager::AddLineBullet(Entity sender, float _damage)
-{
-    Bullet* newBullet = Shoot_Pattern_Line::Shoot(sender, _damage, 25, 1, mWindow);
-    mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
-    mEntityMesh.insert({ newBullet->mEntity, mLineBulletMesh });
-    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
-    mWindow->Update(newBullet->mEntity, bulletWorld);
-    if (sender == mPlayer->mEntity) {
-        newBullet->mDamage = _damage;
-        mPlayerbulletList.push_back(newBullet);
-    }
-    else
-    {
-        newBullet->mDamage = _damage;
-        mBulletList.push_back(newBullet);
-    }
-}
-
-void GameManager::AddExplosionBullet(Entity sender, float bullets)
-{
-	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
-	for (int i = 0; i < newShot->bulletList.size(); ++i)
-    {
-		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });
-        mPlayerbulletList.push_back(newShot->bulletList[i]);
-    }
-}
-
 //?
 void GameManager::SpawnBoss(float x, float z) {
     newBoss = new Makhina_Boss(mPlayer->mEntity);

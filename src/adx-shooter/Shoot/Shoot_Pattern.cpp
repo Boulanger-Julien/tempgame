@@ -67,14 +67,14 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
 	return nullptr;
 }
 
-Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width, Window* window)
+Bullet* Shoot_Pattern_Line::Shoot(Window* window, Entity sender, float _damage, float range, float width, float lifeTime)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
 	transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
     Bullet* newBullet = new Bullet();
 	newBullet->mTransform = senderTrans;
 	newBullet->mDamage = _damage/1.5f;
-	newBullet->maxLifetime = 0.3f;
+	newBullet->maxLifetime = lifeTime;
 	newBullet->m_speed = 0;
 	newBullet->mTransform.scale = FLOAT3(width, 0.5f, range);
 	newBullet->mCollider.updateCollider();

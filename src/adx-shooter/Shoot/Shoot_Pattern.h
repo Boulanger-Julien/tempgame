@@ -106,5 +106,5 @@ public:
 	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
-	static Bullet* Shoot(Entity sender, float _damage, float range, float width, Window* window);
+	static Bullet* Shoot(Window* window, Entity sender, float _damage, float range, float width, float lifeTime);
 };

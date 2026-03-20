@@ -153,7 +153,7 @@ void Player::Aim()
 }
 void Player::AddLineBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 25,1,GameManager::GetInstance().GetWindow());
+	Bullet* newBullet = Shoot_Pattern_Line::Shoot(GameManager::GetInstance().GetWindow(), mEntity, mStats.mStrength, 5,3, 0.01f);
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
