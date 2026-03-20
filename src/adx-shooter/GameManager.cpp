@@ -36,6 +36,7 @@ bool GameManager::Initialize()
 {
     srand(time(NULL));
     ecs = ECS::GetInstance();
+    mRessourceManager.Init(mWindow->GetDevice());
 
     //Generate player
     {

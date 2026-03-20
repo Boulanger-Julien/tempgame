@@ -58,6 +58,10 @@ void D3DApp::Set4xMsaaState(bool value)
         OnResize();
     }
 }
+ID3D12Device* D3DApp::GetDevice() const
+{
+    return md3dDevice.Get();
+}
 
 int D3DApp::Run()
 {

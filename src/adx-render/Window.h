@@ -31,7 +31,11 @@ public:
 	void RegisterExistingMeshForEntity(int entityID);
 	void RemoveEntityResources(int entityID);
 
+	ID3D12Device* GetDevice() const;
+
 private:
+
+
 	virtual void OnResize() override;
 	void DrawSplash();
 

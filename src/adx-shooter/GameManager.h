@@ -15,6 +15,7 @@
 #include "adx-render/TextRenderer.h"
 #include "adx-render/UIRenderer.h"
 #include "Shoot\Shoot_Pattern.h"
+#include "RessourceManager.h"
 
 class GameManager
 {
@@ -58,7 +59,7 @@ public:
 
 private:
 	static GameManager* instance;//SINGELTON
-
+	RessourceManager mRessourceManager;
 	bool firstFrame = true;
 	bool mAppPaused = false;
 	float mSpeedDownCd = 10.0f;

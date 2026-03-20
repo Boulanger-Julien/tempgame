@@ -33,6 +33,7 @@ public:
 
     int Run();
 
+    ID3D12Device* GetDevice() const;
 
     virtual bool Initialize(int winW, int winH);
     virtual LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

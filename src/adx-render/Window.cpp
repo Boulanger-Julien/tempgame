@@ -20,7 +20,10 @@ Window::Window(HINSTANCE hInstance) : D3DApp(hInstance)
 Window::~Window()
 {
 }
-
+ID3D12Device* Window::GetDevice() const
+{
+	return md3dDevice.Get();
+}
 bool Window::Initialize(int winW, int winH)
 {
 	std::srand(static_cast<unsigned int>(time(0)));
