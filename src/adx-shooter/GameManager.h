@@ -19,6 +19,7 @@
 class GameManager
 {
 public:
+	static GameManager& GetInstance() {	return *instance; }
 	GameManager(HINSTANCE hInstance, int winW, int winH);
 	~GameManager() {}
 	bool Initialize();
@@ -45,6 +46,8 @@ public:
 
 
 private:
+	static GameManager* instance;//SINGELTON
+
 	bool firstFrame = true;
 	bool mAppPaused = false;
 	float mSpeedDownCd = 10.0f;
