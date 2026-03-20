@@ -2,6 +2,7 @@
 #include "adx-engine\framework.h"
 #include "Bullet.h"
 #include "adx-render\Window.h"
+#include "MeshCreator.h"
 
 struct Shot
 {
@@ -107,4 +108,25 @@ public:
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
 	static Bullet* Shoot(Window* window, Entity sender, float _damage, float range, float width, float lifeTime);
+};
+
+class Spell_FireBall
+{
+public:
+	Entity mEntity = 5;
+	//float mDamage = 1000;
+	//float mLifeTime = 2;
+	//MeshGeometry mGeo;
+	transformComponent mTransform;
+	//ColliderComponent mCollider;
+
+	void Init(int _playerIndex) {
+		mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0)/*, ColliderComponent()*/ );
+
+		mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
+	}
+	void Update() {
+		ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
+	}
+	transformComponent& GetTransform() { return mTransform; }
 };

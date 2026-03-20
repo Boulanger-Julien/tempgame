@@ -50,6 +50,7 @@ bool GameManager::Initialize()
 	mBulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
 	mLineBulletMesh = MeshCreator::CreateBox(mWindow, 5, 1, 1, 1, (XMFLOAT4)Colors::Blue, L"Diamond2.dds");
     mEnemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
+    mFireBallMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::Green, L"Diamond2.dds");
 
 	currentRoom.Initialize(mWindow);
     mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
@@ -368,6 +369,10 @@ void GameManager::EnemyUpdate()
 
 void GameManager::BulletUpdate()
 {
+    for (auto& spell : mSpellListe)
+    {
+        spell->Update();
+    }
     for (int i = (int)mPlayerbulletList.size() - 1; i >= 0; i--) {
         Bullet* bullet = mPlayerbulletList[i];
         bullet->Update();
@@ -531,12 +536,31 @@ void GameManager::Destroy() {
 
 void GameManager::SpawnMob(float x, float z, int mob) {
     EnemyMarksman* newEnemy = new EnemyMarksman();
+
     newEnemy->Init(mPlayer->mEntity);
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
-    newEnemy->GetTransform().position = FLOAT3(x, 2, z);
+    //newEnemy->GetTransform().position = FLOAT3(x, 2, z);
     mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
-    mEntityMesh.insert({ newEnemy->mEntity, mEnemyMesh });
-    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
-    mWindow->Update(newEnemy->mEntity, enemyWorld);
+
+    mEntityMesh.insert({ newEnemy->mEntity, mFireBallMesh });
+
+    //XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
+    //mWindow->Update(newEnemy->mEntity, enemyWorld);
+
 	mEnemyList.push_back(newEnemy);
+}
+
+void GameManager::CreateFireBall() {
+
+    Spell_FireBall* newEnemy = new Spell_FireBall();
+
+    newEnemy->Init(mPlayer->mEntity);
+    newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
+
+    mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
+
+    mEntityMesh.insert({ newEnemy->mEntity, mFireBallMesh });
+
+
+	mSpellListe.push_back(newEnemy);
 }

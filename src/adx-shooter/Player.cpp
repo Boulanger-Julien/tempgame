@@ -192,7 +192,8 @@ void Player::CheckInput() {
 	{
 		if (mNextShootTimer <= globalTime) {
 			AddLineBullet();
-			mNextShootTimer += mShootColdown;
+			GameManager::GetInstance().CreateFireBall();
+			mNextShootTimer = globalTime + mShootColdown;
 		}
 	}
 
@@ -200,14 +201,14 @@ void Player::CheckInput() {
 	{
 		if (mNextShootTimer <= globalTime) {
 			AddBullet();
-			mNextShootTimer += mShootColdown;
+			mNextShootTimer = globalTime + mShootColdown;
 		}
 	}
 
 	if (InputSystem::isKeyDown(VK_SPACE)) {
 		if (mNextShootTimer <= globalTime) {
 			AddExplosionBullet();
-			mNextShootTimer += mShootColdown;
+			mNextShootTimer += globalTime + mShootColdown;
 		}
 	}
 }

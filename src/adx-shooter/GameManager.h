@@ -30,6 +30,7 @@ public:
 	void SpeedDown();
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
+	void CreateFireBall();
 	void SpawnBoss(float x, float z);
 	float GetDeltatime();
 	void UpdateCam();
@@ -50,6 +51,10 @@ public:
 	std::vector<Bullet*> mPlayerbulletList;
 	std::vector<Boss*> mBossList;
 	std::vector<EnemyMarksman*> mEnemyList;
+
+	/**/
+	std::vector<Spell_FireBall*> mSpellListe;
+	//
 
 private:
 	static GameManager* instance;//SINGELTON
@@ -74,7 +79,6 @@ private:
 	bool spaceDown2 = false;
 	float timer = 0.0f;
 
-
 	MSG msg = { 0 };
 
 	HINSTANCE mhInstance;
@@ -91,6 +95,7 @@ private:
 
 	MeshGeometry mPlayerMesh;
 	MeshGeometry mEnemyMesh;
+	MeshGeometry mFireBallMesh;
 	MeshGeometry MakhinaBossMesh;
 
 	Light mLight;
