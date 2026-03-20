@@ -277,7 +277,7 @@ void GameManager::Shoot()
     }
     if (InputSystem::isKeyDown(VK_SPACE)) {
         if (!cDownLastFrame2) {
-            AddExplosionBullet(mPlayer->mEntity, 9);
+            mPlayer->AddExplosionBullet();
             cDownLastFrame2 = true;
         }
     }
