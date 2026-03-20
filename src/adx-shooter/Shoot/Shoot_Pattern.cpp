@@ -28,32 +28,36 @@ void Shoot_Pattern_Single_Shot::Reset()
 
 Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window)
 {
+    transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
+    transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
+
     const float angleStep = (2.0f * XM_PI) / bullets; 
-    transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(GetInstance().mPlayerIndex);
 	Shot* newShot = new Shot();
 
     for (int i = 0; i < bullets; ++i) {
         Bullet* newBullet = new Bullet();
-        transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
+        newBullet->mTransform = senderTrans;
+        newBullet->mCollider.updateCollider();
 
-        bulletTrans = playerTrans;
+        newBullet->mTransform = senderTrans;
 
-        bulletTrans.rotation.y = playerTrans.rotation.y + (i * angleStep);
+        newBullet->mTransform.rotation.y = senderTrans.rotation.y + (i * angleStep);
 
-        transformSystem::UpdateForward(bulletTrans);
+        transformSystem::UpdateForward(newBullet->mTransform);
 
         float distFromPlayer = 5.0f;
-        transformSystem::MoveForward(bulletTrans, distFromPlayer);
+        transformSystem::MoveForward(newBullet->mTransform, distFromPlayer);
 
-        transformSystem::Move(bulletTrans, 0, 0, 2);
+        transformSystem::Move(newBullet->mTransform, 0, 0, 2);
 
         window->RegisterExistingMeshForEntity(newBullet->mEntity);
 
-        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(bulletTrans);
+        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(newBullet->mTransform);
         window->Update(newBullet->mEntity, bulletWorld);
 
         newBullet->mDamage = _damage;
 		newShot->bulletList.push_back(newBullet);
+	    ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
     }
     return newShot;
 }

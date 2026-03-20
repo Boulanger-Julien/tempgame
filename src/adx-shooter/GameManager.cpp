@@ -263,7 +263,7 @@ void GameManager::Shoot()
 {
     static bool cDownLastFrame = false;
     static bool cDownLastFrame2 = false;
-
+	static bool cDownLastFrame3 = false;
     if (InputSystem::isKeyDown(VK_LBUTTON))
     {
         if (!cDownLastFrame) {
@@ -285,7 +285,13 @@ void GameManager::Shoot()
     }
     if (InputSystem::isKeyDown(VK_RBUTTON))
     {
-        mPlayer->AddBullet();
+        if (!cDownLastFrame3) {
+            mPlayer->AddLineBullet();
+            cDownLastFrame3 = true;
+        }
+    }
+    else {
+        cDownLastFrame3 = false;
     }
 }
 

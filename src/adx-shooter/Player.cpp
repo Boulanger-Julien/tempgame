@@ -93,8 +93,8 @@ void Player::AddBullet() {
 
 	newBullet->mDamage = mStats.mStrength;
 	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
-
 }
+
 void Player::Aim()
 {
 	if (aimType == AimType::Mouse)
@@ -148,4 +148,36 @@ void Player::Aim()
 			}
 		}
 	}
+void Player::AddLineBullet() {
+
+	Bullet* newBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 25,1,GameManager::GetInstance().GetWindow());
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
+	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+
+	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
+}
+
+
+void Player::AddExplosionBullet() {
+	Shot* newShot = Shoot_Pattern_Explosion::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow());
+	for (int i = 0; i < newShot->bulletList.size(); ++i)
+	{
+		GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
+		GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
+	}
+}
+
+void Player::TestShootPattern()
+{
+	static int patternIndex = 0;
+	switch (patternIndex) {
+	case 0:
+		AddBullet();
+		break;
+	case 1:
+		break;
+	}
+	patternIndex = (patternIndex + 1) % ShootPatternType::Amount;
 }
