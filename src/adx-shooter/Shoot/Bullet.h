@@ -6,6 +6,7 @@
 class Bullet
 {
 public:
+	std::unordered_map<int, bool > entitiesToIgnore;
 	Entity mEntity;
 	ColliderComponent mCollider;
 	transformComponent mTransform;

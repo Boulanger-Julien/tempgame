@@ -76,34 +76,20 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
 	return nullptr;
 }
 
-Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, Window* window)
+Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width, Window* window)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
-
+	transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
     Bullet* newBullet = new Bullet();
-    newBullet->mTransform = ECS::GetInstance().getComponent<transformComponent>(sender);
+	newBullet->mTransform = senderTrans;
 	newBullet->mDamage = _damage/1.5f;
 	newBullet->maxLifetime = 0.3f;
 	newBullet->m_speed = 0;
-	newBullet->mTransform.scale = FLOAT3(0.5f, 0.5f, 10.0f);
+	newBullet->mTransform.scale = FLOAT3(width, 0.5f, range);
 	newBullet->mCollider.updateCollider();
+	transformSystem::RotateAround(newBullet->mTransform, ECS::GetInstance().getComponent<transformComponent>(sender), newBullet->mTransform.scale.z / 2);
 	ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
 	ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;
-    if (sender == GetInstance().mPlayerIndex)
-    {
-        transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(instance->mPlayerIndex);
-        float pitch = playerTrans.rotation.x;
-        float yaw = playerTrans.rotation.y;
-
-        FLOAT3 forward = {
-            sin(yaw) * cos(pitch),
-            -sin(pitch),
-            cos(yaw) * cos(pitch)
-        };
-
-        FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
-        ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity).position = playerTrans.position;
-    }
     transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
     bulletTrans.forward = bulletTrans.forward * -1;
 	newBullet->isLineBullet = true;
