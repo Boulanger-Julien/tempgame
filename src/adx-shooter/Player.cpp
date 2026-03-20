@@ -63,7 +63,7 @@ void Player::Update() {
 }
 void Player::OnUpdate(float _deltatime)
 {
-	//GameManager::GetInstance().AddBullet(mEntity, 1000);
+	GameManager::GetInstance().AddBullet(mEntity, 1000);
 
 	HealthSystem::RecoverHealth(mHealthComponent, mStats.mHealthRegen * _deltatime);
 
