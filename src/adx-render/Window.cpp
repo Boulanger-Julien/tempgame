@@ -207,7 +207,63 @@ void Window::Draw(MeshGeometry& mGeo, int entityID) {
 		mDescriptorManager.GetDescriptorHeap()
 	);
 }
+/**/
+void Window::AddRenderItem(Mesh* mesh, /*Material* mat,*/ XMFLOAT4X4 world)
+{
+	RenderItem* item = new RenderItem();
+	item->mesh = mesh;
+	//item->material = mat;
+	item->world = world;
 
+	mRenderItems.push_back(item);
+}
+void Window::DrawRenderItems()
+{
+	auto cmdList = mCommandList.Get();
+
+	for (auto& item : mRenderItems)
+	{
+		if (!item || !item->mesh) continue;
+
+		// 1. Bind mesh
+		item->mesh->Bind(cmdList);
+
+		// 2. Constant buffers
+		//cmdList->SetGraphicsRootConstantBufferView(
+		//	0,
+		//	item->objectCB->GetGPUVirtualAddress()
+		//);
+
+		//cmdList->SetGraphicsRootConstantBufferView(
+		//	1,
+		//	mMaterialBuffer->GetGPUVirtualAddress()
+		//);
+
+		//cmdList->SetGraphicsRootConstantBufferView(
+		//	2,
+		//	mPassCB->GetGPUVirtualAddress()
+		//);
+
+		// 3. Texture heap
+		ID3D12DescriptorHeap* heaps[] = { mDescriptorManager.GetDescriptorHeap() };
+		cmdList->SetDescriptorHeaps(1, heaps);
+
+		cmdList->SetGraphicsRootDescriptorTable(
+			3,
+			mDescriptorManager.GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart()
+		);
+
+		// 4. Draw
+		cmdList->DrawIndexedInstanced(
+			item->mesh->GetIndexCount(),
+			1,
+			0,
+			0,
+			0
+		);
+	}
+}
+//
 void Window::DrawUI(MeshGeometry& mGeo, int entityID)
 {
 	if (mGeo.VertexBufferGPU == nullptr) return; // FIX

@@ -176,6 +176,11 @@ void GameManager::Draw()
 
         mWindow->Draw(meshRef, entityID);
     }
+    mWindow->DrawRenderItems();
+    //for (auto entity : mEntityMesh2)
+    //{
+    //    mWindow->Draw2(entity.second);
+    //}
     for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
     {
         int entityID = it->first;

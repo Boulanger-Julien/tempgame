@@ -1,6 +1,8 @@
 #pragma once
 #include "framework.h"
 #include "../adx-core/d3dApp.h"
+#include "Mesh.h"
+#include "RenderItem.h"
 
 using namespace DirectX;
 
@@ -11,6 +13,7 @@ public:
 	~Window();
 
 	virtual bool Initialize(int winW, int winH) override;
+	
 	virtual void Draw(MeshGeometry& mGeo, int descriptorIndex) override;
 	void DrawUI(MeshGeometry& mGeo, int descriptorIndex);
 	virtual void Update(int renderIndex, XMMATRIX world) override;
@@ -31,8 +34,12 @@ public:
 	void RegisterExistingMeshForEntity(int entityID);
 	void RemoveEntityResources(int entityID);
 
+	/**/
+	void AddRenderItem(Mesh* mesh,/* Material* mat,*/ XMFLOAT4X4 world);
+	void DrawRenderItems();
 	ID3D12Device* GetDevice() const;
-
+	std::vector<RenderItem*> mRenderItems;
+	//
 private:
 
 
