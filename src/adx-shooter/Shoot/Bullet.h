@@ -6,18 +6,21 @@
 class Bullet
 {
 public:
+	std::unordered_map<int, bool > entitiesToIgnore;
 	Entity mEntity;
 	ColliderComponent mCollider;
 	transformComponent mTransform;
 	float m_speed = 50;
-	int maxLifetime = 1;			// in Seconds
+	float maxLifetime = 1;			// in Seconds
 	float currentLifetime = 0;
 	bool toBeDestroyed = false;
 	int mDamage;
+	bool isPersistantBullet = false;
 
 	Bullet();
 	~Bullet();
 
 	void Update();
+	void UpdateComponent();
 };
 

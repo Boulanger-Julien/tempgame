@@ -1,5 +1,6 @@
 #pragma once
 #include "adx-engine/framework.h"
+#include "Shoot/Shoot_Pattern.h"
 
 class Boss
 {
@@ -26,6 +27,7 @@ class Boss
 	float GetStrength() { return mStats.mStrength; }
 	float GetHealth() { return mHealthComponent.mHealth; }
 	virtual void UpdateComponent() = 0;
+	virtual void ChangeShootPattern() = 0;
 protected:
 	Entity mEntity;
 	ColliderComponent mCollider;
@@ -34,8 +36,8 @@ protected:
 	StatsComponent mStats;
 	bool isAlive = true;
 	int mPlayerIndex;
-	int mShootCooldown = 1;
+	float mShootCooldown = 1;
 	float mCurrentShootCooldown = 0;
 	bool canShoot = false;
-
+	int mCurrentShootPattern;
 };

@@ -28,6 +28,7 @@ public:
 	void Draw();
 	void Pause();
 	void SpeedDown();
+	void AddLineBullet(Entity sender, float _damage);
 	void AddExplosionBullet(Entity sender, float bullets);
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
@@ -46,7 +47,8 @@ public:
 	Window* GetWindow() { return mWindow; }
 
 	std::unordered_map<int, MeshGeometry> mEntityMesh;
-	MeshGeometry m_bulletMesh;
+	MeshGeometry mBulletMesh;
+	MeshGeometry mLineBulletMesh;
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;
 
@@ -88,9 +90,8 @@ private:
 	Rooms currentRoom;
 	Boss* newBoss;
 
-	MeshGeometry m_obstacleMesh;
-	MeshGeometry m_playerMesh;
-	MeshGeometry m_enemyMesh;
+	MeshGeometry mPlayerMesh;
+	MeshGeometry mEnemyMesh;
 	MeshGeometry MakhinaBossMesh;
 
 	Light mLight;

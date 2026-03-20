@@ -46,8 +46,10 @@ bool GameManager::Initialize()
     }
 	Shoot_Pattern_Explosion::GetInstance().SetPlayerIndex(mPlayer->mEntity);
 	Shoot_Pattern_Single_Shot::GetInstance().SetPlayerIndex(mPlayer->mEntity);
-	m_bulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
-    m_enemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
+	Shoot_Pattern_Line::GetInstance().SetPlayerIndex(mPlayer->mEntity);
+	mBulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
+	mLineBulletMesh = MeshCreator::CreateBox(mWindow, 5, 1, 1, 1, (XMFLOAT4)Colors::Blue, L"Diamond2.dds");
+    mEnemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
 	currentRoom.Initialize(mWindow);
     mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
@@ -232,12 +234,29 @@ void GameManager::Pause()
 
 /////////////////////////
 
+void GameManager::AddLineBullet(Entity sender, float _damage)
+{
+    Bullet* newBullet = Shoot_Pattern_Line::Shoot(sender, _damage, 25, 1, mWindow);
+    mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
+    mEntityMesh.insert({ newBullet->mEntity, mLineBulletMesh });
+    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
+    mWindow->Update(newBullet->mEntity, bulletWorld);
+    if (sender == mPlayer->mEntity) {
+        newBullet->mDamage = _damage;
+        mPlayerbulletList.push_back(newBullet);
+    }
+    else
+    {
+        newBullet->mDamage = _damage;
+        mBulletList.push_back(newBullet);
+    }
+}
 void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
 	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
     {
-		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, m_bulletMesh });
+		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });
         mPlayerbulletList.push_back(newShot->bulletList[i]);
     }
 }
@@ -465,51 +484,84 @@ void GameManager::EnemyUpdate()
 
 void GameManager::BulletUpdate()
 {
-    for (int i = mPlayerbulletList.size() - 1; i >= 0; i--) {
-        mPlayerbulletList[i]->Update();
-        if (!mPlayerbulletList[i]->toBeDestroyed) {
+    for (int i = (int)mPlayerbulletList.size() - 1; i >= 0; i--) {
+        Bullet* bullet = mPlayerbulletList[i];
+        bullet->Update();
+
+        if (!bullet->toBeDestroyed) {
+            float maxS = max(bullet->mTransform.scale.x, max(bullet->mTransform.scale.z, bullet->mTransform.scale.y));
+            float thresholdSq = (maxS + 3.0f) * (maxS + 3.0f);
             for (EnemyMarksman* enemy : mEnemyList) {
                 if (enemy->isDead) continue;
-
-                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->mEntity).collisionCheck(enemy->mEntity)) {
-                    enemy->TakeDamage(mPlayerbulletList[i]->mDamage);
-                    mPlayerbulletList[i]->toBeDestroyed = true;
-                    if (enemy->IsAlive() == false) {
-                        mDestroyEnemyList.push_back(enemy);
-
-                        mPlayer->GetStats().mExp += 10;
-                        break;
+                if (bullet->entitiesToIgnore.count(enemy->mEntity)) continue;
+                float dx = bullet->mTransform.position.x - enemy->GetTransform().position.x;
+                float dz = bullet->mTransform.position.z - enemy->GetTransform().position.z;
+                float distSq = (dx * dx + dz * dz);
+                if (distSq < thresholdSq) {
+                    if (ecs.getComponent<ColliderComponent>(bullet->mEntity).collisionCheck(enemy->mEntity)) {
+                        enemy->TakeDamage(bullet->mDamage);
+                        bullet->entitiesToIgnore[enemy->mEntity] = true;
+                        if (!enemy->IsAlive()) {
+                            mDestroyEnemyList.push_back(enemy);
+                            mPlayer->GetStats().mExp += 10;
+                        }
+                        if (!bullet->isPersistantBullet) {
+                            bullet->toBeDestroyed = true;
+                            break;
+                        }
                     }
                 }
             }
-            for (Boss* boss : mBossList) {
-                if (boss->IsAlive() == false) continue;
-                if (ecs.getComponent<ColliderComponent>(mPlayerbulletList[i]->mEntity).collisionCheck(boss->GetEntity())) {
-                    boss->TakeDamage(mPlayerbulletList[i]->mDamage);
-                    mPlayerbulletList[i]->toBeDestroyed = true;
-                    if (boss->IsAlive() == false) {
-                        mDestroyBossList.push_back(boss);
-                        mPlayer->GetStats().mExp += 50;
-                        break;
+
+            if (!bullet->toBeDestroyed) {
+                for (Boss* boss : mBossList) {
+                    if (!boss->IsAlive() || bullet->entitiesToIgnore.count(boss->GetEntity())) continue;
+
+                    float dx = bullet->mTransform.position.x - boss->GetTransform().position.x;
+                    float dz = bullet->mTransform.position.z - boss->GetTransform().position.z;
+                    if ((dx * dx + dz * dz) < thresholdSq) {
+                        if (ecs.getComponent<ColliderComponent>(bullet->mEntity).collisionCheck(boss->GetEntity())) {
+                            boss->TakeDamage(bullet->mDamage);
+                            bullet->entitiesToIgnore[boss->GetEntity()] = true;
+                            if (!boss->IsAlive()) {
+                                mDestroyBossList.push_back(boss);
+                                mPlayer->GetStats().mExp += 50;
+                            }
+                            if (!bullet->isPersistantBullet) { bullet->toBeDestroyed = true; break; }
+                        }
                     }
                 }
             }
         }
 
-        // Si la balle doit être détruite (sortie d'écran ou collision)
         if (mPlayerbulletList[i]->toBeDestroyed) {
             mDestroyBulletList.push_back(mPlayerbulletList[i]);
-            mPlayerbulletList.erase(mPlayerbulletList.begin() + i);
+            mPlayerbulletList[i] = mPlayerbulletList.back();
+            mPlayerbulletList.pop_back();
         }
     }
     for (int i = mBulletList.size() - 1; i >= 0; i--) {
         mBulletList[i]->Update();
-        if (!mBulletList[i]->toBeDestroyed) {
-            if (ecs.getComponent<ColliderComponent>(mBulletList[i]->mEntity).collisionCheck(mPlayer->mEntity)) {
-                mPlayer->takeDamage(mBulletList[i]->mDamage);
-                mBulletList[i]->toBeDestroyed = true;
+		Bullet* bullet = mBulletList[i];
+        if (!bullet->toBeDestroyed) {
+            if (bullet->entitiesToIgnore.count(mPlayer->mEntity)) continue;
+
+            float maxS = max(bullet->mTransform.scale.x, max(bullet->mTransform.scale.z, bullet->mTransform.scale.y));
+            float thresholdSq = (maxS + 3.0f) * (maxS + 3.0f);
+            float dx = bullet->mTransform.position.x - mPlayer->GetTransform().position.x;
+            float dz = bullet->mTransform.position.z - mPlayer->GetTransform().position.z;
+            if ((dx * dx + dz * dz) < thresholdSq) {
+                if (ecs.getComponent<ColliderComponent>(bullet->mEntity).collisionCheck(mPlayer->mEntity)) {
+                    mPlayer->takeDamage(bullet->mDamage);
+                    bullet->entitiesToIgnore[mPlayer->mEntity] = true;
+                    if (!bullet->isPersistantBullet) {
+                        bullet->toBeDestroyed = true;
+                        break;
+                    }
+                }
             }
         }
+
         if (mBulletList[i]->toBeDestroyed) {
             mDestroyBulletList.push_back(mBulletList[i]);
             mBulletList.erase(mBulletList.begin() + i);
@@ -599,7 +651,7 @@ void GameManager::SpawnMob(float x, float z, int mob) {
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
     mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
-    mEntityMesh.insert({ newEnemy->mEntity, m_enemyMesh });
+    mEntityMesh.insert({ newEnemy->mEntity, mEnemyMesh });
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
     mEnemyList.push_back(newEnemy);

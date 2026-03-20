@@ -47,4 +47,6 @@ class Makhina_Boss : public Boss
 		}
 		ECS::GetInstance().getComponent<HealthComponent>(mEntity) = mHealthComponent;
 	}
+
+	virtual void ChangeShootPattern() override;
 };

@@ -8,6 +8,17 @@ struct Shot
 	std::vector<Bullet*> bulletList;
 };
 
+enum ShootPatternType
+{
+	None,
+	Single_Shot,
+	Explosion,
+	Pump,
+	Line,
+	Amount
+};
+
+
 class Shoot_Pattern_Single_Shot
 {
 public:
@@ -54,4 +65,46 @@ class Shoot_Pattern_Explosion
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
 	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window);
+};
+
+class Shoot_Pattern_Pump
+{
+	public:
+		Shoot_Pattern_Pump() {}
+	~Shoot_Pattern_Pump() {}
+	inline static Shoot_Pattern_Pump* instance;
+
+	inline static Shoot_Pattern_Pump& GetInstance() {
+		if (instance == nullptr)
+		{
+			instance = new Shoot_Pattern_Pump();
+		}
+		return *instance;
+	}
+	void Update(float _deltaTime);
+	void Reset();
+	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
+	int mPlayerIndex = -1;
+	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window);
+};
+
+class Shoot_Pattern_Line
+{
+public:
+	Shoot_Pattern_Line() {}
+	~Shoot_Pattern_Line() {}
+	inline static Shoot_Pattern_Line* instance;
+
+	inline static Shoot_Pattern_Line& GetInstance() {
+		if (instance == nullptr)
+		{
+			instance = new Shoot_Pattern_Line();
+		}
+		return *instance;
+	}
+	void Update(float _deltaTime);
+	void Reset();
+	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
+	int mPlayerIndex = -1;
+	static Bullet* Shoot(Entity sender, float _damage, float range, float width, Window* window);
 };

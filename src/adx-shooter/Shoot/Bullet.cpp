@@ -10,6 +10,7 @@ Bullet::Bullet() {
 	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).height = mTransform.scale.y;
 	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).compOwner = mEntity;
 	ECS::GetInstance().getComponent<ColliderComponent>(mEntity).updateCollider();
+	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 
 }
 
@@ -27,4 +28,13 @@ void Bullet::Update() {
 	currentLifetime += deltaTime;
 
 	transformSystem::MoveForward(ECS::GetInstance().getComponent<transformComponent>(mEntity), m_speed*deltaTime);
+	UpdateComponent();
+}
+
+void Bullet::UpdateComponent() {
+
+	mCollider.updateCollider();
+	mTransform.position = mCollider.orientedBox.Center;
+	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
+	ECS::GetInstance().getComponent<ColliderComponent>(mEntity) = mCollider;
 }
