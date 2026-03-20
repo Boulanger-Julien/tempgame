@@ -6,7 +6,7 @@ void LimitMapSystem::CheckLimitMap(Player& _player, Rooms& _currentRoom)
 	transformComponent transformMap = ECS::GetInstance().getComponent<transformComponent>(_currentRoom.ground);
 
 	float dt = Timer::GetInstance()->GetDeltatime();
-	float speed = _player.GetStats().mSpeed+ 5*dt;
+	float speed = _player.GetStats().mSpeed+ 200*dt;
 
 	float rad = -45 * XM_PI / 180.0f;
 
