@@ -34,7 +34,6 @@ public:
 	void SpawnMob(float x, float z, int mob);
 	void SpawnBoss(float x, float z);
 	float GetDeltatime();
-	void Aim();
 	void UpdateCam();
 	void Shoot();
 	void EnemyUpdate();
@@ -43,6 +42,7 @@ public:
 	void UpdateBar();
 	void GenerateRoom();
 	void CheckInput();
+	Camera GetCamera() { return mCamera; }
 
 	Window* GetWindow() { return mWindow; }
 
@@ -51,6 +51,8 @@ public:
 	MeshGeometry mLineBulletMesh;
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;
+	std::vector<Boss*> mBossList;
+	std::vector<EnemyMarksman*> mEnemyList;
 
 private:
 	static GameManager* instance;//SINGELTON
@@ -99,9 +101,8 @@ private:
 
 	Road road;
 
-	std::vector<EnemyMarksman*> mEnemyList;
 	std::vector<EnemyMarksman*> mDestroyEnemyList;
-	std::vector<Boss*> mBossList;
+
 	std::vector<Boss*> mDestroyBossList;
 
 	std::vector<Bullet*> mDestroyBulletList;

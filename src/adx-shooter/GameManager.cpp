@@ -110,7 +110,7 @@ void GameManager::Update()
     float deltaTime = GetDeltatime();
 
 	// Update du joueur
-    Aim();
+    mPlayer->Aim();
 
 	// Update de la caméra pour suivre le joueur
 	UpdateCam();
@@ -248,6 +248,7 @@ void GameManager::AddLineBullet(Entity sender, float _damage)
         mBulletList.push_back(newBullet);
     }
 }
+
 void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
 	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
@@ -257,60 +258,7 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
         mPlayerbulletList.push_back(newShot->bulletList[i]);
     }
 }
-void GameManager::Aim()
-{
-    if (mPlayer->aimType == AimType::Mouse)
-    {
-        POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
-        ScreenToClient(mWindow->MainWnd(), &mousePos);
-        float finalMouseX = static_cast<float>(mousePos.x);
-        float finalMouseY = static_cast<float>(mousePos.y);
 
-        Ray ray = mCamera.GetRayFromMouse(finalMouseX, finalMouseY, mWindow->mWindowRect.right, mWindow->mWindowRect.bottom);
-        mPlayer->Update(ray);
-    }
-    else if (mPlayer->aimType == AimType::Auto)
-    {
-        mPlayer->Update();
-        float closestDistance = FLT_MAX;
-        transformComponent& playerTrans = mPlayer->GetTransform();
-        for (Boss* enemy : mBossList) {
-            transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->GetEntity());
-            float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
-            if (distance < closestDistance) {
-                closestDistance = distance;
-            }
-            else
-            {
-                continue;
-            }
-            if (distance < 70) {
-                float dx = enemyTrans.position.x - playerTrans.position.x;
-                float dz = enemyTrans.position.z - playerTrans.position.z;
-                float angle = atan2f(dx, dz);
-                playerTrans.rotation.y = angle;
-            }
-        }
-
-        for (EnemyMarksman* enemy : mEnemyList) {
-            transformComponent& enemyTrans = ecs.getComponent<transformComponent>(enemy->mEntity);
-            float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
-            if (distance < closestDistance) {
-                closestDistance = distance;
-            }
-            else
-            {
-                continue;
-            }
-            if (distance < 70) {
-                float dx = enemyTrans.position.x - playerTrans.position.x;
-                float dz = enemyTrans.position.z - playerTrans.position.z;
-                float angle = atan2f(dx, dz);
-                playerTrans.rotation.y = angle;
-            }
-        }
-    }
-}
 void GameManager::Shoot()
 {
     static bool cDownLastFrame = false;

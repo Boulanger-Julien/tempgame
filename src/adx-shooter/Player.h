@@ -19,14 +19,8 @@ public:
 	void Update();
 	void OnUpdate(float _deltaTime);
 	void takeDamage(int _damage);
-	void ChangeAimType() {
-		if (aimType == AimType::Auto) {
-			aimType = AimType::Mouse;
-		}
-		else {
-			aimType = AimType::Auto;
-		}
-	}
+	void ChangeAimType();
+	void Aim();
 	void AddBullet();
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }

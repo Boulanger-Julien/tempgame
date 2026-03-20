@@ -74,6 +74,15 @@ void Player::OnUpdate(float _deltatime)
 void Player::takeDamage(int _damage) {
 	HealthSystem::TakeDamage(mHealthComponent, _damage);
 }
+void Player::ChangeAimType()
+{
+	if (aimType == AimType::Auto) {
+		aimType = AimType::Mouse;
+	}
+	else {
+		aimType = AimType::Auto;
+	}
+}
 void Player::AddBullet() {
 
 	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity);
@@ -85,4 +94,58 @@ void Player::AddBullet() {
 	newBullet->mDamage = mStats.mStrength;
 	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
 
+}
+void Player::Aim()
+{
+	if (aimType == AimType::Mouse)
+	{
+		POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
+		ScreenToClient(GameManager::GetInstance().GetWindow()->MainWnd(), &mousePos);
+		float finalMouseX = static_cast<float>(mousePos.x);
+		float finalMouseY = static_cast<float>(mousePos.y);
+
+		Ray ray = GameManager::GetInstance().GetCamera().GetRayFromMouse(finalMouseX, finalMouseY, GameManager::GetInstance().GetWindow()->mWindowRect.right, GameManager::GetInstance().GetWindow()->mWindowRect.bottom);
+		Update(ray);
+	}
+	else if (aimType == AimType::Auto)
+	{
+		Update();
+		float closestDistance = FLT_MAX;
+		transformComponent& playerTrans = GetTransform();
+		for (Boss* enemy : GameManager::GetInstance().mBossList) {
+			transformComponent& enemyTrans = ECS::GetInstance().getComponent<transformComponent>(enemy->GetEntity());
+			float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
+			if (distance < closestDistance) {
+				closestDistance = distance;
+			}
+			else
+			{
+				continue;
+			}
+			if (distance < 70) {
+				float dx = enemyTrans.position.x - playerTrans.position.x;
+				float dz = enemyTrans.position.z - playerTrans.position.z;
+				float angle = atan2f(dx, dz);
+				playerTrans.rotation.y = angle;
+			}
+		}
+
+		for (EnemyMarksman* enemy : GameManager::GetInstance().mEnemyList) {
+			transformComponent& enemyTrans = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
+			float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
+			if (distance < closestDistance) {
+				closestDistance = distance;
+			}
+			else
+			{
+				continue;
+			}
+			if (distance < 70) {
+				float dx = enemyTrans.position.x - playerTrans.position.x;
+				float dz = enemyTrans.position.z - playerTrans.position.z;
+				float angle = atan2f(dx, dz);
+				playerTrans.rotation.y = angle;
+			}
+		}
+	}
 }
