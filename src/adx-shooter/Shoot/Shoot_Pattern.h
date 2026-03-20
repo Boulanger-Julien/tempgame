@@ -120,7 +120,7 @@ public:
 	transformComponent mTransform;
 	//ColliderComponent mCollider;
 
-	void Init(int _playerIndex) {
+	void Init() {
 		mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0)/*, ColliderComponent()*/ );
 
 		mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);

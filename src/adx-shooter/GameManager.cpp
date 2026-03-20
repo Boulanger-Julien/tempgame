@@ -553,15 +553,13 @@ void GameManager::SpawnMob(float x, float z, int mob) {
 
 void GameManager::CreateFireBall() {
 
-    Spell_FireBall* newEnemy = new Spell_FireBall();
+    Spell_FireBall* fireBall = new Spell_FireBall();
 
-    newEnemy->Init(mPlayer->mEntity);
-    newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
+    fireBall->Init();
 
-    mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
+    mWindow->RegisterExistingMeshForEntity(fireBall->mEntity);
 
-    mEntityMesh.insert({ newEnemy->mEntity, mFireBallMesh });
+    mEntityMesh2.insert({ fireBall->mEntity, mRessourceManager.GetCubeMesh() });
 
-
-	mSpellListe.push_back(newEnemy);
+	mSpellListe.push_back(fireBall);
 }
