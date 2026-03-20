@@ -52,10 +52,7 @@ bool GameManager::Initialize()
     mEnemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
 	currentRoom.Initialize(mWindow);
-    mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
-    mEntityMesh.insert({ currentRoom.wall1Entity, currentRoom.wall1 });
-    mEntityMesh.insert({ currentRoom.wall2Entity, currentRoom.wall2 });
-    mEntityMesh.insert({ currentRoom.door.mEntity , currentRoom.door.doorMesh });
+
 	currentRoom.door.mPlayer = mPlayer->mEntity;
     
 	newBoss = new Makhina_Boss(mPlayer->mEntity);
@@ -129,6 +126,7 @@ void GameManager::Update()
     EnemyUpdate();
 
 	currentRoom.door.Update(mEnemyList.size() + mBossList.size());
+	currentRoom.Update();
 
     // Nettoyage final des entités supprimées cette frame
     Destroy();

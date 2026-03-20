@@ -45,8 +45,6 @@ void Player::Update(const Ray& mouseRay) {
 
 	OnUpdate(deltatime);
 
-
-
 	float t = (mTransform.position.y - XMVectorGetY(mouseRay.origin)) / XMVectorGetY(mouseRay.direction);
 	XMVECTOR intersectPoint = XMVectorAdd(mouseRay.origin, XMVectorScale(mouseRay.direction, t));
 	float targetX = XMVectorGetX(intersectPoint);

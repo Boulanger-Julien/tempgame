@@ -43,6 +43,7 @@ public:
 	void UpdateBar();
 	void GenerateRoom();
 	void CheckInput();
+	Player* GetPlayer() { return mPlayer; }
 
 	Window* GetWindow() { return mWindow; }
 
