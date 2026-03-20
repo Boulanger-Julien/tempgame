@@ -59,7 +59,7 @@ bool GameManager::Initialize()
 	currentRoom.door.mPlayer = mPlayer->mEntity;
     
 	newBoss = new Makhina_Boss(mPlayer->mEntity);
-    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
+    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), 1,1,1, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
     Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
     MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Json\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
@@ -231,34 +231,6 @@ void GameManager::Pause()
 
 /////////////////////////
 
-void GameManager::AddLineBullet(Entity sender, float _damage)
-{
-    Bullet* newBullet = Shoot_Pattern_Line::Shoot(sender, _damage, 25, 1, mWindow);
-    mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
-    mEntityMesh.insert({ newBullet->mEntity, mLineBulletMesh });
-    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
-    mWindow->Update(newBullet->mEntity, bulletWorld);
-    if (sender == mPlayer->mEntity) {
-        newBullet->mDamage = _damage;
-        mPlayerbulletList.push_back(newBullet);
-    }
-    else
-    {
-        newBullet->mDamage = _damage;
-        mBulletList.push_back(newBullet);
-    }
-}
-
-void GameManager::AddExplosionBullet(Entity sender, float bullets)
-{
-	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
-	for (int i = 0; i < newShot->bulletList.size(); ++i)
-    {
-		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });
-        mPlayerbulletList.push_back(newShot->bulletList[i]);
-    }
-}
-
 void GameManager::Shoot()
 {
     static bool cDownLastFrame = false;
@@ -310,7 +282,7 @@ void GameManager::SpawnBoss(float x, float z) {
     newBoss = new Makhina_Boss(mPlayer->mEntity);
 
     newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
-    newBoss->GetTransform().position = FLOAT3(x, 13.5, z);
+    newBoss->GetTransform().position = FLOAT3(x, newBoss->GetTransform().scale.y/2, z);
     mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBoss->GetEntity()));
     mEntityMesh.insert({ newBoss->GetEntity(), MakhinaBossMesh });
@@ -344,7 +316,7 @@ void GameManager::GenerateRoom()
     //mWindow->RemoveEntityResources(currentRoom.ground);
     mWindow->RemoveEntityResources(currentRoom.door.mEntity);
     currentRoom.Initialize(mWindow);
-    int color = rand() % 6;
+	int color = 5;//rand() % 6;
     //if (currentRoom.generated == false)
     //{
     //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
@@ -389,7 +361,7 @@ void GameManager::GenerateRoom()
         //currentRoom.door.mTransform.position = FLOAT3(-50, 0, -50);
         currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkCyan);
         for (int i = 0; i < 1; i++) {
-            SpawnBoss(rand() % 100 - 50, rand() % 100 - 50);
+            SpawnBoss(0, 0);
         }
         break;
     default:
@@ -438,7 +410,6 @@ void GameManager::EnemyUpdate()
     }
     //Julien
     for (Boss* boss : mBossList) {
-        transformComponent& bossTransform = ECS::GetInstance().getComponent<transformComponent>(boss->GetEntity());
         boss->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
     }
 }

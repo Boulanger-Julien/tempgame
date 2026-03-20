@@ -1,7 +1,6 @@
 #pragma once
 #include "adx-engine/framework.h"
 #include "Shoot/Shoot_Pattern.h"
-
 class Boss
 {
 	public:
@@ -30,8 +29,10 @@ class Boss
 	virtual void ChangeShootPattern() = 0;
 protected:
 	Entity mEntity;
+	Entity mHeadEntity;
 	ColliderComponent mCollider;
 	transformComponent mTransform;
+	transformComponent mHeadTransform;
 	HealthComponent mHealthComponent;
 	StatsComponent mStats;
 	bool isAlive = true;
@@ -39,5 +40,7 @@ protected:
 	float mShootCooldown = 1;
 	float mCurrentShootCooldown = 0;
 	bool canShoot = false;
-	int mCurrentShootPattern;
+	int mCurrentShootPattern = 0;
+	float timeSinceLastPatternChange = 0;
+	float patternChangeInterval = 5.0f;
 };

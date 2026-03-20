@@ -30,22 +30,22 @@ class Makhina_Boss : public Boss
 	{
 		// Boss movement logic here
 	}
-	virtual void Attack(float _deltaTime) override
-	{
-		// Boss attack logic here
-	}
+	virtual void Attack(float _deltaTime) override;
 	virtual void LookPlayer() override
 	{
-		// Boss look at player logic here
+		transformSystem::LookAt(mHeadTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex).position);
 	}
 	virtual void UpdateComponent() override
 	{
+		mHeadTransform.position = mTransform.position;
+		mHeadTransform.position.y = 2;
 		ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
 		ECS::GetInstance().getComponent<ColliderComponent>(mEntity) = mCollider;
 		if (mHealthComponent.mHealth >  mStats.mHealth) {
 			mHealthComponent.mHealth = mStats.mHealth;
 		}
 		ECS::GetInstance().getComponent<HealthComponent>(mEntity) = mHealthComponent;
+		ECS::GetInstance().getComponent<transformComponent>(mHeadEntity) = mHeadTransform;
 	}
 
 	virtual void ChangeShootPattern() override;

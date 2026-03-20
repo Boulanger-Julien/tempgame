@@ -6,12 +6,13 @@ void Shoot_Pattern_Single_Shot::Update(float _deltaTime)
 {
 }
 
-Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender)
+Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
     transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
     Bullet* newBullet = new Bullet();
     newBullet->mTransform = senderTrans;
+	newBullet->mTransform.scale = FLOAT3(1,1,1) * scale;
     newBullet->mCollider.updateCollider();
     transformSystem::RotateAround(newBullet->mTransform, ECS::GetInstance().getComponent<transformComponent>(sender), newBullet->mTransform.scale.z *2);
     ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
@@ -26,7 +27,7 @@ void Shoot_Pattern_Single_Shot::Reset()
 {
 }
 
-Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window)
+Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
     transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -37,9 +38,9 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
     for (int i = 0; i < bullets; ++i) {
         Bullet* newBullet = new Bullet();
         newBullet->mTransform = senderTrans;
-        newBullet->mCollider.updateCollider();
+        newBullet->mTransform.scale = FLOAT3(1, 1, 1) * scale;
 
-        newBullet->mTransform = senderTrans;
+        newBullet->mCollider.updateCollider();
 
         newBullet->mTransform.rotation.y = senderTrans.rotation.y + (i * angleStep);
 
@@ -62,12 +63,12 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
     return newShot;
 }
 
-Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Window* window)
+Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale)
 {
 	return nullptr;
 }
 
-Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width, Window* window)
+Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width, Window* window, float scale)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
 	transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);

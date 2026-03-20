@@ -1,20 +1,27 @@
 #include "pch.h"
 #include "Makhina_Boss.h"
-
+#include "GameManager.h"
 Makhina_Boss::~Makhina_Boss()
 {
 }
 
 void Makhina_Boss::Update()
 {
+	float deltatime = Timer::GetInstance()->GetDeltatime();
+	LookPlayer();
+	Attack(deltatime);
+	ChangeShootPattern();
 	UpdateComponent();
 }
 
 void Makhina_Boss::init()
 {
-	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 0, 0, 5, 5, 5), ColliderComponent(), HealthComponent());
+	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 0, 0, 10, 10, 10), ColliderComponent(), HealthComponent());
+	mHeadEntity = ECS::GetInstance().createEntity(transformComponent(0, 0, 0, 1, 1, 1));
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
+	mHeadTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
+	mHeadTransform.position.y = 2.0f;
 	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);
 	mCollider.depth = mTransform.scale.z;
 	mCollider.width = mTransform.scale.x;
@@ -25,32 +32,92 @@ void Makhina_Boss::init()
 	mHealthComponent.mHealth = mStats.mHealth;
 }
 
+void Makhina_Boss::Attack(float _deltaTime)
+{
+	if (mCurrentShootCooldown <= 0) {
+
+		switch (mCurrentShootPattern)
+		{
+		case ShootPatternType::Single_Shot:
+		{
+			Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mHeadEntity,2);
+			GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+			GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
+			XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+			GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+			newBullet->mDamage = mStats.mStrength;
+			GameManager::GetInstance().mBulletList.push_back(newBullet);
+			mCurrentShootCooldown = mShootCooldown;
+			break;
+		}
+
+		case ShootPatternType::Explosion:
+		{
+			Shot* newShot = Shoot_Pattern_Explosion::Shoot(mHeadEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow(),2);
+			for (int i = 0; i < newShot->bulletList.size(); ++i)
+			{
+				GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
+				GameManager::GetInstance().mBulletList.push_back(newShot->bulletList[i]);
+			}
+			mCurrentShootCooldown = mShootCooldown;
+			break;
+		}
+
+		case ShootPatternType::Line:
+		{
+			Bullet* newLineBullet = Shoot_Pattern_Line::Shoot(mHeadEntity, mStats.mStrength, 25, 1, GameManager::GetInstance().GetWindow(),3);
+			GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newLineBullet->mEntity);
+			GameManager::GetInstance().mEntityMesh.insert({ newLineBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
+			XMMATRIX lineBulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newLineBullet->mEntity));
+			GameManager::GetInstance().GetWindow()->Update(newLineBullet->mEntity, lineBulletWorld);
+			newLineBullet->mDamage = mStats.mStrength;
+			GameManager::GetInstance().mBulletList.push_back(newLineBullet);
+			mCurrentShootCooldown = mShootCooldown;
+			break;
+		}
+		case ShootPatternType::None:
+			break;
+		default:
+			break;
+		}
+	}
+	else {
+		mCurrentShootCooldown -= _deltaTime;
+	}
+
+}
+
 void Makhina_Boss::ChangeShootPattern()
 {
-	mCurrentShootPattern = rand() % ShootPatternType::Amount;
-	switch (mCurrentShootPattern)
+	timeSinceLastPatternChange += Timer::GetInstance()->GetDeltatime();
+	if (timeSinceLastPatternChange >= patternChangeInterval)
 	{
-	case ShootPatternType::Single_Shot:
-		mShootCooldown = 0.5f;
-		mCurrentShootCooldown = 0;
-		mStats.mStrength = 30;
-		break;
-	case ShootPatternType::Explosion:
-		mShootCooldown = 5;
-		mCurrentShootCooldown = 0;
-		mStats.mStrength = 50;
-		break;
-	case ShootPatternType::Line:
-		mShootCooldown = 2;
-		mCurrentShootCooldown = 0;
-		mStats.mStrength = 60;
-		break;
-	default:
-		mCurrentShootPattern = ShootPatternType::None;
-		mShootCooldown = 10;
-		mCurrentShootCooldown = 0;
-		mStats.mStrength = 0;
-		break;
+		timeSinceLastPatternChange = 0;
+		mCurrentShootPattern = rand() % ShootPatternType::Amount;
+		switch (mCurrentShootPattern)
+		{
+		case ShootPatternType::Single_Shot:
+			mShootCooldown = 0.25f;
+			mCurrentShootCooldown = 0;
+			mStats.mStrength = 30;
+			break;
+		case ShootPatternType::Explosion:
+			mShootCooldown = 0.5;
+			mCurrentShootCooldown = 0;
+			mStats.mStrength = 50;
+			break;
+		case ShootPatternType::Line:
+			mShootCooldown = 0.1f;
+			mCurrentShootCooldown = 0;
+			mStats.mStrength = 60;
+			break;
+		default:
+			mCurrentShootPattern = ShootPatternType::None;
+			mShootCooldown = 10;
+			mCurrentShootCooldown = 0;
+			mStats.mStrength = 0;
+			break;
+		}
 	}
 }
 
