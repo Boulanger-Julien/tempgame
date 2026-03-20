@@ -35,7 +35,6 @@ public:
 	void SpawnBoss(float x, float z);
 	float GetDeltatime();
 	void UpdateCam();
-	void Shoot();
 	void EnemyUpdate();
 	void BulletUpdate();
 	void UpdateMatrix();

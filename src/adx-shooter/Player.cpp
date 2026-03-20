@@ -63,6 +63,8 @@ void Player::Update() {
 }
 void Player::OnUpdate(float _deltatime)
 {
+	CheckInput();
+
 	HealthSystem::RecoverHealth(mHealthComponent, mStats.mHealthRegen * _deltatime);
 
 	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
@@ -148,6 +150,7 @@ void Player::Aim()
 			}
 		}
 	}
+}
 void Player::AddLineBullet() {
 
 	Bullet* newBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 25,1,GameManager::GetInstance().GetWindow());
@@ -180,4 +183,31 @@ void Player::TestShootPattern()
 		break;
 	}
 	patternIndex = (patternIndex + 1) % ShootPatternType::Amount;
+}
+void Player::CheckInput() {
+
+	float globalTime = Timer::GetTotalTime();
+
+	if (InputSystem::isKeyDown(VK_LBUTTON))
+	{
+		if (mNextShootTimer <= globalTime) {
+			AddLineBullet();
+			mNextShootTimer += mShootColdown;
+		}
+	}
+
+	if (InputSystem::isKeyDown(VK_RBUTTON))
+	{
+		if (mNextShootTimer <= globalTime) {
+			AddBullet();
+			mNextShootTimer += mShootColdown;
+		}
+	}
+
+	if (InputSystem::isKeyDown(VK_SPACE)) {
+		if (mNextShootTimer <= globalTime) {
+			AddExplosionBullet();
+			mNextShootTimer += mShootColdown;
+		}
+	}
 }

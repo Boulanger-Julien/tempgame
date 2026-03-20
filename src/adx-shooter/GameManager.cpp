@@ -121,9 +121,6 @@ void GameManager::Update()
 	// Update des matrices des objets
     UpdateMatrix();
 
-    // Tir (Bullet instantiation)
-    Shoot();
-
 	// Update des bullets et des ennemis
 	BulletUpdate();
     EnemyUpdate();
@@ -256,42 +253,6 @@ void GameManager::AddExplosionBullet(Entity sender, float bullets)
     {
 		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });
         mPlayerbulletList.push_back(newShot->bulletList[i]);
-    }
-}
-
-void GameManager::Shoot()
-{
-    static bool cDownLastFrame = false;
-    static bool cDownLastFrame2 = false;
-	static bool cDownLastFrame3 = false;
-    if (InputSystem::isKeyDown(VK_LBUTTON))
-    {
-        if (!cDownLastFrame) {
-            mPlayer->AddBullet();
-            cDownLastFrame = true;
-        }
-    }
-    else {
-        cDownLastFrame = false;
-    }
-    if (InputSystem::isKeyDown(VK_SPACE)) {
-        if (!cDownLastFrame2) {
-            AddExplosionBullet(mPlayer->mEntity, 9);
-            cDownLastFrame2 = true;
-        }
-    }
-    else {
-        cDownLastFrame2 = false;
-    }
-    if (InputSystem::isKeyDown(VK_RBUTTON))
-    {
-        if (!cDownLastFrame3) {
-            mPlayer->AddLineBullet();
-            cDownLastFrame3 = true;
-        }
-    }
-    else {
-        cDownLastFrame3 = false;
     }
 }
 

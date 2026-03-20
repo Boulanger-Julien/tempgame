@@ -25,12 +25,16 @@ public:
 	void AddLineBullet();
 	void AddExplosionBullet();
 	void TestShootPattern();
+	void CheckInput();
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
 	StatsComponent& GetStats() { return mStats; }
 	HealthComponent& GetHealthComponent() { return mHealthComponent; }
 	float GetHealth() { return mHealthComponent.mHealth; }
 	int aimType = AimType::Mouse;
+
+	float mShootColdown = 0.4;
+	float mNextShootTimer = 0;
 private:
 
 	transformComponent mTransform;
