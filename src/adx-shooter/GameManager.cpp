@@ -128,7 +128,7 @@ void GameManager::Update()
 	BulletUpdate();
     EnemyUpdate();
 
-	currentRoom.door.Update(mEnemyList.size());
+	currentRoom.door.Update(mEnemyList.size() + mBossList.size());
 
     // Nettoyage final des entités supprimées cette frame
     Destroy();
@@ -369,7 +369,7 @@ void GameManager::CheckInput()
     {
         SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
     }
-	if (InputSystem::isKeyUp('E') && mEnemyList.size() <= 0 && mBossList.size() <= 0 && currentRoom.door.mCollider.collisionCheck(mPlayer->mEntity))
+	if (InputSystem::isKeyUp('E') && currentRoom.door.changeRoom == true)
     {
         GenerateRoom();
     }
