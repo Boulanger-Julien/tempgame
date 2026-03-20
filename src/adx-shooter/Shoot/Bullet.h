@@ -15,7 +15,7 @@ public:
 	float currentLifetime = 0;
 	bool toBeDestroyed = false;
 	int mDamage;
-	bool isLineBullet = false;
+	bool isPersistantBullet = false;
 
 	Bullet();
 	~Bullet();

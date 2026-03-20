@@ -24,3 +24,33 @@ void Makhina_Boss::init()
 	mStats.SetStats(300, 0, 0, 0, 30, 10, 0, 60, 0);
 	mHealthComponent.mHealth = mStats.mHealth;
 }
+
+void Makhina_Boss::ChangeShootPattern()
+{
+	mCurrentShootPattern = rand() % ShootPatternType::Amount;
+	switch (mCurrentShootPattern)
+	{
+		case ShootPatternType::Single_Shot:
+			mShootCooldown = 0.5f;
+			mCurrentShootCooldown = 0;
+			mStats.mStrength = 30;
+			break;
+		case ShootPatternType::Explosion:
+			mShootCooldown = 5;
+			mCurrentShootCooldown = 0;
+			mStats.mStrength = 50;
+			break;
+		case ShootPatternType::Line:
+			mShootCooldown = 2;
+			mCurrentShootCooldown = 0;
+			mStats.mStrength = 60;
+			break;
+		default:
+			mCurrentShootPattern = ShootPatternType::None;
+			mShootCooldown = 10;
+			mCurrentShootCooldown = 0;
+			mStats.mStrength = 0;
+			break;
+}
+
+

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Shoot_Pattern.h"
 
+
 void Shoot_Pattern_Single_Shot::Update(float _deltaTime)
 {
 }
@@ -41,7 +42,7 @@ void Shoot_Pattern_Single_Shot::Reset()
 
 Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window)
 {
-    const float angleStep = (2.0f * XM_PI) / bullets; // 360° / 8 en radians
+    const float angleStep = (2.0f * XM_PI) / bullets; 
     transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(GetInstance().mPlayerIndex);
 	Shot* newShot = new Shot();
 
@@ -92,6 +93,6 @@ Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, flo
 	ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;
     transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
     bulletTrans.forward = bulletTrans.forward * -1;
-	newBullet->isLineBullet = true;
+	newBullet->isPersistantBullet = true;
     return newBullet;
 }

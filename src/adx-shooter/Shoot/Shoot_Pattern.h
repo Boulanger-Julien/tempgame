@@ -8,10 +8,16 @@ struct Shot
 	std::vector<Bullet*> bulletList;
 };
 
-struct Line
+enum ShootPatternType
 {
-	std::vector<Bullet*> bulletList;
+	None,
+	Single_Shot,
+	Explosion,
+	Pump,
+	Line,
+	Amount
 };
+
 
 class Shoot_Pattern_Single_Shot
 {
