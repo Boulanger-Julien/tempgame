@@ -28,6 +28,9 @@ public:
 		}
 	}
 	void AddBullet();
+	void AddLineBullet();
+	void AddExplosionBullet();
+	void TestShootPattern();
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
 	StatsComponent& GetStats() { return mStats; }
