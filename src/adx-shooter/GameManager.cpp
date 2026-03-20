@@ -369,7 +369,7 @@ void GameManager::CheckInput()
     {
         SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
     }
-    if (InputSystem::isKeyUp('E') && mEnemyList.size() <= 0)
+	if (InputSystem::isKeyUp('E') && mEnemyList.size() <= 0 && mBossList.size() <= 0 && currentRoom.door.mCollider.collisionCheck(mPlayer->mEntity))
     {
         GenerateRoom();
     }
@@ -652,36 +652,4 @@ void GameManager::SpawnMob(float x, float z, int mob) {
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
 	mEnemyList.push_back(newEnemy);
-}
-
-void GameManager::SpawnBoss(float x, float z) {
-    newBoss = new Makhina_Boss(mPlayer->mEntity);
-
-    newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
-    newBoss->GetTransform().position = FLOAT3(x, 13.5, z);
-    mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
-    XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBoss->GetEntity()));
-    mEntityMesh.insert({ newBoss->GetEntity(), MakhinaBossMesh });
-    mWindow->Update(newBoss->GetEntity(), enemyWorld);
-    mBossList.push_back(newBoss);
-}
-void GameManager::CheckInput()
-{
-    if (InputSystem::isKeyDown(VK_F1) && mAppPaused)
-    {
-        HealthSystem::RecoverHealth(mPlayer->GetHealthComponent(), mPlayer->GetHealthComponent().mMaxHealth);
-        mAppPaused = !mAppPaused;
-        for (Bullet* bullet : mBulletList) {
-            bullet->toBeDestroyed = true;
-        }
-        Destroy();
-    }
-    if (InputSystem::isKeyDown('C'))
-    {
-        SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-    }
-    if (InputSystem::isKeyDown('E') && currentRoom.door.changeRoom == true)
-    {
-        GenerateRoom();
-    }
 }
