@@ -34,6 +34,7 @@ void Bullet::Update() {
 void Bullet::UpdateComponent() {
 
 	mCollider.updateCollider();
+	mTransform.position = mCollider.orientedBox.Center;
 	ECS::GetInstance().getComponent<transformComponent>(mEntity) = mTransform;
 	ECS::GetInstance().getComponent<ColliderComponent>(mEntity) = mCollider;
 }

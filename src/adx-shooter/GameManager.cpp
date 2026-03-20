@@ -232,9 +232,9 @@ void GameManager::Pause()
 /////////////////////////
 
 void GameManager::AddBullet(Entity sender, float _damage) {
-	Bullet* newBullet = Shoot_Pattern_Line::Shoot(sender, _damage, 25, 1, mWindow);
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(sender);
     mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
-    mEntityMesh.insert({ newBullet->mEntity, mLineBulletMesh });
+    mEntityMesh.insert({ newBullet->mEntity, mBulletMesh });
     XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
     mWindow->Update(newBullet->mEntity, bulletWorld);
     if (sender == mPlayer->mEntity) {
@@ -249,8 +249,20 @@ void GameManager::AddBullet(Entity sender, float _damage) {
 }
 void GameManager::AddLineBullet(Entity sender, float _damage)
 {
-	//Bullet* newLine = Shoot_Pattern_Line::Shoot(sender, _damage, mWindow);
-
+    Bullet* newBullet = Shoot_Pattern_Line::Shoot(sender, _damage, 25, 1, mWindow);
+    mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
+    mEntityMesh.insert({ newBullet->mEntity, mLineBulletMesh });
+    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
+    mWindow->Update(newBullet->mEntity, bulletWorld);
+    if (sender == mPlayer->mEntity) {
+        newBullet->mDamage = _damage;
+        mPlayerbulletList.push_back(newBullet);
+    }
+    else
+    {
+        newBullet->mDamage = _damage;
+        mBulletList.push_back(newBullet);
+    }
 }
 void GameManager::AddExplosionBullet(Entity sender, float bullets)
 {
@@ -351,7 +363,7 @@ void GameManager::Shoot()
     if (InputSystem::isKeyDown(VK_LBUTTON))
     {
         if (!cDownLastFrame) {
-			AddBullet(mPlayer->mEntity, mPlayer->GetStats().mStrength);
+			AddLineBullet(mPlayer->mEntity, mPlayer->GetStats().mStrength);
             cDownLastFrame = true;
         }
     }

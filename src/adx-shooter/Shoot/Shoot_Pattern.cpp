@@ -9,31 +9,17 @@ void Shoot_Pattern_Single_Shot::Update(float _deltaTime)
 Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
-
+    transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
     Bullet* newBullet = new Bullet();
-
-    ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = ECS::GetInstance().getComponent<transformComponent>(sender);
-    if (sender == GetInstance().mPlayerIndex)
-    {
-        transformComponent& playerTrans = ECS::GetInstance().getComponent<transformComponent>(instance->mPlayerIndex);
-        float pitch = playerTrans.rotation.x;
-        float yaw = playerTrans.rotation.y;
-
-        FLOAT3 forward = {
-            sin(yaw) * cos(pitch),
-            -sin(pitch),
-            cos(yaw) * cos(pitch)
-        };
-
-        FLOAT3 right = { cos(yaw), 0, -sin(yaw) };
-        ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity).position = playerTrans.position + (forward * 2.5f);
-    }
+    newBullet->mTransform = senderTrans;
+    newBullet->mCollider.updateCollider();
+    transformSystem::RotateAround(newBullet->mTransform, ECS::GetInstance().getComponent<transformComponent>(sender), newBullet->mTransform.scale.z *2);
+    ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
+    ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;
     transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
     bulletTrans.forward = bulletTrans.forward * -1;
-
-    transformSystem::Move(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity), 0, 0, 2);
-
-	return newBullet;
+    newBullet->isPersistantBullet = false;
+    return newBullet;
 }
 
 void Shoot_Pattern_Single_Shot::Reset()
