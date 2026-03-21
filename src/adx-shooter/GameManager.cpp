@@ -176,11 +176,10 @@ void GameManager::Draw()
 
         mWindow->Draw(meshRef, entityID);
     }
-    mWindow->DrawRenderItems();
-    //for (auto entity : mEntityMesh2)
-    //{
-    //    mWindow->Draw2(entity.second);
-    //}
+    for (RenderItem* item : mWindow->mRenderItems) {
+        mWindow->DrawRenderItems(*item);
+    }
+
     for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
     {
         int entityID = it->first;
@@ -564,7 +563,13 @@ void GameManager::CreateFireBall() {
 
     mWindow->RegisterExistingMeshForEntity(fireBall->mEntity);
 
-    mEntityMesh2.insert({ fireBall->mEntity, mRessourceManager.GetCubeMesh() });
+    mEntityMesh.insert({ fireBall->mEntity, mFireBallMesh });
 
 	mSpellListe.push_back(fireBall);
+
+    RenderItem* riFireBall = new RenderItem();
+    riFireBall->mEntityId = fireBall->mEntity;
+    riFireBall->mesh = &mFireBallMesh;
+
+    mWindow->mRenderItems.push_back(riFireBall);
 }

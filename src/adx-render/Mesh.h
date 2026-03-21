@@ -3,14 +3,6 @@
 #include <vector>
 #include <DirectXMath.h>
 
-//struct Vertex
-//{
-//    DirectX::XMFLOAT3 position = { 0.0f,0.0f,0.0f };
-//    DirectX::XMFLOAT3 normal = { 0.0f,0.0f,0.0f };
-//    DirectX::XMFLOAT4 color = { 0.0f,0.0f,0.0f,1.0f };
-//    DirectX::XMFLOAT2 texCoord = { 0.0f,0.0f };
-//};
-
 class Mesh
 {
 public:

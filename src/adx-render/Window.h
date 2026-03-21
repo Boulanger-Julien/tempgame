@@ -36,7 +36,7 @@ public:
 
 	/**/
 	void AddRenderItem(Mesh* mesh,/* Material* mat,*/ XMFLOAT4X4 world);
-	void DrawRenderItems();
+	void DrawRenderItems(RenderItem _renderItem);
 	ID3D12Device* GetDevice() const;
 	std::vector<RenderItem*> mRenderItems;
 	//

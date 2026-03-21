@@ -7,11 +7,7 @@ using namespace DirectX;
 
 struct RenderItem
 {
-    Mesh* mesh = nullptr;
-    //Material* material = nullptr;
+    int mEntityId;
+    MeshGeometry* mesh = nullptr;
 
-    XMFLOAT4X4 world = {};
-
-    // Constant buffer GPU
-    //ComPtr<ID3D12Resource> objectCB;
 };

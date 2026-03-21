@@ -210,58 +210,37 @@ void Window::Draw(MeshGeometry& mGeo, int entityID) {
 /**/
 void Window::AddRenderItem(Mesh* mesh, /*Material* mat,*/ XMFLOAT4X4 world)
 {
-	RenderItem* item = new RenderItem();
-	item->mesh = mesh;
-	//item->material = mat;
-	item->world = world;
+	//RenderItem* item = new RenderItem();
+	//item->mesh = mesh;
+	////item->material = mat;
+	//item->world = world;
 
-	mRenderItems.push_back(item);
+	//mRenderItems.push_back(item);
 }
-void Window::DrawRenderItems()
+void Window::DrawRenderItems(RenderItem _renderItem)
 {
-	auto cmdList = mCommandList.Get();
+	MeshGeometry mGeo = *_renderItem.mesh;
+	int entityID = _renderItem.mEntityId;
 
-	for (auto& item : mRenderItems)
-	{
-		if (!item || !item->mesh) continue;
+	if (mGeo.VertexBufferGPU == nullptr) return;
+	if (sEntityToDescriptor.find(entityID) == sEntityToDescriptor.end()) return;
+	mCommandList->SetPipelineState(mPipelineManager.GetPSO());
 
-		// 1. Bind mesh
-		item->mesh->Bind(cmdList);
+	int descriptorSlot = sEntityToDescriptor[entityID];
+	int textureIdx = sIndexUseTexture[entityID];
 
-		// 2. Constant buffers
-		//cmdList->SetGraphicsRootConstantBufferView(
-		//	0,
-		//	item->objectCB->GetGPUVirtualAddress()
-		//);
+	// Calcul de l'offset de texture dans le heap
+	int textureDescriptorOffset = mDescriptorManager.GetMaxDescriptors() + textureIdx;
 
-		//cmdList->SetGraphicsRootConstantBufferView(
-		//	1,
-		//	mMaterialBuffer->GetGPUVirtualAddress()
-		//);
-
-		//cmdList->SetGraphicsRootConstantBufferView(
-		//	2,
-		//	mPassCB->GetGPUVirtualAddress()
-		//);
-
-		// 3. Texture heap
-		ID3D12DescriptorHeap* heaps[] = { mDescriptorManager.GetDescriptorHeap() };
-		cmdList->SetDescriptorHeaps(1, heaps);
-
-		cmdList->SetGraphicsRootDescriptorTable(
-			3,
-			mDescriptorManager.GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart()
-		);
-
-		// 4. Draw
-		cmdList->DrawIndexedInstanced(
-			item->mesh->GetIndexCount(),
-			1,
-			0,
-			0,
-			0
-		);
-	}
+	mRenderContext.DrawMesh(
+		mCommandList.Get(),
+		md3dDevice.Get(),
+		mGeo,
+		descriptorSlot, // Utilise le slot 0-1023
+		mDescriptorManager.GetMaxDescriptors(),
+		textureDescriptorOffset,
+		mDescriptorManager.GetDescriptorHeap()
+	);
 }
 //
 void Window::DrawUI(MeshGeometry& mGeo, int entityID)
