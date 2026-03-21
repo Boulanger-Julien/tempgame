@@ -6,7 +6,7 @@ void Shoot_Pattern_Single_Shot::Update(float _deltaTime)
 {
 }
 
-Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale)
+Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale, float speedBullet)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
     transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -14,6 +14,7 @@ Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale)
     newBullet->mTransform = senderTrans;
 	newBullet->mTransform.scale = FLOAT3(1,1,1) * scale;
     newBullet->mCollider.updateCollider();
+	newBullet->m_speed = speedBullet;
     transformSystem::RotateAround(newBullet->mTransform, ECS::GetInstance().getComponent<transformComponent>(sender), newBullet->mTransform.scale.z *2);
     ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
     ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;
@@ -27,7 +28,7 @@ void Shoot_Pattern_Single_Shot::Reset()
 {
 }
 
-Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale)
+Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
     transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -43,7 +44,7 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
         newBullet->mCollider.updateCollider();
 
         newBullet->mTransform.rotation.y = senderTrans.rotation.y + (i * angleStep);
-
+		newBullet->m_speed = speedBullet;
         transformSystem::UpdateForward(newBullet->mTransform);
 
         float distFromPlayer = 5.0f;
@@ -63,7 +64,7 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
     return newShot;
 }
 
-Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale)
+Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale,float speedBullet)
 {
 	return nullptr;
 }

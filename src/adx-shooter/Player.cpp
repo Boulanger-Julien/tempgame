@@ -85,7 +85,7 @@ void Player::ChangeAimType()
 }
 void Player::AddBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity,1);
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 50);
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
@@ -162,7 +162,7 @@ void Player::AddLineBullet() {
 
 
 void Player::AddExplosionBullet() {
-	Shot* newShot = Shoot_Pattern_Explosion::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow(), 1);
+	Shot* newShot = Shoot_Pattern_Explosion::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow(), 1, 50);
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
 	{
 		GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });

@@ -25,8 +25,10 @@ class Boss
 	virtual void LookPlayer() = 0;
 	float GetStrength() { return mStats.mStrength; }
 	float GetHealth() { return mHealthComponent.mHealth; }
+	float GetMaxHealth() { return mStats.mHealth; }
 	virtual void UpdateComponent() = 0;
 	virtual void ChangeShootPattern() = 0;
+	std::string GetName() { return name; }
 protected:
 	Entity mEntity;
 	Entity mHeadEntity;
@@ -42,5 +44,8 @@ protected:
 	bool canShoot = false;
 	int mCurrentShootPattern = 0;
 	float timeSinceLastPatternChange = 0;
-	float patternChangeInterval = 5.0f;
+	float patternChangeInterval = 15.0f;
+	int mPatternChangeCooldown = 3;
+	float mPatternChangeCurrentCooldown = 0;
+	std::string name = "Boss";
 };
