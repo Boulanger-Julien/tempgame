@@ -207,9 +207,19 @@ void GameManager::Draw()
         mTimerTextRenderer->DrawTxt(timerStr, 20, 60, 24);
         if (mBossList.size() > 0)
         {
-            mBossNameTextRenderer->DrawTxt(mBossList[0]->GetName(), 700, 10, 20);
+            int size = mBossList[0]->GetName().size();
+            if (size < 22)
+                size = 22;
+            else
+                size = 500 / size;
+            mBossNameTextRenderer->DrawTxt(mBossList[0]->GetName(), 700, 10, size);
             if (mBossList.size() > 1)
             {
+				size = mBossList[1]->GetName().size();
+				if (size < 22)
+					size = 22;
+				else
+					size = 500 / size;
                 mBossName2TextRenderer->DrawTxt(mBossList[1]->GetName(), 700, 110, 24);
             }
         }
