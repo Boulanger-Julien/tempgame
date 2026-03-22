@@ -577,6 +577,7 @@ void GameManager::OnInit() {
 
     RenderItem cubeItem;
     cubeItem.CreateItem("Cube", mRessourceManager.GetCubeMesh());
+    CreateConstantBuffer(cubeItem);
     
 }
 void GameManager::CreateConstantBuffer(RenderItem& item)
