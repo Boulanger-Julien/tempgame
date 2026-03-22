@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Mesh.h"
 
-void Mesh::Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, const std::vector<uint16_t>& _indices)
+void Mesh::Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices)
 {
     m_indexCount = (UINT)_indices.size();
 

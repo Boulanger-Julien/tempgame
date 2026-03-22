@@ -95,7 +95,7 @@ Mesh GeometryFactory::CreateGeoCube()
     }
     ComputeNormals(vertices, indices);
 
-    //mesh.Create(mDevice, vertices, indices);
+    mesh.Create(mDevice, vertices, indices);
 
     return mesh;
 }

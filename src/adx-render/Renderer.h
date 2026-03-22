@@ -4,6 +4,13 @@
 #include "SwapChainManager.h"
 #include "DepthBufferManager.h"
 #include "FenceManager.h"
+#include "Camera.h"
+#include "SceneData.h"
+#include "RenderItem.h"
+#include "RessourceManager.h"
+//
+#include "DescriptorManager.h"
+#include "adx-render/Window.h"
 
 class Renderer
 {
@@ -12,14 +19,17 @@ public:
 	void Init(HWND& _hwnd);
 	void Loop();
 
+	bool ProcessMessages();
+
 	void Update();
 	void FRender();
 	void Clear();
-	void SetViewPort();
-	void Draw();
+	void SetViewport();
+	void DrawScene();
 
-	void CreateConstantBuffer();
+	void CreateConstantBuffer(RenderItem& item);
 private:
+	//Window
 	int mWindowWidth;
 	int mWindowHeight;
 
@@ -29,5 +39,20 @@ private:
 	SwapChainManager mSwapChainManager;
 	DepthBufferManager mDepthBufferManager;
 	FenceManager mFenceManager;
+	Camera mCamera;
+	SceneData mSceneData;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE mRtvHandle;
+
+	DescriptorManager mDescriptorManager;
+	//Draw
+	RessourceManager mRessourceManager;
+	std::vector<RenderItem> mRenderItems;
+	//Light
+	Light mLight;
+	D3D12_GPU_DESCRIPTOR_HANDLE mDiffuseMapGpuHandle = {};
+	//Divers
+	float elapsedTime;
+
 };
 

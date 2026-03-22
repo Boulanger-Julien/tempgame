@@ -329,10 +329,6 @@ float GameManager::GetDeltatime() {
     return Timer::GetInstance()->GetDeltatime();
 }
 
-
-
-
-
 /////////////////////////
 
 //?

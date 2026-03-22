@@ -6,6 +6,7 @@ void Renderer::Run(HWND& _hwnd, int _width, int _height) {
 	mWindowHeight = _height;
 
 	Init(_hwnd);
+	Loop();
 }
 void Renderer::Init(HWND& _hwnd) {
 
@@ -16,4 +17,206 @@ void Renderer::Init(HWND& _hwnd) {
 	mDepthBufferManager.Init(mDeviceManager.GetDevice(), mWindowWidth, mWindowHeight);
 	mFenceManager.Init(mDeviceManager.GetDevice());
 
+	//	mCamera.SetLens(0.25f * 3.14, (mWindowWidth / mWindowHeight), 0.1f, 100.0f);
+	//mCamera.SetPosition(0.0f, 7.0f, -15.0f);
+		mCamera.SetPosition(0.0f, 3.0f, -10.0f);
+		float aspect = static_cast<float>(mWindowWidth) / static_cast<float>(mWindowHeight);
+		mCamera.SetLens(0.25f * 3.14f, aspect, 1.0f, 1000.0f);
+		XMFLOAT3 pos = { 0.0f, 3.0f, -10.0f };
+		XMVECTOR camPos = XMLoadFloat3(&pos);
+		XMVECTOR target = XMVectorZero();
+		mCamera.LookAt(camPos, target);
+		mSceneData.SetCamera(mCamera);
+	//Light
+		//mLight = Light(XMFLOAT3(1.0f, -1.0f, 0.0f), 1, XMFLOAT4(1.0f, 1.f, 1.0f, 1.0f));
+		//mSceneData.SetLight(mLight);
+		//LightConstants lc = mSceneData.GetLightConstants();
+		//mDescriptorManager.UpdateLightConstants(lc);
+	//
+	mRessourceManager.Init(mDeviceManager.GetDevice());
+
+	RenderItem cubeItem;
+	cubeItem.CreateItem("Cube", mRessourceManager.GetCubeMesh());
+	CreateConstantBuffer(cubeItem);
+
+	mRenderItems.push_back(cubeItem);
+}
+void Renderer::Loop() {
+	bool running = true;
+	while (running) {
+
+		running = ProcessMessages();
+
+		Update();
+
+		FRender();
+
+		ID3D12CommandList* command_lists[] = { mCommandManager.GetCommandList() };
+		mCommandManager.GetCommandQueue()->ExecuteCommandLists(1, command_lists);
+
+		mSwapChainManager.GetSwapChain()->Present(1, 0);
+
+		const UINT64 current_fence_value = mFenceManager.IncrementFenceValue();
+		mCommandManager.GetCommandQueue()->Signal(mFenceManager.GetFence(), current_fence_value);
+
+		if (mFenceManager.GetFence()->GetCompletedValue() < current_fence_value) {
+			mFenceManager.GetFence()->SetEventOnCompletion(current_fence_value, mFenceManager.GetFenceEvent());
+			WaitForSingleObject(mFenceManager.GetFenceEvent(), INFINITE);
+		}
+	}
+}
+bool Renderer::ProcessMessages()
+{
+	MSG msg = {};
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+	{
+		if (msg.message == WM_QUIT)
+			return false;
+
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	return true;
+}
+
+void Renderer::Update() {
+	elapsedTime += Timer::GetInstance()->GetDeltatime();
+	//scale
+	float sx = 0.5;
+	float sy = 0.5;
+	float sz = 0.5;
+	DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(sx, sy, sz);
+	//rotation
+	DirectX::XMMATRIX rotationX = DirectX::XMMatrixRotationX(cosf(elapsedTime) * 1.5f);
+	DirectX::XMMATRIX rotationY = DirectX::XMMatrixRotationY(elapsedTime * 1.5f);
+
+	//cube
+	DirectX::XMMATRIX cubePosition = DirectX::XMMatrixTranslation(1.5 + cosf(elapsedTime), sinf(elapsedTime), 3);
+	DirectX::XMMATRIX cubeWorld = scale * rotationY * cubePosition;
+
+	//view//
+	DirectX::XMMATRIX view = mSceneData.GetViewMatrix();
+	//proj
+	DirectX::XMMATRIX projection = mSceneData.GetProjMatrix();
+
+	//UpdateCamera
+	//mCamera.Update(_deltaTime);
+
+	//UpdateViewMatrix
+	mCamera.UpdateViewMatrix();
+
+	for (auto item : mRenderItems)
+	{
+		DirectX::XMMATRIX world;
+
+		if (item.name == "Cube")
+			world = cubeWorld;
+
+		DirectX::XMMATRIX wvp = world * view * projection;
+
+		ObjectConstants cb;
+		cb.UseLight = false;
+		DirectX::XMStoreFloat4x4(&cb.WorldViewProj,
+			DirectX::XMMatrixTranspose(wvp));
+
+		void* data;
+		D3D12_RANGE readRange = {};
+		item.constantBuffer->Map(0, &readRange, &data);
+		memcpy(data, &cb, sizeof(cb));
+		item.constantBuffer->Unmap(0, nullptr);
+	}
+}
+
+void Renderer::FRender() {
+	mCommandManager.BeginFrame();
+	mSwapChainManager.BeginFrame(mCommandManager.GetCommandList());
+
+	Clear();
+	SetViewport();
+	DrawScene();
+
+	mSwapChainManager.EndFrame(mCommandManager.GetCommandList());
+	mCommandManager.EndFrame();
+}
+
+void Renderer::Clear()
+{
+	mRtvHandle = mSwapChainManager.GetRtvHeap()->GetCPUDescriptorHandleForHeapStart();
+	mRtvHandle.ptr += mSwapChainManager.GetBackBufferIndex() * mSwapChainManager.GetRtvIncrementSize();
+
+	float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
+	mCommandManager.GetCommandList()->ClearRenderTargetView(mRtvHandle, clearColor, 0, nullptr);
+	mCommandManager.GetCommandList()->ClearDepthStencilView(
+		mDepthBufferManager.GetDsvHeap()->GetCPUDescriptorHandleForHeapStart(),
+		D3D12_CLEAR_FLAG_DEPTH,
+		1.0f,
+		0,
+		0,
+		nullptr
+	);
+}
+void Renderer::SetViewport()
+{
+	D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(mWindowWidth), static_cast<float>(mWindowHeight), 0.0f, 1.0f };
+	D3D12_RECT scissor_rect = { 0, 0, mWindowWidth, mWindowHeight };
+	mCommandManager.GetCommandList()->RSSetViewports(1, &viewport);
+	mCommandManager.GetCommandList()->RSSetScissorRects(1, &scissor_rect);
+}
+void Renderer::DrawScene()
+{
+	auto dsvHandle = mDepthBufferManager.GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
+	mCommandManager.GetCommandList()->OMSetRenderTargets(1, &mRtvHandle, FALSE, &dsvHandle);
+
+	mCommandManager.GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mGraphicPipelineManager.Bind(mCommandManager.GetCommandList());
+
+	auto commandList = mCommandManager.GetCommandList();
+
+	for (auto& item : mRenderItems)
+	{
+		item.mesh->Bind(commandList);
+
+		// Juste passer le constant buffer de l'objet (cube)
+		commandList->SetGraphicsRootConstantBufferView(
+			0,
+			item.constantBuffer->GetGPUVirtualAddress()
+		);
+
+		// Ne pas mettre de lumière ni de texture
+		// commandList->SetGraphicsRootConstantBufferView(1, mLightConstantBuffer->GetGPUVirtualAddress());
+		// commandList->SetGraphicsRootDescriptorTable(2, mDiffuseMapGpuHandle);
+
+		commandList->DrawIndexedInstanced(
+			item.mesh->GetIndexCount(),
+			1,  // instance count
+			0,  // start index
+			0,  // base vertex
+			0   // start instance
+		);
+	}
+}
+void Renderer::CreateConstantBuffer(RenderItem& item)
+{
+	UINT alignedSize = (sizeof(ObjectConstants) + 255) & ~255;
+
+	D3D12_HEAP_PROPERTIES heapProps = {};
+	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+	D3D12_RESOURCE_DESC desc = {};
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	desc.Width = alignedSize;
+	desc.Height = 1;
+	desc.DepthOrArraySize = 1;
+	desc.MipLevels = 1;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	desc.SampleDesc.Count = 1;
+
+	mDeviceManager.GetDevice()->CreateCommittedResource(
+		&heapProps,
+		D3D12_HEAP_FLAG_NONE,
+		&desc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&item.constantBuffer)
+	);
 }
