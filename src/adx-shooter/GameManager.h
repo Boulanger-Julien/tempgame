@@ -21,26 +21,36 @@ class GameManager
 {
 public:
 	static GameManager& GetInstance() {	return *instance; }
+
 	GameManager(HINSTANCE hInstance, int winW, int winH);
 	~GameManager() {}
+
 	bool Initialize();
 	void Update();
-	bool Run();
 	void Draw();
-	void Pause();
-	void SpeedDown();
 	void Destroy();
+
+	bool Run();
+
+	void UpdateCam();
+	void UpdateMatrix();
+
+	void Pause();
+	float GetDeltatime();
+
+	//void SpeedDown();
+
 	void SpawnMob(float x, float z, int mob);
 	void CreateFireBall();
 	void SpawnBoss(float x, float z);
-	float GetDeltatime();
-	void UpdateCam();
+
 	void EnemyUpdate();
 	void BulletUpdate();
-	void UpdateMatrix();
+
 	void UpdateBar();
 	void GenerateRoom();
 	void CheckInput();
+
 	Camera GetCamera() { return mCamera; }
 
 	Window* GetWindow() { return mWindow; }

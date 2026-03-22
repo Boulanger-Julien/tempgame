@@ -7,7 +7,21 @@ void GraphicsPipelineManager::Initialize(ID3D12Device* device, DXGI_FORMAT backB
 	BuildShadersAndInputLayout();
 	BuildPSO(device, backBufferFormat, depthStencilFormat, msaaState, msaaQuality);
 }
+/**/
+void GraphicsPipelineManager::Init(ID3D12Device* _device) {
+	//CommandQueue
+	D3D12_COMMAND_QUEUE_DESC queue_desc = {};
+	queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 
+	_device->CreateCommandQueue(&queue_desc, IID_PPV_ARGS(&mCommandQueue));
+	//CommandAllocator
+	_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAllocator));
+
+	//CommandListe
+	_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAllocator, nullptr, IID_PPV_ARGS(&mCommandList));
+}
+//
 void GraphicsPipelineManager::BuildRootSignature(ID3D12Device* device)
 {
 	CD3DX12_DESCRIPTOR_RANGE texRange;

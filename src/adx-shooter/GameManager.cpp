@@ -15,11 +15,11 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
     instance = this;
 
     mhInstance = hInstance;
+
     //Initialize window
-    {
-        mWindow = new Window(mhInstance);
-        mWindow->Initialize(1920, 1080);
-    }
+    mWindow = new Window(mhInstance);
+    mWindow->Initialize(1920, 1080);
+
 	mPlayer = new Player();
     mLifeTextRenderer = new TextRenderer(mWindow);
     mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
@@ -132,37 +132,6 @@ void GameManager::Update()
     Destroy();
 }
 
-bool GameManager::Run()
-{
-    Timer::Reset();
-
-    while (msg.message != WM_QUIT)
-    {
-        if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-        else
-        {
-            Timer::Update();
-            Pause();
-            if (!mAppPaused)
-            {
-                mWindow->CalculateFrameStats();
-                Update();
-                Draw();
-            }
-            else
-            {
-                Sleep(100);
-            }
-        }
-    }
-
-    return (int)msg.wParam;
-}
-
 void GameManager::Draw()
 {
     mWindow->BeginFrame();
@@ -203,6 +172,133 @@ void GameManager::Draw()
     mWindow->EndFrame();
 }
 
+void GameManager::Destroy() {
+    // NETTOYAGE DES BULLETS
+    if (!mDestroyBulletList.empty()) {
+        for (Bullet* bullet : mDestroyBulletList) {
+            // 1. Libérer les ressources DirectX (Slots de descripteurs)
+            mWindow->RemoveEntityResources(bullet->mEntity);
+
+            // 2. Retirer du système de rendu
+            mEntityMesh.erase(bullet->mEntity);
+
+            // 4. Supprimer l'objet C++
+            delete bullet;
+        }
+        mDestroyBulletList.clear();
+    }
+
+    // NETTOYAGE DES ENNEMIS (Même logique)
+    if (!mDestroyEnemyList.empty()) {
+        for (EnemyMarksman* enemy : mDestroyEnemyList) {
+            // 1. On le retire de la liste de l'Update LOGIQUE
+            auto it = std::find(mEnemyList.begin(), mEnemyList.end(), enemy);
+            if (it != mEnemyList.end()) {
+                mEnemyList.erase(it);
+            }
+
+            // 2. On retire les ressources DirectX
+            mWindow->RemoveEntityResources(enemy->mEntity);
+
+            // 3. On le retire du dictionnaire de rendu
+            mEntityMesh.erase(enemy->mEntity);
+
+            // 4. Supprimer l'objet C++
+            delete enemy;
+        }
+        mDestroyEnemyList.clear();
+    }
+    if (!mDestroyBossList.empty()) {
+        for (Boss* boss : mDestroyBossList) {
+            // 1. On le retire de la liste de l'Update LOGIQUE
+            auto it = std::find(mBossList.begin(), mBossList.end(), boss);
+            if (it != mBossList.end()) {
+                mBossList.erase(it);
+            }
+            // 2. On retire les ressources DirectX
+            mWindow->RemoveEntityResources(boss->GetEntity());
+            // 3. On le retire du dictionnaire de rendu
+            mEntityMesh.erase(boss->GetEntity());
+            // 4. Supprimer l'objet C++
+            delete boss;
+        }
+        mDestroyBossList.clear();
+    }
+}
+
+
+bool GameManager::Run()
+{
+    Timer::Reset();
+
+    while (msg.message != WM_QUIT)
+    {
+        if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+        else
+        {
+            Timer::Update();
+            Pause();
+            if (!mAppPaused)
+            {
+                mWindow->CalculateFrameStats();
+                Update();
+                Draw();
+            }
+            else
+            {
+                Sleep(100);
+            }
+        }
+    }
+
+    return (int)msg.wParam;
+}
+
+
+void GameManager::UpdateCam()
+{
+    transformComponent& playerTrans = mPlayer->GetTransform();
+    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
+    XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
+    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
+    XMFLOAT3 camPos = mCamera.Position();
+    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
+    mWindow->SetCamera(mCamera);
+
+    static bool OneDownLastFrame = false;
+    if (InputSystem::isKeyDown('1')) {
+        if (!OneDownLastFrame) {
+            mPlayer->ChangeAimType();
+            OneDownLastFrame = true;
+        }
+    }
+    else {
+        OneDownLastFrame = false;
+    }
+}
+
+void GameManager::UpdateMatrix()
+{
+    for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
+    {
+        int entityID = it->first;
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
+        mWindow->Update(entityID, entityWorld);
+    }
+    for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
+    {
+        int entityID = it->first;
+        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
+        mWindow->UpdateUI(entityID, entityWorld);
+    }
+    OnUpdate();
+}
+
+
 void GameManager::Pause()
 {
     if (mPlayer->GetHealth() <= 0) {
@@ -228,6 +324,14 @@ void GameManager::Pause()
     }
     CheckInput();
 }
+
+float GameManager::GetDeltatime() {
+    return Timer::GetInstance()->GetDeltatime();
+}
+
+
+
+
 
 /////////////////////////
 
@@ -331,31 +435,6 @@ void GameManager::GenerateRoom()
 }
 
 //
-float GameManager::GetDeltatime() {
-    return Timer::GetInstance()->GetDeltatime();
-}
-
-void GameManager::UpdateCam()
-{
-    transformComponent& playerTrans = mPlayer->GetTransform();
-    mCamera.SetPosition(toXMFLOAT3(playerTrans.position + FLOAT3(30, 30, -30)));
-    XMFLOAT3 playerPos = toXMFLOAT3(playerTrans.position);
-    XMVECTOR targetVect = XMLoadFloat3(&playerPos);
-    XMFLOAT3 camPos = mCamera.Position();
-    mCamera.LookAt(XMLoadFloat3(&camPos), targetVect);
-    mWindow->SetCamera(mCamera);
-
-    static bool OneDownLastFrame = false;
-    if (InputSystem::isKeyDown('1')) {
-        if (!OneDownLastFrame) {
-            mPlayer->ChangeAimType();
-            OneDownLastFrame = true;
-        }
-    }
-    else {
-        OneDownLastFrame = false;
-    }
-}
 
 void GameManager::EnemyUpdate()
 {
@@ -460,81 +539,10 @@ void GameManager::BulletUpdate()
     }
 }
 
-void GameManager::UpdateMatrix()
-{
-    for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
-    {
-        int entityID = it->first;
-        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
-        mWindow->Update(entityID, entityWorld);
-    }
-    for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
-    {
-        int entityID = it->first;
-        XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
-        mWindow->UpdateUI(entityID, entityWorld);
-    }
-    OnUpdate();
-}
-
 void GameManager::UpdateBar()
 {
     ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
     //ecs.getComponent<transformComponent>(manaBar).scale.x = 0/*mPlayer->GetStats().mMana*/ / mPlayer->GetStats().mMana;
-}
-
-void GameManager::Destroy() {
-    // NETTOYAGE DES BULLETS
-    if (!mDestroyBulletList.empty()) {
-        for (Bullet* bullet : mDestroyBulletList) {
-            // 1. Libérer les ressources DirectX (Slots de descripteurs)
-            mWindow->RemoveEntityResources(bullet->mEntity);
-
-            // 2. Retirer du système de rendu
-            mEntityMesh.erase(bullet->mEntity);
-
-            // 4. Supprimer l'objet C++
-            delete bullet;
-        }
-        mDestroyBulletList.clear();
-    }
-
-    // NETTOYAGE DES ENNEMIS (Même logique)
-    if (!mDestroyEnemyList.empty()) {
-        for (EnemyMarksman* enemy : mDestroyEnemyList) {
-            // 1. On le retire de la liste de l'Update LOGIQUE
-            auto it = std::find(mEnemyList.begin(), mEnemyList.end(), enemy);
-            if (it != mEnemyList.end()) {
-                mEnemyList.erase(it);
-            }
-
-            // 2. On retire les ressources DirectX
-            mWindow->RemoveEntityResources(enemy->mEntity);
-
-            // 3. On le retire du dictionnaire de rendu
-            mEntityMesh.erase(enemy->mEntity);
-
-            // 4. Supprimer l'objet C++
-            delete enemy;
-        }
-        mDestroyEnemyList.clear();
-    }
-    if (!mDestroyBossList.empty()) {
-        for (Boss* boss : mDestroyBossList) {
-            // 1. On le retire de la liste de l'Update LOGIQUE
-            auto it = std::find(mBossList.begin(), mBossList.end(), boss);
-            if (it != mBossList.end()) {
-                mBossList.erase(it);
-            }
-            // 2. On retire les ressources DirectX
-            mWindow->RemoveEntityResources(boss->GetEntity());
-            // 3. On le retire du dictionnaire de rendu
-            mEntityMesh.erase(boss->GetEntity());
-            // 4. Supprimer l'objet C++
-            delete boss;
-        }
-        mDestroyBossList.clear();
-    }
 }
 
 void GameManager::SpawnMob(float x, float z, int mob) {
@@ -571,6 +579,8 @@ void GameManager::CreateFireBall() {
 
  //   mWindow->mRenderItems.push_back(riFireBall);
 }
+
+//Moi
 void GameManager::OnInit() {
     mRessourceManager.Init(mWindow->GetDevice());
 
