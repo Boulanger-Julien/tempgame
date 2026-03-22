@@ -473,6 +473,7 @@ void GameManager::UpdateMatrix()
         XMMATRIX entityWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(entityID));
         mWindow->UpdateUI(entityID, entityWorld);
     }
+    OnUpdate();
 }
 
 void GameManager::UpdateBar()
@@ -578,6 +579,52 @@ void GameManager::OnInit() {
 
     mWindow->mRenderItems.push_back(cubeItem);
     
+}
+void GameManager::OnUpdate() {
+
+    elapsedTime += Timer::GetDeltatime();
+    //scale
+    float sx = 0.5;
+    float sy = 0.5;
+    float sz = 0.5;
+    DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(sx, sy, sz);
+    //rotation
+    DirectX::XMMATRIX rotationX = DirectX::XMMatrixRotationX(cosf(elapsedTime) * 1.5f);
+    DirectX::XMMATRIX rotationY = DirectX::XMMatrixRotationY(elapsedTime * 1.5f);
+
+    //cube
+    DirectX::XMMATRIX cubePosition = DirectX::XMMatrixTranslation(1.5 + cosf(elapsedTime), sinf(elapsedTime), 3);
+    DirectX::XMMATRIX cubeWorld = scale * rotationY * cubePosition;
+
+    //view//
+    DirectX::XMMATRIX view = mWindow->mSceneData.GetViewMatrix();
+    //proj
+    DirectX::XMMATRIX projection = mWindow->mSceneData.GetProjMatrix();
+
+    for (auto item : mWindow->mRenderItems)
+    {
+        DirectX::XMMATRIX world;
+
+        if (item.name == "Cube")
+            world = cubeWorld;
+        //else if (item.name == "Pyramide")
+        //    world = pyramideWorld;
+        //else
+        //    world = gridWorld;
+
+        DirectX::XMMATRIX wvp = world * view * projection;
+
+        ObjectConstants cb;
+        DirectX::XMStoreFloat4x4(&cb.WorldViewProj,
+            DirectX::XMMatrixTranspose(wvp));
+
+        void* data;
+        D3D12_RANGE readRange = {};
+        item.constantBuffer->Map(0, &readRange, &data);
+        memcpy(data, &cb, sizeof(cb));
+        item.constantBuffer->Unmap(0, nullptr);
+    }
+
 }
 void GameManager::CreateConstantBuffer(RenderItem& item)
 {

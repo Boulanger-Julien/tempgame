@@ -39,6 +39,8 @@ public:
 	void DrawRenderItems(RenderItem _renderItem);
 	ID3D12Device* GetDevice() const;
 	std::vector<RenderItem> mRenderItems;
+
+	SceneData mSceneData;
 	//
 private:
 
@@ -50,7 +52,6 @@ private:
 
 	GraphicsPipelineManager mPipelineManager;
 	DescriptorManager mDescriptorManager;
-	SceneData mSceneData;
 	RenderContext mRenderContext;
 
 	int mBoxCount = 0;

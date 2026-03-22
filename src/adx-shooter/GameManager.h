@@ -56,8 +56,10 @@ public:
 	/**/
 	std::vector<Spell_FireBall*> mSpellListe;
 	std::unordered_map<int, Mesh*> mEntityMesh2;
+	float elapsedTime = 0;
 
 	void OnInit();
+	void OnUpdate();
 	void CreateConstantBuffer(RenderItem& item);
 	//
 
