@@ -36,7 +36,6 @@ bool GameManager::Initialize()
 {
     srand(time(NULL));
     ecs = ECS::GetInstance();
-    mRessourceManager.Init(mWindow->GetDevice());
 
     //Generate player
     {
@@ -557,19 +556,51 @@ void GameManager::SpawnMob(float x, float z, int mob) {
 
 void GameManager::CreateFireBall() {
 
-    Spell_FireBall* fireBall = new Spell_FireBall();
+ //   Spell_FireBall* fireBall = new Spell_FireBall();
 
-    fireBall->Init();
+ //   fireBall->Init();
 
-    mWindow->RegisterExistingMeshForEntity(fireBall->mEntity);
+ //   mWindow->RegisterExistingMeshForEntity(fireBall->mEntity);
 
-    mEntityMesh.insert({ fireBall->mEntity, mFireBallMesh });
+ //   mEntityMesh.insert({ fireBall->mEntity, mFireBallMesh });
 
-	mSpellListe.push_back(fireBall);
+	//mSpellListe.push_back(fireBall);
 
-    RenderItem* riFireBall = new RenderItem();
-    riFireBall->mEntityId = fireBall->mEntity;
-    riFireBall->mesh = &mFireBallMesh;
+ //   RenderItem* riFireBall = new RenderItem();
+ //   riFireBall->mEntityId = fireBall->mEntity;
+ //   riFireBall->mesh = &mFireBallMesh;
 
-    mWindow->mRenderItems.push_back(riFireBall);
+ //   mWindow->mRenderItems.push_back(riFireBall);
+}
+void GameManager::OnInit() {
+    mRessourceManager.Init(mWindow->GetDevice());
+
+    RenderItem cubeItem;
+    cubeItem.CreateItem("Cube", mRessourceManager.GetCubeMesh());
+    
+}
+void GameManager::CreateConstantBuffer(RenderItem& item)
+{
+    UINT alignedSize = (sizeof(ObjectConstants) + 255) & ~255;
+
+    D3D12_HEAP_PROPERTIES heapProps = {};
+    heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+    D3D12_RESOURCE_DESC desc = {};
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    desc.Width = alignedSize;
+    desc.Height = 1;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    desc.SampleDesc.Count = 1;
+
+    mWindow->GetDevice()->CreateCommittedResource(
+        &heapProps,
+        D3D12_HEAP_FLAG_NONE,
+        &desc,
+        D3D12_RESOURCE_STATE_GENERIC_READ,
+        nullptr,
+        IID_PPV_ARGS(&item.constantBuffer)
+    );
 }

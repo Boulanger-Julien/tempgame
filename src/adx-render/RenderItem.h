@@ -1,13 +1,17 @@
 #pragma once
 #include "Mesh.h"
-//#include "Material.h"
 #include <DirectXMath.h>
-
-using namespace DirectX;
+#include <string>
 
 struct RenderItem
 {
-    int mEntityId;
-    MeshGeometry* mesh = nullptr;
+    Mesh* mesh = nullptr;
 
+    std::string name;
+
+    DirectX::XMFLOAT4X4 world;
+
+    ID3D12Resource* constantBuffer = nullptr;
+
+    void CreateItem(std::string _name, Mesh* _mesh);
 };

@@ -219,28 +219,28 @@ void Window::AddRenderItem(Mesh* mesh, /*Material* mat,*/ XMFLOAT4X4 world)
 }
 void Window::DrawRenderItems(RenderItem _renderItem)
 {
-	MeshGeometry mGeo = *_renderItem.mesh;
-	int entityID = _renderItem.mEntityId;
+	//MeshGeometry mGeo = *_renderItem.mesh;
+	//int entityID = _renderItem.mEntityId;
 
-	if (mGeo.VertexBufferGPU == nullptr) return;
-	if (sEntityToDescriptor.find(entityID) == sEntityToDescriptor.end()) return;
-	mCommandList->SetPipelineState(mPipelineManager.GetPSO());
+	//if (mGeo.VertexBufferGPU == nullptr) return;
+	//if (sEntityToDescriptor.find(entityID) == sEntityToDescriptor.end()) return;
+	//mCommandList->SetPipelineState(mPipelineManager.GetPSO());
 
-	int descriptorSlot = sEntityToDescriptor[entityID];
-	int textureIdx = sIndexUseTexture[entityID];
+	//int descriptorSlot = sEntityToDescriptor[entityID];
+	//int textureIdx = sIndexUseTexture[entityID];
 
-	// Calcul de l'offset de texture dans le heap
-	int textureDescriptorOffset = mDescriptorManager.GetMaxDescriptors() + textureIdx;
+	//// Calcul de l'offset de texture dans le heap
+	//int textureDescriptorOffset = mDescriptorManager.GetMaxDescriptors() + textureIdx;
 
-	mRenderContext.DrawMesh(
-		mCommandList.Get(),
-		md3dDevice.Get(),
-		mGeo,
-		descriptorSlot, // Utilise le slot 0-1023
-		mDescriptorManager.GetMaxDescriptors(),
-		textureDescriptorOffset,
-		mDescriptorManager.GetDescriptorHeap()
-	);
+	//mRenderContext.DrawMesh(
+	//	mCommandList.Get(),
+	//	md3dDevice.Get(),
+	//	mGeo,
+	//	descriptorSlot, // Utilise le slot 0-1023
+	//	mDescriptorManager.GetMaxDescriptors(),
+	//	textureDescriptorOffset,
+	//	mDescriptorManager.GetDescriptorHeap()
+	//);
 }
 //
 void Window::DrawUI(MeshGeometry& mGeo, int entityID)

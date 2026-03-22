@@ -56,6 +56,9 @@ public:
 	/**/
 	std::vector<Spell_FireBall*> mSpellListe;
 	std::unordered_map<int, Mesh*> mEntityMesh2;
+
+	void OnInit();
+	void CreateConstantBuffer(RenderItem& item);
 	//
 
 private:
