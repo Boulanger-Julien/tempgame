@@ -175,9 +175,6 @@ void GameManager::Draw()
 
         mWindow->Draw(meshRef, entityID);
     }
-    for (RenderItem* item : mWindow->mRenderItems) {
-        mWindow->DrawRenderItems(*item);
-    }
 
     for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
     {
@@ -578,6 +575,8 @@ void GameManager::OnInit() {
     RenderItem cubeItem;
     cubeItem.CreateItem("Cube", mRessourceManager.GetCubeMesh());
     CreateConstantBuffer(cubeItem);
+
+    mWindow->mRenderItems.push_back(cubeItem);
     
 }
 void GameManager::CreateConstantBuffer(RenderItem& item)
