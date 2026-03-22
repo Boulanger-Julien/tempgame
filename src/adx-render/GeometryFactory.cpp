@@ -2,9 +2,6 @@
 #include "GeometryFactory.h"
 #include <random>
 
-void GeometryFactory::Init(ID3D12Device* _device) {
-    mDevice = _device;
-}
 
 void GeometryFactory::ComputeNormals(std::vector<Vertex>& verts, const std::vector<std::uint32_t>& inds)
 {
@@ -49,9 +46,13 @@ void GeometryFactory::ComputeNormals(std::vector<Vertex>& verts, const std::vect
     }
 }
 
+void GeometryFactory::Init(ID3D12Device* _device) {
+    mDevice = _device;
+}
 Mesh GeometryFactory::CreateGeoCube()
 {
     Mesh mesh;
+
     std::vector<std::uint32_t> indices;
     std::vector<Vertex> vertices;
 
@@ -94,7 +95,7 @@ Mesh GeometryFactory::CreateGeoCube()
     }
     ComputeNormals(vertices, indices);
 
-    mesh.Create(mDevice, vertices, indices);
+    //mesh.Create(mDevice, vertices, indices);
 
     return mesh;
 }
@@ -103,11 +104,11 @@ Mesh GeometryFactory::CreateGeoPyramide()
 {
     Mesh mesh;
     std::array<Vertex, 5> pyramideVertices = {
-        Vertex{{1,-1,1},{0,0,1},{1,0,0,1}},
-        Vertex{{-1, -1,1},{0,0,1},{0,1,0,1}},
-        Vertex{{ 0, 1,0},{0,0,1},{1,1,0,1}},//
-        Vertex{{ 1,-1,-1},{0,0,1},{0,0,1,1}},
-        Vertex{{-1,-1, -1},{0,0,1},{1,0,1,1}},
+        Vertex{{1,-1,1},{1,0,0}},
+        Vertex{{-1, -1,1},{0,1,0}},
+        Vertex{{ 0, 1,0},{1,1,0}},//
+        Vertex{{ 1,-1,-1},{0,0,1}},
+        Vertex{{-1,-1, -1},{1,0,1}},
     };
 
     std::array<uint16_t, 18> pyramideIndices = {
@@ -155,11 +156,11 @@ Mesh GeometryFactory::GenerateGrid(float _width, float _depth, uint32_t col, uin
             }
 
             if (height == 0)
-                vertex.color = { 1,0,0 ,1 };
+                vertex.color = { 1,0,0 };
             if (height == 1)
-                vertex.color = { 0,0,1 ,1 };
+                vertex.color = { 0,0,1 };
             if (height == 2)
-                vertex.color = { 0,1,0 ,1 };
+                vertex.color = { 0,1,0 };
             gridVertices.push_back(vertex);
         }
     }

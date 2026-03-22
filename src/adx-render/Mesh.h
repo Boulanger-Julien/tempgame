@@ -6,24 +6,18 @@
 class Mesh
 {
 public:
-    void Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices);
+    void Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, const std::vector<uint16_t>& _indices);
 
     void Bind(ID3D12GraphicsCommandList* _commandList);
 
-    UINT GetIndexCount() const { return mIndexCount; }
-
-    ID3D12Resource* GetVertexBuffer() { return mVertexBuffer; }
-    ID3D12Resource* GetIndexBuffer() { return mIndexBuffer; }
-
-    //D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return mVbView; }
-    //D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() { return mIbView; }
+    UINT GetIndexCount() const { return m_indexCount; }
 
 private:
-    ID3D12Resource* mVertexBuffer = nullptr;
-    ID3D12Resource* mIndexBuffer = nullptr;
+    ID3D12Resource* m_vertexBuffer = nullptr;
+    ID3D12Resource* m_indexBuffer = nullptr;
 
-    D3D12_VERTEX_BUFFER_VIEW mVbView = {};
-    D3D12_INDEX_BUFFER_VIEW  mIbView = {};
+    D3D12_VERTEX_BUFFER_VIEW m_vbView = {};
+    D3D12_INDEX_BUFFER_VIEW  m_ibView = {};
 
-    UINT mIndexCount = 0;
+    UINT m_indexCount = 0;
 };
