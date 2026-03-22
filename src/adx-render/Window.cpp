@@ -20,9 +20,21 @@ Window::Window(HINSTANCE hInstance) : D3DApp(hInstance)
 Window::~Window()
 {
 }
-ID3D12Device* Window::GetDevice() const
+ID3D12Device* Window::GetDevice()
 {
 	return md3dDevice.Get();
+}
+ID3D12GraphicsCommandList* Window::GetCommandeList()
+{
+	return mCommandList;
+}
+GraphicsPipelineManager* Window::GetPipelineManager()
+{
+	return &mPipelineManager;
+}
+DescriptorManager* Window::GetDescriptorManager()
+{
+	return &mDescriptorManager;
 }
 bool Window::Initialize(int winW, int winH)
 {
@@ -160,7 +172,7 @@ void Window::UpdateUI(int renderIndex, XMMATRIX world)
 void Window::ExecuteInitCommands()
 {
 	ThrowIfFailed(mCommandList->Close());
-	ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
+	ID3D12CommandList* cmdsLists[] = { mCommandList };
 	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
 }
@@ -173,7 +185,7 @@ void Window::SetCamera(const Camera& cam)
 void Window::BeginFrame()
 {
 	mRenderContext.BeginFrame(
-		mCommandList.Get(),
+		mCommandList,
 		mDirectCmdListAlloc.Get(),
 		mPipelineManager.GetPSO(),
 		CurrentBackBuffer(),
@@ -198,7 +210,7 @@ void Window::Draw(MeshGeometry& mGeo, int entityID) {
 	int textureDescriptorOffset = mDescriptorManager.GetMaxDescriptors() + textureIdx;
 
 	mRenderContext.DrawMesh(
-		mCommandList.Get(),
+		mCommandList,
 		md3dDevice.Get(),
 		mGeo,
 		descriptorSlot, // Utilise le slot 0-1023
@@ -255,7 +267,7 @@ void Window::DrawUI(MeshGeometry& mGeo, int entityID)
 	int textureDescriptorIndex = mDescriptorManager.GetMaxDescriptors() + textureIdx;
 
 	mRenderContext.DrawMesh(
-		mCommandList.Get(),
+		mCommandList,
 		md3dDevice.Get(),
 		mGeo,
 		descriptorSlot,
@@ -268,7 +280,7 @@ void Window::DrawUI(MeshGeometry& mGeo, int entityID)
 void Window::EndFrame()
 {
 	mRenderContext.EndFrame(
-		mCommandList.Get(),
+		mCommandList,
 		mCommandQueue.Get(),
 		CurrentBackBuffer(),
 		mSwapChain.Get(),
@@ -312,7 +324,7 @@ MeshGeometry Window::BuildMesh(std::vector<Vertex>& vertices, std::vector<std::u
 			texture->Name = "Text" + std::to_string(entityID);
 
 			ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
-				mCommandList.Get(), texture->Filename.c_str(),
+				mCommandList, texture->Filename.c_str(),
 				texture->Resource, texture->UploadHeap));
 
 			if (texture->Resource != nullptr) {
@@ -352,8 +364,8 @@ MeshGeometry Window::BuildMesh(std::vector<Vertex>& vertices, std::vector<std::u
 	MeshGeometry mGeoB;
 	mGeoB.Name = (filename != nullptr) ? "TexturedGeo" : "UnTexturedGeo";
 
-	mGeoB.VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(), mCommandList.Get(), vertices.data(), vbByteSize, mGeoB.VertexBufferUploader);
-	mGeoB.IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(), mCommandList.Get(), indices.data(), ibByteSize, mGeoB.IndexBufferUploader);
+	mGeoB.VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(), mCommandList, vertices.data(), vbByteSize, mGeoB.VertexBufferUploader);
+	mGeoB.IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(), mCommandList, indices.data(), ibByteSize, mGeoB.IndexBufferUploader);
 
 	mGeoB.VertexByteStride = sizeof(Vertex);
 	mGeoB.VertexBufferByteSize = vbByteSize;
@@ -427,7 +439,7 @@ MeshGeometry Window::CreateDynamicMesh(int index, UINT maxVertices, UINT maxIndi
 	}
 
 	mGeo.IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-		mCommandList.Get(), indices.data(), ibByteSize, mGeo.IndexBufferUploader);
+		mCommandList, indices.data(), ibByteSize, mGeo.IndexBufferUploader);
 
 	mGeo.VertexByteStride = sizeof(Vertex);
 	mGeo.VertexBufferByteSize = vbByteSize;

@@ -33,7 +33,10 @@ public:
 
     int Run();
 
+    /**/
     ID3D12Device* GetDevice() const;
+    D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView()const;
+    //
 
     virtual bool Initialize(int winW, int winH);
     virtual LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -60,7 +63,7 @@ protected:
     
 
     ID3D12Resource* CurrentBackBuffer()const;
-    D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView()const;
+
     D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView()const;
 
 
@@ -87,7 +90,7 @@ protected:
 
     Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
     Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
-    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
+    ID3D12GraphicsCommandList* mCommandList;
 
     static const int SwapChainBufferCount = 2;
     int mCurrBackBuffer = 0;

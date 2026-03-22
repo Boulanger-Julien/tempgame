@@ -60,6 +60,7 @@ public:
 
 	void OnInit();
 	void OnUpdate();
+	void OnDraw();
 	void CreateConstantBuffer(RenderItem& item);
 	//
 

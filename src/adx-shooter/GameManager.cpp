@@ -183,6 +183,7 @@ void GameManager::Draw()
 
         mWindow->DrawUI(meshRef, entityID);
     }
+    OnDraw();
 	timer += Timer::GetInstance()->GetDeltatime();
     int hours = (int)timer / 3600;
     int minutes = ((int)timer % 3600) / 60;
@@ -625,6 +626,31 @@ void GameManager::OnUpdate() {
         item.constantBuffer->Unmap(0, nullptr);
     }
 
+}
+void GameManager::OnDraw()
+{
+    auto commandList = mWindow->GetCommandeList();
+    //auto HFHS = mWindow->GetDescriptorManager()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
+    //D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = mWindow->CurrentBackBufferView();
+    //commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &HFHS);
+    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    mWindow->GetPipelineManager()->Bind(commandList);
+
+
+    for (auto& item : mWindow->mRenderItems)
+    {
+        item.mesh->Bind(commandList);
+
+        commandList->SetGraphicsRootConstantBufferView(
+            0,
+            item.constantBuffer->GetGPUVirtualAddress()
+        );
+
+        commandList->DrawIndexedInstanced(
+            item.mesh->GetIndexCount(),
+            1, 0, 0, 0);
+    }
 }
 void GameManager::CreateConstantBuffer(RenderItem& item)
 {

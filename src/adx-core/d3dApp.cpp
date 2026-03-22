@@ -199,7 +199,7 @@ void D3DApp::OnResize()
     mCommandList->ResourceBarrier(1, &toDepthBarrier);
 
     ThrowIfFailed(mCommandList->Close());
-    ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
+    ID3D12CommandList* cmdsLists[] = { mCommandList };
     mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 
     FlushCommandQueue();
@@ -443,7 +443,7 @@ void D3DApp::CreateCommandObjects()
         D3D12_COMMAND_LIST_TYPE_DIRECT,
         mDirectCmdListAlloc.Get(),
         nullptr,
-        IID_PPV_ARGS(mCommandList.GetAddressOf())));
+        IID_PPV_ARGS(&mCommandList)));
 
     mCommandList->Close();
 }

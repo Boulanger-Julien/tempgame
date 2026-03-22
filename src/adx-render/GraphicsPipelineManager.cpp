@@ -73,7 +73,7 @@ void GraphicsPipelineManager::BuildPSO(ID3D12Device* device, DXGI_FORMAT backBuf
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
 	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	psoDesc.InputLayout = { mInputLayout.data(), (UINT)mInputLayout.size() };
-	psoDesc.pRootSignature = mRootSignature.Get();
+	psoDesc.pRootSignature = mRootSignature;
 	psoDesc.VS =
 	{
 		reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
@@ -112,4 +112,9 @@ void GraphicsPipelineManager::BuildPSO(ID3D12Device* device, DXGI_FORMAT backBuf
 	blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	ThrowIfFailed(device->CreateGraphicsPipelineState(&uiPsoDesc, IID_PPV_ARGS(&mPSO_UI)));
+}
+void GraphicsPipelineManager::Bind(ID3D12GraphicsCommandList* cmd)
+{
+	cmd->SetGraphicsRootSignature(mRootSignature);
+	cmd->SetPipelineState(mPSO);
 }
