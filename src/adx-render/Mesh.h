@@ -6,7 +6,7 @@
 class Mesh
 {
 public:
-    void Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices);
+    void Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, const std::vector<uint16_t>& _indices);
 
     void Bind(ID3D12GraphicsCommandList* _commandList);
 

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Mesh.h"
 
-void Mesh::Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices)
+void Mesh::Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, const std::vector<uint16_t>& _indices)
 {
     m_indexCount = (UINT)_indices.size();
 
@@ -39,7 +39,7 @@ void Mesh::Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, c
 
     // Index buffer
     D3D12_RESOURCE_DESC ibDesc = vbDesc;
-    ibDesc.Width = sizeof(uint16_t) * _indices.size();
+    ibDesc.Width = sizeof(uint32_t) * _indices.size();
 
     _device->CreateCommittedResource(
         &heapProps,
@@ -51,11 +51,11 @@ void Mesh::Create(ID3D12Device* _device, const std::vector<Vertex>& _vertices, c
     );
 
     m_indexBuffer->Map(0, &readRange, &data);
-    memcpy(data, _indices.data(), sizeof(uint16_t) * _indices.size());
+    memcpy(data, _indices.data(), sizeof(uint32_t) * _indices.size());
     m_indexBuffer->Unmap(0, nullptr);
 
     m_ibView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
-    m_ibView.SizeInBytes = sizeof(uint16_t) * _indices.size();
+    m_ibView.SizeInBytes = sizeof(uint32_t) * _indices.size();
     m_ibView.Format = DXGI_FORMAT_R16_UINT;
 }
 void Mesh::Bind(ID3D12GraphicsCommandList* _commandList) {

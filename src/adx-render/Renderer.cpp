@@ -86,13 +86,10 @@ void Renderer::Update(float _deltaTime) {
 	float sy = 0.5;
 	float sz = 0.5;
 	DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(sx, sy, sz);
-	//rotation
-	DirectX::XMMATRIX rotationX = DirectX::XMMatrixRotationX(cosf(elapsedTime) * 1.5f);
-	DirectX::XMMATRIX rotationY = DirectX::XMMatrixRotationY(elapsedTime * 1.5f);
 
 	//cube
-	DirectX::XMMATRIX cubePosition = DirectX::XMMatrixTranslation(1.5 + cosf(elapsedTime), sinf(elapsedTime), 3);
-	DirectX::XMMATRIX cubeWorld = scale * rotationY * cubePosition;
+	DirectX::XMMATRIX cubePosition = DirectX::XMMatrixTranslation(0,2,3);
+	DirectX::XMMATRIX cubeWorld = cubePosition;
 
 	//view//
 	DirectX::XMMATRIX view = mCamera.GetViewMatrix();

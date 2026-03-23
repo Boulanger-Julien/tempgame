@@ -8,7 +8,7 @@ class GeometryFactory
 public:
 	void Init(ID3D12Device* _device);
 
-	void ComputeNormals(std::vector<Vertex>& verts, const std::vector<std::uint32_t>& inds);
+	void ComputeNormals(std::vector<Vertex>& verts, const std::vector<std::uint16_t>& inds);
 
 	Mesh CreateGeoCube();
 	//Mesh CreateGeoPyramide();
