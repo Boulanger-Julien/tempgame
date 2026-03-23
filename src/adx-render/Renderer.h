@@ -4,7 +4,7 @@
 #include "SwapChainManager.h"
 #include "DepthBufferManager.h"
 #include "FenceManager.h"
-#include "Camera.h"
+#include "Camera2.h"
 #include "SceneData.h"
 #include "RenderItem.h"
 #include "RessourceManager.h"
@@ -21,7 +21,9 @@ public:
 
 	bool ProcessMessages();
 
-	void Update();
+	float GetDeltaTime();
+
+	void Update(float _deltaTime);
 	void FRender();
 	void Clear();
 	void SetViewport();
@@ -39,7 +41,7 @@ private:
 	SwapChainManager mSwapChainManager;
 	DepthBufferManager mDepthBufferManager;
 	FenceManager mFenceManager;
-	Camera mCamera;
+	Camera2 mCamera;
 	SceneData mSceneData;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE mRtvHandle;
@@ -52,7 +54,8 @@ private:
 	Light mLight;
 	D3D12_GPU_DESCRIPTOR_HANDLE mDiffuseMapGpuHandle = {};
 	//Divers
-	float elapsedTime;
+	std::chrono::high_resolution_clock::time_point m_previousTime;
+	float elapsedTime = 0;
 
 };
 

@@ -53,48 +53,56 @@ Mesh GeometryFactory::CreateGeoCube()
 {
     Mesh mesh;
 
-    std::vector<std::uint32_t> indices;
-    std::vector<Vertex> vertices;
+    // 24 vertices (4 par face)
+    std::vector<Vertex> vertices = {
+        // Front (+Z)
+        {{-1,-1, 1},{1,0,0,1},{0,0,1},{0,1}},
+        {{ 1,-1, 1},{0,1,0,1},{0,0,1},{1,1}},
+        {{ 1, 1, 1},{0,0,1,1},{0,0,1},{1,0}},
+        {{-1, 1, 1},{1,1,0,1},{0,0,1},{0,0}},
 
-    XMFLOAT3 corner[8] = {
-        {-1, -1, -1}, { -1, +1, -1 }, { +1, +1, -1 }, { +1, -1, -1 },
-        {-1, -1, +1}, { -1, +1, +1 }, { +1, +1, +1 }, { +1, -1, +1 }
+        // Back (-Z)
+        {{-1,-1,-1},{1,0,1,1},{0,0,-1},{1,1}},
+        {{-1, 1,-1},{0,1,1,1},{0,0,-1},{1,0}},
+        {{ 1, 1,-1},{1,1,1,1},{0,0,-1},{0,0}},
+        {{ 1,-1,-1},{0,0,0,1},{0,0,-1},{0,1}},
+
+        // Left (-X)
+        {{-1,-1,-1},{1,0,0,1},{-1,0,0},{0,1}},
+        {{-1,-1, 1},{0,1,0,1},{-1,0,0},{1,1}},
+        {{-1, 1, 1},{0,0,1,1},{-1,0,0},{1,0}},
+        {{-1, 1,-1},{1,1,0,1},{-1,0,0},{0,0}},
+
+        // Right (+X)
+        {{ 1,-1,-1},{1,0,1,1},{1,0,0},{1,1}},
+        {{ 1, 1,-1},{0,1,1,1},{1,0,0},{1,0}},
+        {{ 1, 1, 1},{1,1,1,1},{1,0,0},{0,0}},
+        {{ 1,-1, 1},{0,0,0,1},{1,0,0},{0,1}},
+
+        // Top (+Y)
+        {{-1, 1,-1},{1,0,0,1},{0,1,0},{0,1}},
+        {{-1, 1, 1},{0,1,0,1},{0,1,0},{0,0}},
+        {{ 1, 1, 1},{0,0,1,1},{0,1,0},{1,0}},
+        {{ 1, 1,-1},{1,1,0,1},{0,1,0},{1,1}},
+
+        // Bottom (-Y)
+        {{-1,-1,-1},{1,0,1,1},{0,-1,0},{1,1}},
+        {{ 1,-1,-1},{0,1,1,1},{0,-1,0},{0,1}},
+        {{ 1,-1, 1},{1,1,1,1},{0,-1,0},{0,0}},
+        {{-1,-1, 1},{0,0,0,1},{0,-1,0},{1,0}}
     };
 
-    int faceIndices[6][4] = {
-        {0, 1, 2, 3},
-        {7, 6, 5, 4},
-        {4, 5, 1, 0},
-        {3, 2, 6, 7},
-        {1, 5, 6, 2},
-        {4, 0, 3, 7}
-    };
-    XMFLOAT4 color = { 1,0,0,1 };
-    XMFLOAT3 normals[6] = {
-        {0,0,-1}, {0,0,1}, {-1,0,0}, {1,0,0}, {0,1,0}, {0,-1,0}
+    // 36 indices (6 faces, 2 triangles each)
+    std::vector<uint32_t> indices = {
+        0,1,2, 0,2,3,       // Front
+        4,5,6, 4,6,7,       // Back
+        8,9,10, 8,10,11,    // Left
+        12,13,14, 12,14,15, // Right
+        16,17,18, 16,18,19, // Top
+        20,21,22, 20,22,23  // Bottom
     };
 
-    XMFLOAT2 uv[4] = { {0,1}, {0,0}, {1,0}, {1,1} };
-
-    for (int i = 0; i < 6; ++i)
-    {
-        unsigned int baseIndex = (unsigned int)vertices.size();
-
-        for (int j = 0; j < 4; ++j)
-        {
-            int cornerIndex = faceIndices[i][j];
-            vertices.push_back({ corner[cornerIndex], color, normals[i], uv[j] });
-        }
-
-        indices.push_back(baseIndex + 0);
-        indices.push_back(baseIndex + 1);
-        indices.push_back(baseIndex + 2);
-        indices.push_back(baseIndex + 0);
-        indices.push_back(baseIndex + 2);
-        indices.push_back(baseIndex + 3);
-    }
-    ComputeNormals(vertices, indices);
-
+    // Création du mesh
     mesh.Create(mDevice, vertices, indices);
 
     return mesh;

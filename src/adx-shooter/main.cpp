@@ -17,8 +17,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 }
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdShow)
 {
-	int width = 800;
-	int height = 800;
+	float width = 1080;
+	float height = 920;
 	std::wstring mMainWndCaption = L"Adx Engine";
 
 	// Register a simple window class

@@ -17,16 +17,9 @@ void Renderer::Init(HWND& _hwnd) {
 	mDepthBufferManager.Init(mDeviceManager.GetDevice(), mWindowWidth, mWindowHeight);
 	mFenceManager.Init(mDeviceManager.GetDevice());
 
-	//	mCamera.SetLens(0.25f * 3.14, (mWindowWidth / mWindowHeight), 0.1f, 100.0f);
-	//mCamera.SetPosition(0.0f, 7.0f, -15.0f);
-		mCamera.SetPosition(0.0f, 3.0f, -10.0f);
-		float aspect = static_cast<float>(mWindowWidth) / static_cast<float>(mWindowHeight);
-		mCamera.SetLens(0.25f * 3.14f, aspect, 1.0f, 1000.0f);
-		XMFLOAT3 pos = { 0.0f, 3.0f, -10.0f };
-		XMVECTOR camPos = XMLoadFloat3(&pos);
-		XMVECTOR target = XMVectorZero();
-		mCamera.LookAt(camPos, target);
-		mSceneData.SetCamera(mCamera);
+	mCamera.SetLens(0.25f * 3.14, (mWindowWidth / mWindowHeight), 0.1f, 100.0f);
+	mCamera.SetPosition(0.0f, 3.0f, -15.0f);
+
 	//Light
 		//mLight = Light(XMFLOAT3(1.0f, -1.0f, 0.0f), 1, XMFLOAT4(1.0f, 1.f, 1.0f, 1.0f));
 		//mSceneData.SetLight(mLight);
@@ -47,7 +40,7 @@ void Renderer::Loop() {
 
 		running = ProcessMessages();
 
-		Update();
+		Update(GetDeltaTime());
 
 		FRender();
 
@@ -78,9 +71,16 @@ bool Renderer::ProcessMessages()
 	}
 	return true;
 }
+float Renderer::GetDeltaTime()
+{
+	auto now = std::chrono::high_resolution_clock::now();
+	float deltaTime = std::chrono::duration<float>(now - m_previousTime).count();
+	m_previousTime = now;
+	elapsedTime += deltaTime;
 
-void Renderer::Update() {
-	elapsedTime += Timer::GetInstance()->GetDeltatime();
+	return deltaTime;
+}
+void Renderer::Update(float _deltaTime) {
 	//scale
 	float sx = 0.5;
 	float sy = 0.5;
@@ -95,12 +95,12 @@ void Renderer::Update() {
 	DirectX::XMMATRIX cubeWorld = scale * rotationY * cubePosition;
 
 	//view//
-	DirectX::XMMATRIX view = mSceneData.GetViewMatrix();
+	DirectX::XMMATRIX view = mCamera.GetViewMatrix();
 	//proj
-	DirectX::XMMATRIX projection = mSceneData.GetProjMatrix();
+	DirectX::XMMATRIX projection = mCamera.GetProjMatrix();
 
 	//UpdateCamera
-	//mCamera.Update(_deltaTime);
+	mCamera.Update(_deltaTime);
 
 	//UpdateViewMatrix
 	mCamera.UpdateViewMatrix();
