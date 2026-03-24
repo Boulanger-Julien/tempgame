@@ -28,6 +28,9 @@ void Renderer::Init(HWND& _hwnd) {
 	//
 	mRessourceManager.Init(mDeviceManager.GetDevice());
 
+	//mRessourceManager.LoadTexture(mDeviceManager.GetDevice(), "Cube", L"Diamond2.dds");
+	//Texture* cubeText = mRessourceManager.GetTexture("Cube"); // récupère la même instance
+
 	RenderItem cubeItem;
 	cubeItem.CreateItem("Cube", mRessourceManager.GetCubeMesh());
 	CreateConstantBuffer(cubeItem);

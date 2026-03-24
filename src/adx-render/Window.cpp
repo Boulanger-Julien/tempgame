@@ -326,7 +326,7 @@ MeshGeometry Window::BuildMesh(std::vector<Vertex>& vertices, std::vector<std::u
 			ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
 				mCommandList, texture->Filename.c_str(),
 				texture->Resource, texture->UploadHeap));
-
+			/**/
 			if (texture->Resource != nullptr) {
 				UINT mCbvSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 				CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(mDescriptorManager.GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart());
@@ -347,6 +347,7 @@ MeshGeometry Window::BuildMesh(std::vector<Vertex>& vertices, std::vector<std::u
 				sIndexUseTexture[entityID] = sNextTextureIndex;
 				sNextTextureIndex++;
 			}
+			//
 		}
 	}
 	else {

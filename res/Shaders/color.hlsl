@@ -56,28 +56,29 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-    float4 baseColor = pin.Color;
+    //float4 baseColor = pin.Color;
 
-    if (gUseTexture != 0)
-    {
-        baseColor = gDiffuseMap.Sample(gsamLinear, pin.TexC);
-    }
+    //if (gUseTexture != 0)
+    //{
+    //    baseColor = gDiffuseMap.Sample(gsamLinear, pin.TexC);
+    //}
     
-    float3 N = normalize(pin.Normal);
-    float3 L = normalize(-gLightDirection);
-    float NdotL = saturate(max(dot(N, L), 0.0f));
+    //float3 N = normalize(pin.Normal);
+    //float3 L = normalize(-gLightDirection);
+    //float NdotL = saturate(max(dot(N, L), 0.0f));
 
-    float3 ambient = gLightStrength * 0.2f;
-    float3 diffuse = gLightStrength * NdotL;
-    float3 lighting = saturate(ambient + diffuse);
+    //float3 ambient = gLightStrength * 0.2f;
+    //float3 diffuse = gLightStrength * NdotL;
+    //float3 lighting = saturate(ambient + diffuse);
 
-    float3 result = baseColor.rgb * lighting * gLightColor.xyz;
-    if (gUseLight == 0)
-    {
-        return float4(baseColor.rgb, baseColor.a);
-    }
-    else
-    {
-        return float4(result, baseColor.a * gLightColor.w);
-    }
+    //float3 result = baseColor.rgb * lighting * gLightColor.xyz;
+    //if (gUseLight == 0)
+    //{
+    //    return float4(baseColor.rgb, baseColor.a);
+    //}
+    //else
+    //{
+    //    return float4(result, baseColor.a * gLightColor.w);
+    //}
+    return float4(pin.TexC, 0, 1);
 }
