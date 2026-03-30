@@ -46,6 +46,8 @@ public:
 
 	Window* GetWindow() { return mWindow; }
 
+	Player * GetPlayer() { return mPlayer; }
+
 	std::unordered_map<int, MeshGeometry> mEntityMesh;
 	MeshGeometry mBulletMesh;
 	MeshGeometry mLineBulletMesh;
