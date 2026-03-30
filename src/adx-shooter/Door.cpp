@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Door.h"
-
+#include "GameManager.h"
 
 Door::Door()
 {
@@ -25,6 +25,8 @@ Door::~Door()
 void Door::Initialize(Window* _window) 
 {
 	doorMesh = MeshCreator::CreateBox(_window, mEntity, 1.0f, 1, 1, (XMFLOAT4)Colors::Aqua);
+	GameManager::GetInstance().mEntityMesh.insert({ mEntity, doorMesh });
+
 }
 
 void Door::Update(int _enemyleft) 

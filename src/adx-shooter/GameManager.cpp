@@ -52,10 +52,7 @@ bool GameManager::Initialize()
     mEnemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
 	currentRoom.Initialize(mWindow);
-    mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
-    mEntityMesh.insert({ currentRoom.wall1Entity, currentRoom.wall1 });
-    mEntityMesh.insert({ currentRoom.wall2Entity, currentRoom.wall2 });
-    mEntityMesh.insert({ currentRoom.door.mEntity , currentRoom.door.doorMesh });
+
 	currentRoom.door.mPlayer = mPlayer->mEntity;
     
 	newBoss = new Makhina_Boss(mPlayer->mEntity);
@@ -128,7 +125,8 @@ void GameManager::Update()
 	BulletUpdate();
     EnemyUpdate();
 
-	currentRoom.door.Update(mEnemyList.size());
+	currentRoom.door.Update(mEnemyList.size() + mBossList.size());
+	currentRoom.Update();
 
     // Nettoyage final des entités supprimées cette frame
     Destroy();
@@ -333,7 +331,7 @@ void GameManager::CheckInput()
     {
         SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
     }
-	if (InputSystem::isKeyUp('E') && mEnemyList.size() <= 0 && mBossList.size() <= 0 && currentRoom.door.mCollider.collisionCheck(mPlayer->mEntity))
+	if (InputSystem::isKeyUp('E') && currentRoom.door.changeRoom == true)
     {
         GenerateRoom();
     }
