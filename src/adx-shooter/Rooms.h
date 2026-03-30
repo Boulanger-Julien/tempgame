@@ -4,6 +4,7 @@
 #include "Door.h"
 #include "MeshCreator.h" 
 #include "Enemy\Enemy.h"
+#include "adx-render/TextRenderer.h"
 
 class GameManager;
 
@@ -35,10 +36,24 @@ public:
     //MeshGeometry wall2;
 	bool generated = false;
 	
+    std::vector<Enemy*> enemyList;
+
+
+
+    int EnemyRateRoom = 45;
+    int BossRateRoom = 20;
+    int TreasureRateRoom = 35;
+
 protected: 
     void UpdateComponent();
 	Window* mWindow;
 
     Player* mPlayer;
+    TextRenderer* mNumberOfRoomRenderer;
+	int numberOfRoom = 1;
+
+
+
+
 };
 

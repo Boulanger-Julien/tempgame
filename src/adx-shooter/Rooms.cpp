@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Rooms.h"
 #include "GameManager.h"
+#include "RoomGenerator.h"
 #include "LimitMapSystem.h"
 
 Rooms::Rooms()
@@ -11,6 +12,7 @@ Rooms::Rooms()
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(ground);
 	//road = MeshCreator::CreateBox(mWindow, ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray); 
 	//mEntityMesh.insert({ ground, road });
+
 	
 }
 
@@ -42,12 +44,13 @@ void Rooms::Initialize(Window* _window)
 
 	mPlayer = GameManager::GetInstance().GetPlayer();
 	door.Initialize(mWindow);
+	mNumberOfRoomRenderer = new TextRenderer(_window);
+	mNumberOfRoomRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 }
 void Rooms::Update()
 {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 	UpdateComponent();
-
 
 	OnUpdate(deltatime);
 }
@@ -55,6 +58,13 @@ void Rooms::OnUpdate(float _dt)
 {
 	ECS::GetInstance().getComponent<ColliderComponent>(ground) = mCollider;
 	LimitMapSystem::CheckLimitMap(*mPlayer, *this);
+	mNumberOfRoomRenderer->DrawTxt("Room " + std::to_string(numberOfRoom), 40, 90, 24);
+
+	if (InputSystem::isKeyUp('E') && door.changeRoom == true)
+	{
+
+		RoomGenerator::GenerateRoom(*this);
+	}
 	
 }
 

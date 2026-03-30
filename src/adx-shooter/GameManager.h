@@ -40,7 +40,6 @@ public:
 	void BulletUpdate();
 	void UpdateMatrix();
 	void UpdateBar();
-	void GenerateRoom();
 	void CheckInput();
 	Camera GetCamera() { return mCamera; }
 
