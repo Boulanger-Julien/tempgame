@@ -34,7 +34,24 @@ void Enemy::Init(int _playerIndex)
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
 	mPlayerIndex = _playerIndex;
-
+	shootPatternIndex = rand() % 3;
+	switch (shootPatternIndex) {
+	case 0: // Single Shot
+		canShoot = true;
+		mShootCooldown = 1;
+		break;
+	case 1: // Explosion
+		canShoot = true;
+		mShootCooldown = 3;
+		break;
+	case 2: // Line
+		canShoot = true;
+		mShootCooldown = 2;
+		break;
+	default:
+		canShoot = false;
+		break;
+	}
 	OnInit();
 }
 
@@ -67,7 +84,20 @@ void Enemy::Attack(float _deltaTime)
 {
 	mCurrentShootCooldown += _deltaTime;
 	if (mCurrentShootCooldown >= mShootCooldown) {
-		AddBullet();
+		switch (shootPatternIndex) {
+			case 0: // Single Shot
+			AddBullet();
+			break;
+			case 1: // Explosion
+				ExplosionBullets();
+			break;
+			case 2: // Line
+				LineBullets();
+				break;
+			default:
+				break;
+		}
+
 		mCurrentShootCooldown = 0;
 	}
 	//
@@ -115,4 +145,24 @@ void Enemy::AddBullet() {
 	newBullet->mDamage = mStats.mStrength;
 	GameManager::GetInstance().mBulletList.push_back(newBullet);
 
+}
+
+void Enemy::ExplosionBullets()
+{
+	Shot* newShot = Shoot_Pattern_Explosion::Shoot(mEntity, 10, mStats.mStrength, GameManager::GetInstance().GetWindow(), 1, 50);
+	for (Bullet* bullet : newShot->bulletList) {
+		GameManager::GetInstance().mBulletList.push_back(bullet);
+		GameManager::GetInstance().mEntityMesh.insert({ bullet->mEntity, GameManager::GetInstance().mBulletMesh });
+	}
+}
+
+void Enemy::LineBullets()
+{
+	Bullet* newLineBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 10, 1, GameManager::GetInstance().GetWindow(), 1);
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newLineBullet->mEntity);
+	GameManager::GetInstance().mEntityMesh.insert({ newLineBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
+	XMMATRIX lineBulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newLineBullet->mEntity));
+	GameManager::GetInstance().GetWindow()->Update(newLineBullet->mEntity, lineBulletWorld);
+	newLineBullet->mDamage = mStats.mStrength;
+	GameManager::GetInstance().mBulletList.push_back(newLineBullet);
 }
