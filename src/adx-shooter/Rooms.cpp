@@ -21,7 +21,6 @@ Rooms::~Rooms()
 	mWindow->RemoveEntityResources(door.mEntity);
 }
 
-
 void Rooms::Initialize(Window* _window)
 {
 	mWindow = _window;
@@ -53,6 +52,17 @@ void Rooms::Update()
 	UpdateComponent();
 
 	OnUpdate(deltatime);
+	door.Update(EnemyRooms.size());
+	for (Enemy* enemy : EnemyRooms)
+	{
+		if (enemy->isDead)
+		{
+			auto it = std::find(EnemyRooms.begin(), EnemyRooms.end(), enemy);
+			if (it != EnemyRooms.end()) {
+				EnemyRooms.erase(it);
+			}
+		}
+	}
 }
 void Rooms::OnUpdate(float _dt)
 {

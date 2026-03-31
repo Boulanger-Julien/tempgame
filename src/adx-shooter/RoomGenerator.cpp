@@ -23,7 +23,7 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
      switch (choiceRoom)
      {
         case ENEMY_ROOM:
-            AddEnemies();
+            AddEnemies(_room);
 			break;
         case BOSS_ROOM:
             GameManager::GetInstance().SpawnBoss(0,0);
@@ -39,11 +39,11 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
 }
 
 
-void RoomGenerator::AddEnemies()
+void RoomGenerator::AddEnemies(Rooms& _room)
 {
     int numberOfEnnemies = (rand() % 13) + 2;
     for (int i = 0; i < 10; i++) {
-        GameManager::GetInstance().SpawnMob(rand() % 100 - 48, rand() % 100 - 48, 0);
+        _room.EnemyRooms.push_back(GameManager::GetInstance().SpawnMob(rand() % 100 - 48, rand() % 100 - 48, 0));
     }
 }
 

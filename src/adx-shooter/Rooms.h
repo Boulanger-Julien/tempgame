@@ -24,26 +24,18 @@ public:
     ECS ecs;  
     Door door;
 
-	//Window* mWindow;  
-
     Entity ground;
     ColliderComponent mCollider;
     transformComponent mTransform;
-  /*  Entity wall1Entity;
-    Entity wall2Entity;*/
+
     MeshGeometry road;
-    //MeshGeometry wall1;
-    //MeshGeometry wall2;
 	bool generated = false;
-	
-    std::vector<Enemy*> enemyList;
 
+    int EnemyRateRoom = 70;
+    int BossRateRoom = 15;
+    int TreasureRateRoom = 15;
 
-
-    int EnemyRateRoom = 45;
-    int BossRateRoom = 20;
-    int TreasureRateRoom = 35;
-
+    std::vector<Enemy*> EnemyRooms;
 protected: 
     void UpdateComponent();
 	Window* mWindow;

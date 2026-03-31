@@ -125,7 +125,7 @@ void GameManager::Update()
 	BulletUpdate();
     EnemyUpdate();
 
-	currentRoom.door.Update(mEnemyList.size() + mBossList.size());
+	//currentRoom.door.Update(mEnemyList.size() + mBossList.size());
 	currentRoom.Update();
 
     // Nettoyage final des entités supprimées cette frame
@@ -535,7 +535,7 @@ void GameManager::Destroy() {
     }
 }
 
-void GameManager::SpawnMob(float x, float z, int mob) {
+Enemy* GameManager::SpawnMob(float x, float z, int mob) {
     EnemyMarksman* newEnemy = new EnemyMarksman();
     newEnemy->Init(mPlayer->mEntity);
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
@@ -545,4 +545,5 @@ void GameManager::SpawnMob(float x, float z, int mob) {
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
 	mEnemyList.push_back(newEnemy);
+    return newEnemy;
 }

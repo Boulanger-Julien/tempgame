@@ -31,7 +31,7 @@ public:
 	void AddLineBullet(Entity sender, float _damage);
 	void AddExplosionBullet(Entity sender, float bullets);
 	void Destroy();
-	void SpawnMob(float x, float z, int mob);
+	Enemy* SpawnMob(float x, float z, int mob);
 	void SpawnBoss(float x, float z);
 	float GetDeltatime();
 	void UpdateCam();
