@@ -36,15 +36,15 @@ public:
     int TreasureRateRoom = 15;
 
     std::vector<Enemy*> EnemyRooms;
+	int numberOfRoom = -1;
+
+    int numMaxInDunjeon = -2;
 protected: 
     void UpdateComponent();
 	Window* mWindow;
 
     Player* mPlayer;
     TextRenderer* mNumberOfRoomRenderer;
-	int numberOfRoom = 1;
-
-
 
 
 };

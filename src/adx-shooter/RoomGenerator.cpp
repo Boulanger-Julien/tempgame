@@ -20,6 +20,12 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
          choiceRoom = TREASURE_ROOM; // TREASURE ROOM
      }
 
+
+     if (_room.numberOfRoom == _room.numMaxInDunjeon)
+     {
+         choiceRoom = BOSS_ROOM;
+     }
+
      switch (choiceRoom)
      {
         case ENEMY_ROOM:
