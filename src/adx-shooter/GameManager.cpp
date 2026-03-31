@@ -357,7 +357,6 @@ void GameManager::GenerateRoom()
     {
         mDoorOpened++;
     }
-    color = 5;
     //if (currentRoom.generated == false)
     //{
     //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);

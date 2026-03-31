@@ -40,7 +40,7 @@ public:
 		return *instance;
 	}
 	void Update(float _deltaTime);
-	static Bullet* Shoot(Entity sender, float scale, float speedBullet);
+	static Bullet* Shoot(Entity sender, float scale, float speedBullet, float accuracy);
 	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
@@ -106,5 +106,5 @@ public:
 	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
-	static Bullet* Shoot(Entity sender, float _damage, float range, float width, Window* window, float scale);
+	static Bullet* Shoot(Entity sender, float _damage, float range, float width, Window* window);
 };
