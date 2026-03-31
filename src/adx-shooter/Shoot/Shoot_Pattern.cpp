@@ -84,7 +84,41 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
 
 Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale,float speedBullet)
 {
-	return nullptr;
+    transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
+    transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
+    const float angleStep = (XM_PI / 4) / bullets; 
+    Shot* newShot = new Shot();
+    float accuracy = 55.0f;
+    int minOffset = 100.0f - accuracy;
+    int sign = 1;
+    for (int i = 0; i < bullets; ++i) {
+		int bulletIndex = i - sign * bullets / 2;
+		sign *= -1;
+        if (bullets % 2 == 0) {
+            i = 1;
+        }
+        Bullet* newBullet = new Bullet();
+        newBullet->mTransform = senderTrans;
+        newBullet->mTransform.scale = FLOAT3(1, 1, 1) * scale;
+        newBullet->mCollider.updateCollider();
+        newBullet->m_speed = speedBullet;
+        float newAccuracy = accuracy;
+        float randomOffset = rand() % minOffset;
+
+        newAccuracy += randomOffset;
+        newBullet->mTransform.rotation.y = senderTrans.rotation.y /*+ (XM_PI / 2) * ((100 / newAccuracy) - 1)*/ + (bulletIndex * angleStep);
+        transformSystem::UpdateForward(newBullet->mTransform);
+        float distFromPlayer = 5.0f;
+        transformSystem::MoveForward(newBullet->mTransform, distFromPlayer);
+        transformSystem::Move(newBullet->mTransform, 0, 0, 2);
+        window->RegisterExistingMeshForEntity(newBullet->mEntity);
+        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(newBullet->mTransform);
+        window->Update(newBullet->mEntity, bulletWorld);
+        newBullet->mDamage = _damage;
+        newShot->bulletList.push_back(newBullet);
+        ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
+    }
+	return newShot;
 }
 
 Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width, Window* window)

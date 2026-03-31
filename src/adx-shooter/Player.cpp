@@ -162,7 +162,7 @@ void Player::AddLineBullet() {
 
 
 void Player::AddExplosionBullet() {
-	Shot* newShot = Shoot_Pattern_Explosion::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow(), 1, 50);
+	Shot* newShot = Shoot_Pattern_Pump::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow(), 1, 50);
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
 	{
 		GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
