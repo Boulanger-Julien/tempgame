@@ -383,6 +383,13 @@ void GameManager::BulletUpdate()
     for (int i = (int)mPlayerbulletList.size() - 1; i >= 0; i--) {
         Bullet* bullet = mPlayerbulletList[i];
         bullet->Update();
+        for (Entity entity : currentRoom.wallEntities)
+        {
+            if (ecs.getComponent<ColliderComponent>(bullet->mEntity).collisionCheck(entity))
+            {
+                bullet->toBeDestroyed = true;
+			}
+        }
 
         if (!bullet->toBeDestroyed) {
             float maxS = max(bullet->mTransform.scale.x, max(bullet->mTransform.scale.z, bullet->mTransform.scale.y));

@@ -30,6 +30,7 @@ public:
 
 	std::vector<MeshGeometry> roomMeshes;// à voir plus tard
 	std::vector<MeshGeometry> wallMeshes;// à voir plus tard
+	std::vector<ColliderComponent> wallColliders;// à voir plus tard
 	std::vector<Entity> wallEntities;// à voir plus tard
 	//std::vector<Door> doors;// à voir plus tard
     ECS ecs;  
