@@ -42,8 +42,8 @@ public:
     MeshGeometry road;
 	bool generated = false;
 
-    int EnemyRateRoom = 70;
-    int TreasureRateRoom = 15;
+    int EnemyRateRoom = 80;
+    int TreasureRateRoom = 20;
 
 	int RoomToBoss = 5;
 
