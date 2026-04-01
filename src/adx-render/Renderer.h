@@ -14,6 +14,8 @@
 class Renderer
 {
 public:
+	static Renderer& GetInstance() { return *instance; }
+	Renderer() {}
 	void Run(HWND& _hwnd, int winW, int winH);
 	void Init(HWND& _hwnd);
 	void Loop();
@@ -34,7 +36,11 @@ public:
 	void OnInit();
 	void OnUpdate();
 
+	RessourceManager& GetRessourceManager() { return mRessourceManager; }
+
 private:
+	static Renderer* instance;//SINGELTON
+
 	//Window
 	int mWindowWidth;
 	int mWindowHeight;
@@ -47,7 +53,7 @@ private:
 	FenceManager mFenceManager;
 	Camera2 mCamera;
 	SceneData mSceneData;
-	//GameManager mGmManager;
+	GameManager mGmManager;
 	D3D12_CPU_DESCRIPTOR_HANDLE mRtvHandle;
 
 	DescriptorManager mDescriptorManager;
@@ -64,6 +70,6 @@ private:
 	std::vector<Entity> mEntities;
 
 	//
-	Player* mPlayer;
+	//Player* mPlayer;
 };
 

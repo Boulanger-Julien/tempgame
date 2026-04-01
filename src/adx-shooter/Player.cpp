@@ -4,7 +4,7 @@
 #include "adx-engine\framework.h"
 #include "Weapon/Basic_Sword.h"
 #include "GameManager.h"
-
+#include "adx-render/Renderer.h"
 
 Player::Player() {
 	mEntity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent(), HealthComponent(), RenderComponent());
@@ -12,6 +12,9 @@ Player::Player() {
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);
 	mRender = ECS::GetInstance().getComponent<RenderComponent>(mEntity);
+	Renderer::GetInstance().CreateConstantBuffer(mRender);
+	SetMesh(Renderer::GetInstance().GetRessourceManager().GetCubeMesh());
+	ECS::GetInstance().getComponent<RenderComponent>(mEntity) = mRender;
 	mWeapon = new Basic_Sword();
 	mCollider.depth = mTransform.scale.z;
 	mCollider.width = mTransform.scale.x;
@@ -193,7 +196,7 @@ void Player::CheckInput() {
 	{
 		if (mNextShootTimer <= globalTime) {
 			AddLineBullet();
-			GameManager::GetInstance().CreateFireBall();
+			//GameManager::GetInstance().CreateFireBall();
 			mNextShootTimer = globalTime + mShootColdown;
 		}
 	}

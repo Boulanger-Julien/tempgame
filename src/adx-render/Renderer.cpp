@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "Renderer.h"
 
+Renderer* Renderer::instance = nullptr;
+
 void Renderer::Run(HWND& _hwnd, int _width, int _height) {
 	mWindowWidth = _width;
 	mWindowHeight = _height;
-
-	Init(_hwnd);
-	Loop();
+	instance = this;
+	instance->Init(_hwnd);
+	instance->Loop();
 }
 void Renderer::Init(HWND& _hwnd) {
 
@@ -19,7 +21,6 @@ void Renderer::Init(HWND& _hwnd) {
 
 	mCamera.SetLens(0.25f * 3.14, (mWindowWidth / mWindowHeight), 0.1f, 100.0f);
 	mCamera.SetPosition(0.0f, 3.0f, -15.0f);
-	//mGmManager.Initialize();
 	//Light
 		//mLight = Light(XMFLOAT3(1.0f, -1.0f, 0.0f), 1, XMFLOAT4(1.0f, 1.f, 1.0f, 1.0f));
 		//mSceneData.SetLight(mLight);
@@ -40,23 +41,18 @@ void Renderer::Init(HWND& _hwnd) {
 
 void Renderer::OnInit() {
 	Timer::Reset();
+	mGmManager.Initialize();
 
-	mPlayer = new Player();
-	mPlayer->SetMesh(mRessourceManager.GetCubeMesh());
-	RenderComponent& rend = mPlayer->GetRender();
-	CreateConstantBuffer(rend);
-	ECS::GetInstance().getComponent<RenderComponent>(mPlayer->mEntity) = mPlayer->GetRender();
 }
 void Renderer::OnUpdate() {
-	mPlayer->Aim();
-
 	Timer::Update();
+	mGmManager.Update();
+
 }
 void Renderer::Loop() {
 	bool running = true;
 
 	while (running) {
-
 		running = ProcessMessages();
 
 		Update(GetDeltaTime());
@@ -114,7 +110,6 @@ void Renderer::Update(float _deltaTime) {
 	//UpdateViewMatrix
 	mCamera.UpdateViewMatrix();
 
-	//mGmManager.Update();
 
 	for (auto entity : mEntities)
 	{
@@ -184,7 +179,10 @@ void Renderer::DrawScene()
 	for (auto& entity : mEntities)
 	{
 		RenderComponent& rend = ECS::GetInstance().getComponent<RenderComponent>(entity);
-		rend.mesh->Bind(commandList);
+		if (rend.mesh)
+		{
+			rend.mesh->Bind(commandList);
+		
 
 		// Juste passer le constant buffer de l'objet (cube)
 		commandList->SetGraphicsRootConstantBufferView(
@@ -192,14 +190,14 @@ void Renderer::DrawScene()
 			rend.constantBuffer->GetGPUVirtualAddress()
 		);
 
-
-		commandList->DrawIndexedInstanced(
-			rend.mesh->GetIndexCount(),
-			1,  // instance count
-			0,  // start index
-			0,  // base vertex
-			0   // start instance
-		);
+			commandList->DrawIndexedInstanced(
+				rend.mesh->GetIndexCount(),
+				1,  // instance count
+				0,  // start index
+				0,  // base vertex
+				0   // start instance
+			);
+		}
 	}
 }
 void Renderer::CreateConstantBuffer(RenderComponent& comp)

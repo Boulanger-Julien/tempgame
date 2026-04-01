@@ -38,5 +38,6 @@ inline void ECS::addComponent(Entity entity, T&& component)
 
 template<typename T>
 T& ECS::getComponent(Entity entityID) {
+	//assert(hasComponent<T>(entityID) && "Tentative de r�cup�rer un composant inexistant !");
 	return instance->getComponentPool<T>()->getData(entityID);
 }
