@@ -16,7 +16,7 @@ GameManager::GameManager()
 
 }
 
-bool GameManager::Initialize()
+bool GameManager::Init()
 {
     mPlayer = new Player();
 

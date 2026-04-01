@@ -20,7 +20,9 @@ void Renderer::Init(HWND& _hwnd) {
 	mFenceManager.Init(mDeviceManager.GetDevice());
 
 	mCamera.SetLens(0.25f * 3.14, (mWindowWidth / mWindowHeight), 0.1f, 100.0f);
-	mCamera.SetPosition(0.0f, 3.0f, -15.0f);
+	mCamera.SetPosition(30.0f, 30.0f, -30.0f);
+	DirectX::XMFLOAT3 camPos = mCamera.GetPosition();
+	mCamera.LookAt(DirectX::XMLoadFloat3(&camPos), {0,0,0});
 	//Light
 		//mLight = Light(XMFLOAT3(1.0f, -1.0f, 0.0f), 1, XMFLOAT4(1.0f, 1.f, 1.0f, 1.0f));
 		//mSceneData.SetLight(mLight);
@@ -41,7 +43,7 @@ void Renderer::Init(HWND& _hwnd) {
 
 void Renderer::OnInit() {
 	Timer::Reset();
-	mGmManager.Initialize();
+	mGmManager.Init();
 
 }
 void Renderer::OnUpdate() {

@@ -49,6 +49,7 @@ void GeometryFactory::ComputeNormals(std::vector<Vertex>& verts, const std::vect
 void GeometryFactory::Init(ID3D12Device* _device) {
     mDevice = _device;
 }
+
 Mesh GeometryFactory::CreateGeoCube()
 {
     Mesh mesh;
@@ -104,94 +105,50 @@ Mesh GeometryFactory::CreateGeoCube()
 
     return mesh;
 }
-/*
-Mesh GeometryFactory::CreateGeoPyramide()
-{
-    Mesh mesh;
-    std::array<Vertex, 5> pyramideVertices = {
-        Vertex{{1,-1,1},{1,0,0}},
-        Vertex{{-1, -1,1},{0,1,0}},
-        Vertex{{ 0, 1,0},{1,1,0}},//
-        Vertex{{ 1,-1,-1},{0,0,1}},
-        Vertex{{-1,-1, -1},{1,0,1}},
-    };
-
-    std::array<uint16_t, 18> pyramideIndices = {
-        1,0,2,
-        2,0,3,
-        2,3,4,
-        2,4,1,
-        0,1,3,
-        4,3,1
-    };
-
-    std::vector<Vertex> pyrVerts(pyramideVertices.begin(), pyramideVertices.end());
-    std::vector<uint16_t> pyrIndices(pyramideIndices.begin(), pyramideIndices.end());
-
-    mesh.Create(mDevice, pyrVerts, pyrIndices);
-    return mesh;
-}
-
-Mesh GeometryFactory::GenerateGrid(float _width, float _depth, uint32_t col, uint32_t row)
-{
+Mesh GeometryFactory::CreateGeoBall() {
     Mesh mesh;
 
-    int nbVertice = col * row;
-    int nbIndice = nbVertice;
-    float nbFace = (col - 1) * (row - 1);
-    float nbTriangle = nbFace * 2;
-    float dm = _width / col;
-    float dn = _depth / row;
+    float radius = 1;
+    float sliceCount = 10;
+    float stackCount = 10;
 
-    std::vector<Vertex> gridVertices;
 
-    for (int i = 0; i < col; i++)
+    std::vector<Vertex> vertices;
+    std::vector<std::uint16_t> indices;
+
+    XMFLOAT2 uv[4] = { {0,1}, {0,0}, {1,0}, {1,1} };
+    XMFLOAT4 color = { 1,0,0,1 };
+    for (int i = 0; i <= stackCount; ++i)
     {
-        for (int j = 0; j < row; j++)
+        float phi = XM_PI * i / stackCount;
+        for (int j = 0; j <= sliceCount; ++j)
         {
-            float height = rand() % 3;
-            Vertex vertex;
-            if (i == 0 || i == col - 1 ||
-                j == 0 || j == row - 1)
-            {
-                vertex.position = { i * dm, 0,j * dn };
-            }
-            else {
-                vertex.position = { i * dm, height,j * dn };
-            }
-
-            if (height == 0)
-                vertex.color = { 1,0,0 };
-            if (height == 1)
-                vertex.color = { 0,0,1 };
-            if (height == 2)
-                vertex.color = { 0,1,0 };
-            gridVertices.push_back(vertex);
+            float theta = XM_2PI * j / sliceCount;
+            float x = radius * sinf(phi) * cosf(theta);
+            float y = radius * cosf(phi);
+            float z = radius * sinf(phi) * sinf(theta);
+            vertices.push_back({ XMFLOAT3(x, y, z), color, XMFLOAT3(0,1,0) });
         }
     }
 
-    std::vector<uint16_t> gridIndices;
-
-    for (int j = 0; j < col - 1; j++)
+    for (int i = 0; i < stackCount; ++i)
     {
-        for (int i = 0; i < row - 1; i++)
+        for (int j = 0; j < sliceCount; ++j)
         {
-            int vertexIndice = i + j * row;
-            gridIndices.push_back(vertexIndice);
-            gridIndices.push_back(vertexIndice + 1);
-            gridIndices.push_back(vertexIndice + row);
-
-            gridIndices.push_back(vertexIndice + 1);
-            gridIndices.push_back(vertexIndice + row + 1);
-            gridIndices.push_back(vertexIndice + row);
+            int first = i * (sliceCount + 1) + j;
+            int second = first + sliceCount + 1;
+            indices.push_back(first + 1);
+            indices.push_back(second);
+            indices.push_back(first);
+            indices.push_back(second + 1);
+            indices.push_back(second);
+            indices.push_back(first + 1);
         }
     }
 
-    std::vector<Vertex> grVerts(gridVertices.begin(), gridVertices.end());
-    std::vector<uint16_t> grIndices(gridIndices.begin(), gridIndices.end());
+    //ComputeNormals(vertices, indices);
 
-    mesh.Create(mDevice, grVerts, grIndices);
+    mesh.Create(mDevice, vertices, indices);
 
     return mesh;
 }
-*/

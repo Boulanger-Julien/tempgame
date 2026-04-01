@@ -25,8 +25,9 @@ public:
 	GameManager();
 	~GameManager() {}
 
-	bool Initialize();
+	bool Init();
 	void Update();
+
 	//void Draw();
 	//void Destroy();
 	

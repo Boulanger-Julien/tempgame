@@ -97,6 +97,21 @@ void Camera2::SetPosition(float x, float y, float z)
     mPosition.z = z;
 }
 
+void Camera2::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR up)
+{
+    XMVECTOR R = XMVector3Normalize(XMVector3Cross(up, XMVectorSubtract(target, pos)));
+    XMVECTOR U = XMVector3Normalize(XMVector3Cross(XMVectorSubtract(target, pos), R));
+    XMVECTOR L = XMVector3Normalize(XMVectorSubtract(target, pos));
+
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&mRight), R);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&mUp), U);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&mLookAt), L);
+
+    XMStoreFloat3(&mPosition, pos);
+
+    UpdateViewMatrix();
+}
+
 void Camera2::Walk(float d)
 {
     // mPosition += d*mLook

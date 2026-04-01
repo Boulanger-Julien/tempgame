@@ -11,6 +11,7 @@ public:
 	void ComputeNormals(std::vector<Vertex>& verts, const std::vector<std::uint16_t>& inds);
 
 	Mesh CreateGeoCube();
+	Mesh CreateGeoBall();
 	//Mesh CreateGeoPyramide();
 	//Mesh GenerateGrid(float _width, float _depth, uint32_t col, uint32_t row);
 

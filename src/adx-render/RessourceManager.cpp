@@ -5,6 +5,7 @@ void RessourceManager::Init(ID3D12Device* _device) {
 	GeometryFactory geoFacto;
 	geoFacto.Init(_device);
 	mCubeMesh = geoFacto.CreateGeoCube();
+    mBallMesh = geoFacto.CreateGeoBall();
 	//mPyramideMesh = geoFacto.CreateGeoPyramide();
 	//mGridMesh = geoFacto.GenerateGrid(50, 50, 50, 50);
 }
@@ -13,7 +14,10 @@ Mesh* RessourceManager::GetCubeMesh()
 {
 	return &mCubeMesh;
 }
-
+Mesh* RessourceManager::GetBallMesh()
+{
+    return &mBallMesh;
+}
 Mesh* RessourceManager::GetPyramideMesh()
 {
 	return &mPyramideMesh;

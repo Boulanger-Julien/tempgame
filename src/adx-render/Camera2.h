@@ -14,6 +14,7 @@ public:
 	DirectX::XMMATRIX GetProjMatrix();
 	DirectX::XMMATRIX GetViewMatrix();
 	void SetPosition(float x, float y, float z);
+	void LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 	//move camera
 	void Walk(float d);
 	void Strafe(float d);
@@ -23,6 +24,8 @@ public:
 	void RotateY(float angle);
 
 	void Update(float _deltaTime);
+
+	XMFLOAT3 GetPosition() { return mPosition; }
 
 private:
 	// Camera coordinate system with coordinates relative to world space
