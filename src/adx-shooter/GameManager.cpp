@@ -387,6 +387,7 @@ void GameManager::BulletUpdate()
         {
             if (ecs.getComponent<ColliderComponent>(bullet->mEntity).collisionCheck(entity))
             {
+                if (bullet->type == BULLET)
                 bullet->toBeDestroyed = true;
 			}
         }

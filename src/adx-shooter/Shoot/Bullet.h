@@ -3,6 +3,11 @@
 #include "adx-core/d3dUtil.h"
 
 
+enum BulletType
+{
+	BULLET,
+	LINE
+};
 class Bullet
 {
 public:
@@ -17,6 +22,7 @@ public:
 	int mDamage;
 	bool isPersistantBullet = false;
 
+	BulletType type = BULLET;
 	Bullet();
 	~Bullet();
 
