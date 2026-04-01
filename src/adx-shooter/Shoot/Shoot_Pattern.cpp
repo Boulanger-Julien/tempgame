@@ -88,15 +88,18 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
     transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
     const float angleStep = (XM_PI / 4) / bullets; 
     Shot* newShot = new Shot();
-    float accuracy = 55.0f;
+    float accuracy = 20.0f;
     int minOffset = 100.0f - accuracy;
     int sign = 1;
+	int depart = 0;
+    if ((int)bullets % 2 == 0) {
+        depart = 1;
+    }
     for (int i = 0; i < bullets; ++i) {
-		int bulletIndex = i - sign * bullets / 2;
-		sign *= -1;
-        if (bullets % 2 == 0) {
-            i = 1;
-        }
+        int valeurAbsolue = (i + depart + 1) / 2;
+
+        sign = (i % 2 == 0) ? 1 : -1;
+
         Bullet* newBullet = new Bullet();
         newBullet->mTransform = senderTrans;
         newBullet->mTransform.scale = FLOAT3(1, 1, 1) * scale;
@@ -106,7 +109,7 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
         float randomOffset = rand() % minOffset;
 
         newAccuracy += randomOffset;
-        newBullet->mTransform.rotation.y = senderTrans.rotation.y /*+ (XM_PI / 2) * ((100 / newAccuracy) - 1)*/ + (bulletIndex * angleStep);
+        newBullet->mTransform.rotation.y = senderTrans.rotation.y + /*(XM_PI / 2)*/  + (valeurAbsolue* sign * angleStep* ((100 / newAccuracy) - 1));
         transformSystem::UpdateForward(newBullet->mTransform);
         float distFromPlayer = 5.0f;
         transformSystem::MoveForward(newBullet->mTransform, distFromPlayer);
@@ -114,7 +117,7 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
         window->RegisterExistingMeshForEntity(newBullet->mEntity);
         XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(newBullet->mTransform);
         window->Update(newBullet->mEntity, bulletWorld);
-        newBullet->mDamage = _damage;
+        newBullet->mDamage = _damage/bullets;
         newShot->bulletList.push_back(newBullet);
         ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
     }
