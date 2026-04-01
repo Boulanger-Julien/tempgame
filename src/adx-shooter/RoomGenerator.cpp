@@ -8,22 +8,21 @@
 void RoomGenerator::GenerateRoom(Rooms& _room)
 {
         //mWindow->RemoveEntityResources(currentRoom.ground);
-        int color = (rand() % 100) + 1;
+        int color = (rand() % _room.EnemyRateRoom + _room.TreasureRateRoom) + 1;
         int choiceRoom= NULL;
      if (color <= _room.EnemyRateRoom) {
          choiceRoom = ENEMY_ROOM;
 	 }
-     else if (color <= _room.EnemyRateRoom + _room.BossRateRoom) {
-         choiceRoom = BOSS_ROOM;
-     }
-     else if (color <= _room.EnemyRateRoom + _room.BossRateRoom + _room.TreasureRateRoom) {
+     else if (color <= _room.EnemyRateRoom + _room.TreasureRateRoom) {
          choiceRoom = TREASURE_ROOM; // TREASURE ROOM
      }
 
+	 _room.RoomToBoss--;
 
-     if (_room.numberOfRoom == _room.numMaxInDunjeon)
+     if (_room.RoomToBoss == 0)
      {
          choiceRoom = BOSS_ROOM;
+		 _room.RoomToBoss = 5;
      }
 
      switch (choiceRoom)

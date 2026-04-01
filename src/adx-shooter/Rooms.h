@@ -32,8 +32,9 @@ public:
 	bool generated = false;
 
     int EnemyRateRoom = 70;
-    int BossRateRoom = 15;
     int TreasureRateRoom = 15;
+
+	int RoomToBoss = 5;
 
     std::vector<Enemy*> EnemyRooms;
 	int numberOfRoom = -1;
