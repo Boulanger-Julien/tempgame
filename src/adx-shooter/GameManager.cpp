@@ -133,7 +133,7 @@ void GameManager::Update()
 	BulletUpdate();
     EnemyUpdate();
 
-	currentRoom.door.Update(mEnemyList.size() + mBossList.size());
+	//currentRoom.door.Update(mEnemyList.size() + mBossList.size());
 	currentRoom.Update();
 
     // Nettoyage final des entités supprimées cette frame
@@ -335,86 +335,9 @@ void GameManager::CheckInput()
     {
         SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
     }
-	if (InputSystem::isKeyUp('E') && currentRoom.door.changeRoom == true)
-    {
-        GenerateRoom();
-    }
+
 }
 
-void GameManager::GenerateRoom()
-{
-    //mWindow->RemoveEntityResources(currentRoom.ground);
-    mWindow->RemoveEntityResources(currentRoom.door.mEntity);
-    currentRoom.Initialize(mWindow);
-	int color = rand() % 5;
-    if (mDoorOpened == 5) {
-        color = 5;
-		mDoorOpened = 0;
-	}
-    else
-    {
-        mDoorOpened++;
-    }
-    //if (currentRoom.generated == false)
-    //{
-    //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
-    //    currentRoom.generated = true;
-    //}
-    mPlayer->GetTransform().position = FLOAT3(0, 2, -45);
-    switch (color)
-    {
-    case 0:
-        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
-        //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
-        for (int i = 0; i < 3; i++) {
-            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-        }
-        break;
-    case 1:
-        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkGreen);
-        //currentRoom.door.mTransform.position = FLOAT3(0, 0, 50);
-        for (int i = 0; i < 7; i++) {
-            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-        }
-        break;
-    case 2:
-        //currentRoom.door.mTransform.position = FLOAT3(50, 0, 50);
-        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkBlue);
-        for (int i = 0; i < 5; i++) {
-            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-        }
-        break;
-    case 3:
-        //currentRoom.door.mTransform.position = FLOAT3(0, 0, 0);
-        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkRed);
-        for (int i = 0; i < 20; i++) {
-            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-        }
-        break;
-    case 4:
-        //currentRoom.door.mTransform.position = FLOAT3(50, 0, -50);
-        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkViolet);
-        break;
-    case 5:
-        //currentRoom.door.mTransform.position = FLOAT3(-50, 0, -50);
-        currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkCyan);
-        for (int i = 0; i < 1; i++) {
-            SpawnBoss(0, 0);
-        }
-        break;
-    default:
-        //currentRoom.door.mTransform.position = FLOAT3(0, 0, 25);
-        for (int i = 0; i < 10; i++) {
-            SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-        }
-        //currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::SkyBlue);
-        break;
-    }
-
-    mEntityMesh.insert({ currentRoom.ground, currentRoom.road });
-}
-
-//
 float GameManager::GetDeltatime() {
     return Timer::GetInstance()->GetDeltatime();
 }
@@ -628,7 +551,7 @@ void GameManager::Destroy() {
     }
 }
 
-void GameManager::SpawnMob(float x, float z, int mob) {
+Enemy* GameManager::SpawnMob(float x, float z, int mob) {
     EnemyMarksman* newEnemy = new EnemyMarksman();
     newEnemy->Init(mPlayer->mEntity);
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
@@ -638,4 +561,5 @@ void GameManager::SpawnMob(float x, float z, int mob) {
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
 	mEnemyList.push_back(newEnemy);
+    return newEnemy;
 }

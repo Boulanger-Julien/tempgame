@@ -4,6 +4,7 @@
 #include "Door.h"
 #include "MeshCreator.h" 
 #include "Enemy\Enemy.h"
+#include "adx-render/TextRenderer.h"
 
 class GameManager;
 
@@ -23,22 +24,28 @@ public:
     ECS ecs;  
     Door door;
 
-	//Window* mWindow;  
-
     Entity ground;
     ColliderComponent mCollider;
     transformComponent mTransform;
-  /*  Entity wall1Entity;
-    Entity wall2Entity;*/
+
     MeshGeometry road;
-    //MeshGeometry wall1;
-    //MeshGeometry wall2;
 	bool generated = false;
-	
+
+    int EnemyRateRoom = 70;
+    int BossRateRoom = 15;
+    int TreasureRateRoom = 15;
+
+    std::vector<Enemy*> EnemyRooms;
+	int numberOfRoom = -1;
+
+    int numMaxInDunjeon = -2;
 protected: 
     void UpdateComponent();
 	Window* mWindow;
 
     Player* mPlayer;
+    TextRenderer* mNumberOfRoomRenderer;
+
+
 };
 

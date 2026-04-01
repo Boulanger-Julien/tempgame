@@ -29,7 +29,7 @@ public:
 	void Pause();
 	void SpeedDown();
 	void Destroy();
-	void SpawnMob(float x, float z, int mob);
+	Enemy* SpawnMob(float x, float z, int mob);
 	void SpawnBoss(float x, float z);
 	float GetDeltatime();
 	void UpdateCam();
@@ -38,7 +38,6 @@ public:
 	void BulletUpdate();
 	void UpdateMatrix();
 	void UpdateBar();
-	void GenerateRoom();
 	void CheckInput();
 	Camera GetCamera() { return mCamera; }
 
