@@ -28,8 +28,6 @@ public:
 	void Draw();
 	void Pause();
 	void SpeedDown();
-	void AddLineBullet(Entity sender, float _damage);
-	void AddExplosionBullet(Entity sender, float bullets);
 	void Destroy();
 	void SpawnMob(float x, float z, int mob);
 	void SpawnBoss(float x, float z);
@@ -78,6 +76,7 @@ private:
 	bool spaceDownLastFrame2 = false;
 	bool spaceDown2 = false;
 	float timer = 0.0f;
+	int mDoorOpened = 0;
 
 
 	MSG msg = { 0 };
@@ -90,6 +89,8 @@ private:
 	Player* mPlayer;
 	Entity weapon;
 	Entity healthBar;
+	Entity healthBossBar;
+	Entity healthBossBar2;
 	Entity manaBar;
 	Rooms currentRoom;
 	Boss* newBoss;
@@ -116,5 +117,7 @@ private:
 	TextRenderer* mLifeTextRenderer;
 	TextRenderer* mManaTextRenderer;
 	TextRenderer* mTimerTextRenderer;
+	TextRenderer* mBossNameTextRenderer;
+	TextRenderer* mBossName2TextRenderer;
 
 };

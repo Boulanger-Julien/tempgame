@@ -29,7 +29,10 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
     mScoreTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
     mTimerTextRenderer = new TextRenderer(mWindow);
     mTimerTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-
+    mBossNameTextRenderer = new TextRenderer(mWindow);
+    mBossNameTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    mBossName2TextRenderer = new TextRenderer(mWindow);
+    mBossName2TextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 }
 
 bool GameManager::Initialize()
@@ -56,7 +59,7 @@ bool GameManager::Initialize()
 	currentRoom.door.mPlayer = mPlayer->mEntity;
     
 	newBoss = new Makhina_Boss(mPlayer->mEntity);
-    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, newBoss->GetTransform().scale.x, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
+    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), 1,1,1, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
     Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
     MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Json\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
@@ -85,8 +88,14 @@ bool GameManager::Initialize()
         UIRenderer healthBarExtMesh(*mWindow, healthExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
         mUIMesh.insert({ healthExtBar, healthBarExtMesh.UIQuad });
         healthBar = ecs.createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
+		healthBossBar = ecs.createEntity(transformComponent(700, 70, 0, 500, 20));
+		healthBossBar2 = ecs.createEntity(transformComponent(700, 170, 0, 500, 20));
         UIRenderer healthBarMesh(*mWindow, healthBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Red));
+        UIRenderer healthBarBossMesh(*mWindow, healthBossBar, 1, 1, XMFLOAT4(Colors::Red));
+        UIRenderer healthBarBoss2Mesh(*mWindow, healthBossBar2, 1, 1, XMFLOAT4(Colors::Red));
         mUIMesh.insert({ healthBar, healthBarMesh.UIQuad });
+		mUIMesh.insert({ healthBossBar, healthBarBossMesh.UIQuad });
+		mUIMesh.insert({ healthBossBar2, healthBarBoss2Mesh.UIQuad });
     }
     {
         Entity manaExtBar = ecs.createEntity(transformComponent(offsetMBX, offsetMBY));
@@ -113,7 +122,6 @@ void GameManager::Update()
 	UpdateCam();
     // Update de la barre de vie UI
     UpdateBar();
-    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
 
 	// Update des matrices des objets
     UpdateMatrix();
@@ -195,6 +203,30 @@ void GameManager::Draw()
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
         mLifeTextRenderer->DrawTxt(mPlayer->GetHealth() > 0 ? std::to_string((int)mPlayer->GetHealth()) + "/" + std::to_string((int)mPlayer->GetStats().mHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
         mTimerTextRenderer->DrawTxt(timerStr, 20, 60, 24);
+        if (mBossList.size() > 0)
+        {
+            int size = mBossList[0]->GetName().size();
+            if (size < 22)
+                size = 22;
+            else
+                size = 500 / size;
+            mBossNameTextRenderer->DrawTxt(mBossList[0]->GetName(), 700, 10, size);
+            if (mBossList.size() > 1)
+            {
+				size = mBossList[1]->GetName().size();
+				if (size < 22)
+					size = 22;
+				else
+					size = 500 / size;
+                mBossName2TextRenderer->DrawTxt(mBossList[1]->GetName(), 700, 110, 24);
+            }
+        }
+        else
+        {
+            mBossNameTextRenderer->DrawTxt("", 650, 10, 24);
+            mBossName2TextRenderer->DrawTxt("", 650, 110, 24);
+        }
+
     }
 
     firstFrame = false;
@@ -229,34 +261,6 @@ void GameManager::Pause()
 
 /////////////////////////
 
-void GameManager::AddLineBullet(Entity sender, float _damage)
-{
-    Bullet* newBullet = Shoot_Pattern_Line::Shoot(sender, _damage, 25, 1, mWindow);
-    mWindow->RegisterExistingMeshForEntity(newBullet->mEntity);
-    mEntityMesh.insert({ newBullet->mEntity, mLineBulletMesh });
-    XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBullet->mEntity));
-    mWindow->Update(newBullet->mEntity, bulletWorld);
-    if (sender == mPlayer->mEntity) {
-        newBullet->mDamage = _damage;
-        mPlayerbulletList.push_back(newBullet);
-    }
-    else
-    {
-        newBullet->mDamage = _damage;
-        mBulletList.push_back(newBullet);
-    }
-}
-
-void GameManager::AddExplosionBullet(Entity sender, float bullets)
-{
-	Shot* newShot = Shoot_Pattern_Explosion::Shoot(sender, bullets, mPlayer->GetStats().mStrength, mWindow);
-	for (int i = 0; i < newShot->bulletList.size(); ++i)
-    {
-		mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });
-        mPlayerbulletList.push_back(newShot->bulletList[i]);
-    }
-}
-
 void GameManager::Shoot()
 {
     static bool cDownLastFrame = false;
@@ -275,7 +279,7 @@ void GameManager::Shoot()
     }
     if (InputSystem::isKeyDown(VK_SPACE)) {
         if (!cDownLastFrame2) {
-            AddExplosionBullet(mPlayer->mEntity, 9);
+            mPlayer->AddExplosionBullet();
             cDownLastFrame2 = true;
         }
     }
@@ -308,7 +312,7 @@ void GameManager::SpawnBoss(float x, float z) {
     newBoss = new Makhina_Boss(mPlayer->mEntity);
 
     newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
-    newBoss->GetTransform().position = FLOAT3(x, 13.5, z);
+    newBoss->GetTransform().position = FLOAT3(x, newBoss->GetTransform().scale.y/2, z);
     mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newBoss->GetEntity()));
     mEntityMesh.insert({ newBoss->GetEntity(), MakhinaBossMesh });
@@ -342,7 +346,15 @@ void GameManager::GenerateRoom()
     //mWindow->RemoveEntityResources(currentRoom.ground);
     mWindow->RemoveEntityResources(currentRoom.door.mEntity);
     currentRoom.Initialize(mWindow);
-    int color = rand() % 6;
+	int color = rand() % 5;
+    if (mDoorOpened == 5) {
+        color = 5;
+		mDoorOpened = 0;
+	}
+    else
+    {
+        mDoorOpened++;
+    }
     //if (currentRoom.generated == false)
     //{
     //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
@@ -387,7 +399,7 @@ void GameManager::GenerateRoom()
         //currentRoom.door.mTransform.position = FLOAT3(-50, 0, -50);
         currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::DarkCyan);
         for (int i = 0; i < 1; i++) {
-            SpawnBoss(rand() % 100 - 50, rand() % 100 - 50);
+            SpawnBoss(0, 0);
         }
         break;
     default:
@@ -436,7 +448,6 @@ void GameManager::EnemyUpdate()
     }
     //Julien
     for (Boss* boss : mBossList) {
-        transformComponent& bossTransform = ECS::GetInstance().getComponent<transformComponent>(boss->GetEntity());
         boss->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
     }
 }
@@ -462,6 +473,7 @@ void GameManager::BulletUpdate()
                         bullet->entitiesToIgnore[enemy->mEntity] = true;
                         if (!enemy->IsAlive()) {
                             mDestroyEnemyList.push_back(enemy);
+
                             mPlayer->GetStats().mExp += 10;
                         }
                         if (!bullet->isPersistantBullet) {
@@ -484,6 +496,9 @@ void GameManager::BulletUpdate()
                             bullet->entitiesToIgnore[boss->GetEntity()] = true;
                             if (!boss->IsAlive()) {
                                 mDestroyBossList.push_back(boss);
+                                boss = mBossList.back();
+                                mBossList.pop_back();
+
                                 mPlayer->GetStats().mExp += 50;
                             }
                             if (!bullet->isPersistantBullet) { bullet->toBeDestroyed = true; break; }
@@ -547,7 +562,19 @@ void GameManager::UpdateMatrix()
 void GameManager::UpdateBar()
 {
     ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
-    //ecs.getComponent<transformComponent>(manaBar).scale.x = 0/*mPlayer->GetStats().mMana*/ / mPlayer->GetStats().mMana;
+	if (mBossList.size() > 0)
+    {
+        ecs.getComponent<transformComponent>(healthBossBar).scale.x = (mBossList[0]->GetHealth() / mBossList[0]->GetMaxHealth()) * 500;
+        if (mBossList.size() > 1)
+        {
+            ecs.getComponent<transformComponent>(healthBossBar2).scale.x = (mBossList[1]->GetHealth() / mBossList[1]->GetMaxHealth()) * 500;
+        }
+    }
+    else
+    {
+        ecs.getComponent<transformComponent>(healthBossBar).scale.x = 0;
+        ecs.getComponent<transformComponent>(healthBossBar2).scale.x = 0;
+	}
 }
 
 void GameManager::Destroy() {
@@ -562,6 +589,7 @@ void GameManager::Destroy() {
 
             // 4. Supprimer l'objet C++
             delete bullet;
+
         }
         mDestroyBulletList.clear();
     }
@@ -588,16 +616,12 @@ void GameManager::Destroy() {
     }
     if (!mDestroyBossList.empty()) {
         for (Boss* boss : mDestroyBossList) {
-            // 1. On le retire de la liste de l'Update LOGIQUE
             auto it = std::find(mBossList.begin(), mBossList.end(), boss);
             if (it != mBossList.end()) {
                 mBossList.erase(it);
             }
-            // 2. On retire les ressources DirectX
             mWindow->RemoveEntityResources(boss->GetEntity());
-            // 3. On le retire du dictionnaire de rendu
             mEntityMesh.erase(boss->GetEntity());
-            // 4. Supprimer l'objet C++
             delete boss;
         }
         mDestroyBossList.clear();

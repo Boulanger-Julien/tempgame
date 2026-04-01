@@ -1,7 +1,6 @@
 #pragma once
 #include "adx-engine/framework.h"
 #include "Shoot/Shoot_Pattern.h"
-
 class Boss
 {
 	public:
@@ -26,12 +25,16 @@ class Boss
 	virtual void LookPlayer() = 0;
 	float GetStrength() { return mStats.mStrength; }
 	float GetHealth() { return mHealthComponent.mHealth; }
+	float GetMaxHealth() { return mStats.mHealth; }
 	virtual void UpdateComponent() = 0;
 	virtual void ChangeShootPattern() = 0;
+	std::string GetName() { return name; }
 protected:
 	Entity mEntity;
+	Entity mHeadEntity;
 	ColliderComponent mCollider;
 	transformComponent mTransform;
+	transformComponent mHeadTransform;
 	HealthComponent mHealthComponent;
 	StatsComponent mStats;
 	bool isAlive = true;
@@ -39,5 +42,10 @@ protected:
 	float mShootCooldown = 1;
 	float mCurrentShootCooldown = 0;
 	bool canShoot = false;
-	int mCurrentShootPattern;
+	int mCurrentShootPattern = 0;
+	float timeSinceLastPatternChange = 0;
+	float patternChangeInterval = 15.0f;
+	int mPatternChangeCooldown = 3;
+	float mPatternChangeCurrentCooldown = 0;
+	std::string name = "Boss";
 };

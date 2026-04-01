@@ -40,7 +40,7 @@ public:
 		return *instance;
 	}
 	void Update(float _deltaTime);
-	static Bullet* Shoot(Entity sender);
+	static Bullet* Shoot(Entity sender, float scale, float speedBullet, float accuracy);
 	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
@@ -64,7 +64,7 @@ class Shoot_Pattern_Explosion
 	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
-	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window);
+	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet);
 };
 
 class Shoot_Pattern_Pump
@@ -85,7 +85,7 @@ class Shoot_Pattern_Pump
 	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
-	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window);
+	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet);
 };
 
 class Shoot_Pattern_Line

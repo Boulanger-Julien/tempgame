@@ -23,7 +23,7 @@ protected:
 	};
 	int currentEnemyState = 0;
 private:
-
+	int shootPatternIndex = 0;
 	float mCurrentShootCooldown = 0;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
@@ -45,6 +45,8 @@ public:
 	void MoveTowardPlayer(float _deltaTime);
 	virtual void Attack(float _deltaTime);
 	void AddBullet();
+	void ExplosionBullets();
+	void LineBullets();
 	void TakeDamage(int _damage);
 	bool IsAlive();
 
