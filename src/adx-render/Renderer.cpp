@@ -34,24 +34,27 @@ void Renderer::Init(HWND& _hwnd) {
 
 	/**/
 	OnInit();
-
+	mEntities = ECS::GetInstance().getEntities();
 	///
 }
 
 void Renderer::OnInit() {
+	Timer::Reset();
 
 	mPlayer = new Player();
 	mPlayer->SetMesh(mRessourceManager.GetCubeMesh());
 	RenderComponent& rend = mPlayer->GetRender();
 	CreateConstantBuffer(rend);
 	ECS::GetInstance().getComponent<RenderComponent>(mPlayer->mEntity) = mPlayer->GetRender();
-	mEntities.push_back(mPlayer->mEntity);
 }
 void Renderer::OnUpdate() {
+	mPlayer->Aim();
 
+	Timer::Update();
 }
 void Renderer::Loop() {
 	bool running = true;
+
 	while (running) {
 
 		running = ProcessMessages();
@@ -97,15 +100,8 @@ float Renderer::GetDeltaTime()
 	return deltaTime;
 }
 void Renderer::Update(float _deltaTime) {
-	//scale
-	float sx = 0.5;
-	float sy = 0.5;
-	float sz = 0.5;
-	DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(sx, sy, sz);
 
-	//cube
-	DirectX::XMMATRIX cubePosition = DirectX::XMMatrixTranslation(0,2,3);
-	DirectX::XMMATRIX playerWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(mPlayer->mEntity));
+	OnUpdate();
 
 	//view//
 	DirectX::XMMATRIX view = mCamera.GetViewMatrix();
@@ -120,11 +116,12 @@ void Renderer::Update(float _deltaTime) {
 
 	//mGmManager.Update();
 
-	for (auto item : mEntities)
+	for (auto entity : mEntities)
 	{
-		RenderComponent& rend = ECS::GetInstance().getComponent<RenderComponent>(item);
+		RenderComponent& rend = ECS::GetInstance().getComponent<RenderComponent>(entity);
 
-		DirectX::XMMATRIX wvp = playerWorld * view * projection;
+		DirectX::XMMATRIX world = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(entity));
+		DirectX::XMMATRIX wvp = world * view * projection;
 
 		ObjectConstants cb;
 		cb.UseLight = false;
@@ -184,9 +181,9 @@ void Renderer::DrawScene()
 
 	auto commandList = mCommandManager.GetCommandList();
 
-	for (auto& item : mEntities)
+	for (auto& entity : mEntities)
 	{
-		RenderComponent& rend = ECS::GetInstance().getComponent<RenderComponent>(mPlayer->mEntity);
+		RenderComponent& rend = ECS::GetInstance().getComponent<RenderComponent>(entity);
 		rend.mesh->Bind(commandList);
 
 		// Juste passer le constant buffer de l'objet (cube)

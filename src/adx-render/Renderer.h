@@ -10,6 +10,7 @@
 #include "RessourceManager.h"
 #include "adx-shooter/GameManager.h"
 
+
 class Renderer
 {
 public:

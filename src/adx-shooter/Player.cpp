@@ -88,89 +88,89 @@ void Player::ChangeAimType()
 }
 void Player::AddBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity);
-	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
-	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
-	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
-	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+	//Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity);
+	//GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	//GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
+	//XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	//GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
 
-	newBullet->mDamage = mStats.mStrength;
-	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
+	//newBullet->mDamage = mStats.mStrength;
+	//GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
 }
 
 void Player::Aim()
 {
-	if (aimType == AimType::Mouse)
-	{
-		POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
-		ScreenToClient(GameManager::GetInstance().GetWindow()->MainWnd(), &mousePos);
-		float finalMouseX = static_cast<float>(mousePos.x);
-		float finalMouseY = static_cast<float>(mousePos.y);
+	//if (aimType == AimType::Mouse)
+	//{
+	//	POINT mousePos = { (LONG)InputSystem::GetMouseX(), (LONG)InputSystem::GetMouseY() };
+	//	ScreenToClient(GameManager::GetInstance().GetWindow()->MainWnd(), &mousePos);
+	//	float finalMouseX = static_cast<float>(mousePos.x);
+	//	float finalMouseY = static_cast<float>(mousePos.y);
 
-		Ray ray = GameManager::GetInstance().GetCamera().GetRayFromMouse(finalMouseX, finalMouseY, GameManager::GetInstance().GetWindow()->mWindowRect.right, GameManager::GetInstance().GetWindow()->mWindowRect.bottom);
-		Update(ray);
-	}
-	else if (aimType == AimType::Auto)
+	//	Ray ray = GameManager::GetInstance().GetCamera().GetRayFromMouse(finalMouseX, finalMouseY, GameManager::GetInstance().GetWindow()->mWindowRect.right, GameManager::GetInstance().GetWindow()->mWindowRect.bottom);
+	//	Update(ray);
+	//}
+	//else if (aimType == AimType::Auto)
 	{
 		Update();
 		float closestDistance = FLT_MAX;
 		transformComponent& playerTrans = GetTransform();
-		for (Boss* enemy : GameManager::GetInstance().mBossList) {
-			transformComponent& enemyTrans = ECS::GetInstance().getComponent<transformComponent>(enemy->GetEntity());
-			float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
-			if (distance < closestDistance) {
-				closestDistance = distance;
-			}
-			else
-			{
-				continue;
-			}
-			if (distance < 70) {
-				float dx = enemyTrans.position.x - playerTrans.position.x;
-				float dz = enemyTrans.position.z - playerTrans.position.z;
-				float angle = atan2f(dx, dz);
-				playerTrans.rotation.y = angle;
-			}
-		}
+		//for (Boss* enemy : GameManager::GetInstance().mBossList) {
+		//	transformComponent& enemyTrans = ECS::GetInstance().getComponent<transformComponent>(enemy->GetEntity());
+		//	float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
+		//	if (distance < closestDistance) {
+		//		closestDistance = distance;
+		//	}
+		//	else
+		//	{
+		//		continue;
+		//	}
+		//	if (distance < 70) {
+		//		float dx = enemyTrans.position.x - playerTrans.position.x;
+		//		float dz = enemyTrans.position.z - playerTrans.position.z;
+		//		float angle = atan2f(dx, dz);
+		//		playerTrans.rotation.y = angle;
+		//	}
+		//}
 
-		for (EnemyMarksman* enemy : GameManager::GetInstance().mEnemyList) {
-			transformComponent& enemyTrans = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
-			float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
-			if (distance < closestDistance) {
-				closestDistance = distance;
-			}
-			else
-			{
-				continue;
-			}
-			if (distance < 70) {
-				float dx = enemyTrans.position.x - playerTrans.position.x;
-				float dz = enemyTrans.position.z - playerTrans.position.z;
-				float angle = atan2f(dx, dz);
-				playerTrans.rotation.y = angle;
-			}
-		}
+		//for (EnemyMarksman* enemy : GameManager::GetInstance().mEnemyList) {
+		//	transformComponent& enemyTrans = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
+		//	float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
+		//	if (distance < closestDistance) {
+		//		closestDistance = distance;
+		//	}
+		//	else
+		//	{
+		//		continue;
+		//	}
+		//	if (distance < 70) {
+		//		float dx = enemyTrans.position.x - playerTrans.position.x;
+		//		float dz = enemyTrans.position.z - playerTrans.position.z;
+		//		float angle = atan2f(dx, dz);
+		//		playerTrans.rotation.y = angle;
+		//	}
+		//}
 	}
 }
 void Player::AddLineBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Line::Shoot(GameManager::GetInstance().GetWindow(), mEntity, mStats.mStrength, 5,3, 0.01f);
-	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
-	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
-	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
-	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+	//Bullet* newBullet = Shoot_Pattern_Line::Shoot(GameManager::GetInstance().GetWindow(), mEntity, mStats.mStrength, 5,3, 0.01f);
+	//GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	//GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
+	//XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	//GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
 
-	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
+	//GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
 }
 
 
 void Player::AddExplosionBullet() {
-	Shot* newShot = Shoot_Pattern_Explosion::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow());
-	for (int i = 0; i < newShot->bulletList.size(); ++i)
-	{
-		GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
-		GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
-	}
+	//Shot* newShot = Shoot_Pattern_Explosion::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow());
+	//for (int i = 0; i < newShot->bulletList.size(); ++i)
+	//{
+	//	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
+	//	GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
+	//}
 }
 
 void Player::TestShootPattern()
