@@ -17,25 +17,21 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
     mhInstance = hInstance;
 
     //Initialize window
-    mWindow = new Window(mhInstance);
-    mWindow->Initialize(1920, 1080);
-
-	mPlayer = new Player();
-    mLifeTextRenderer = new TextRenderer(mWindow);
-    mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-    mManaTextRenderer = new TextRenderer(mWindow);
-    mManaTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-    mScoreTextRenderer = new TextRenderer(mWindow);
-    mScoreTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-    mTimerTextRenderer = new TextRenderer(mWindow);
-    mTimerTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-
 }
 
 bool GameManager::Initialize()
 {
     srand(time(NULL));
     ecs = ECS::GetInstance();
+    mPlayer = new Player();
+    //mLifeTextRenderer = new TextRenderer(mWindow);
+    //mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    //mManaTextRenderer = new TextRenderer(mWindow);
+    //mManaTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    //mScoreTextRenderer = new TextRenderer(mWindow);
+    //mScoreTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    //mTimerTextRenderer = new TextRenderer(mWindow);
+    //mTimerTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 
     //Generate player
     {

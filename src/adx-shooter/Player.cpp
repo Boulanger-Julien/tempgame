@@ -7,10 +7,11 @@
 
 
 Player::Player() {
-	mEntity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent(), HealthComponent());
+	mEntity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent(), HealthComponent(), RenderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);
+	mRender = ECS::GetInstance().getComponent<RenderComponent>(mEntity);
 	mWeapon = new Basic_Sword();
 	mCollider.depth = mTransform.scale.z;
 	mCollider.width = mTransform.scale.x;

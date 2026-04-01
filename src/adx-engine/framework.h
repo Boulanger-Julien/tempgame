@@ -18,3 +18,4 @@
 #include "SpriteComponent.h"
 #include "MaterialComponent.h"
 #include "Health.h"
+#include "RenderComponent.h"

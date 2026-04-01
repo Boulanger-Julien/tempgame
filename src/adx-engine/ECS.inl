@@ -15,7 +15,7 @@ inline int ECS::createEntity(T&&... components)
 {
 	(void)std::initializer_list<int>{ (instance->addComponent(instance->entityIDCounter, std::forward<T>(components)), 0)... };
 	instance->realEntityCount++;
-
+	instance->entities.push_back(instance->entityIDCounter);
 	return instance->entityIDCounter++;
 }
 

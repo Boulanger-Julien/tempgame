@@ -2,6 +2,7 @@
 #include <d3d12.h>
 #include <vector>
 #include <DirectXMath.h>
+#include "Vertex.h"
 
 class Mesh
 {

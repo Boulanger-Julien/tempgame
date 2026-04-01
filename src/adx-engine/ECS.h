@@ -37,11 +37,12 @@ private:
 	std::shared_ptr<ComponentArray<T>> getComponentPool();
 
 	static ECS* instance;
-
+	
+	std::vector<Entity> entities;
 public:
 	ECS()
 	{
-		entityIDCounter = 10; // Start from to avoid conflicts
+		entityIDCounter = 100; // Start from to avoid conflicts
 		realEntityCount = 0;
 		if (instance == nullptr)
 		{
@@ -67,6 +68,8 @@ public:
 	T& getComponent(Entity entity);
 
 	void Release(Entity& entityID);
+
+	std::vector<Entity>& getEntities() { return instance->entities; }
 };
 
 template<typename T>

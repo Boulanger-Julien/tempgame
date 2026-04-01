@@ -8,9 +8,7 @@
 #include "SceneData.h"
 #include "RenderItem.h"
 #include "RessourceManager.h"
-//
-#include "DescriptorManager.h"
-#include "adx-render/Window.h"
+#include "adx-shooter/GameManager.h"
 
 class Renderer
 {
@@ -29,7 +27,12 @@ public:
 	void SetViewport();
 	void DrawScene();
 
-	void CreateConstantBuffer(RenderItem& item);
+	void CreateConstantBuffer(RenderComponent& comp);
+
+	//
+	void OnInit();
+	void OnUpdate();
+
 private:
 	//Window
 	int mWindowWidth;
@@ -43,7 +46,7 @@ private:
 	FenceManager mFenceManager;
 	Camera2 mCamera;
 	SceneData mSceneData;
-
+	//GameManager mGmManager;
 	D3D12_CPU_DESCRIPTOR_HANDLE mRtvHandle;
 
 	DescriptorManager mDescriptorManager;
@@ -56,6 +59,10 @@ private:
 	//Divers
 	std::chrono::high_resolution_clock::time_point m_previousTime;
 	float elapsedTime = 0;
+	//Entity
+	std::vector<Entity> mEntities;
 
+	//
+	Player* mPlayer;
 };
 

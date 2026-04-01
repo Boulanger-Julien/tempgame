@@ -19,7 +19,7 @@ void Renderer::Init(HWND& _hwnd) {
 
 	mCamera.SetLens(0.25f * 3.14, (mWindowWidth / mWindowHeight), 0.1f, 100.0f);
 	mCamera.SetPosition(0.0f, 3.0f, -15.0f);
-
+	//mGmManager.Initialize();
 	//Light
 		//mLight = Light(XMFLOAT3(1.0f, -1.0f, 0.0f), 1, XMFLOAT4(1.0f, 1.f, 1.0f, 1.0f));
 		//mSceneData.SetLight(mLight);
@@ -31,11 +31,24 @@ void Renderer::Init(HWND& _hwnd) {
 	//mRessourceManager.LoadTexture(mDeviceManager.GetDevice(), "Cube", L"Diamond2.dds");
 	//Texture* cubeText = mRessourceManager.GetTexture("Cube"); // récupère la même instance
 
-	RenderItem cubeItem;
-	cubeItem.CreateItem("Cube", mRessourceManager.GetCubeMesh());
-	CreateConstantBuffer(cubeItem);
 
-	mRenderItems.push_back(cubeItem);
+	/**/
+	OnInit();
+
+	///
+}
+
+void Renderer::OnInit() {
+
+	mPlayer = new Player();
+	mPlayer->SetMesh(mRessourceManager.GetCubeMesh());
+	RenderComponent& rend = mPlayer->GetRender();
+	CreateConstantBuffer(rend);
+	ECS::GetInstance().getComponent<RenderComponent>(mPlayer->mEntity) = mPlayer->GetRender();
+	mEntities.push_back(mPlayer->mEntity);
+}
+void Renderer::OnUpdate() {
+
 }
 void Renderer::Loop() {
 	bool running = true;
@@ -92,7 +105,7 @@ void Renderer::Update(float _deltaTime) {
 
 	//cube
 	DirectX::XMMATRIX cubePosition = DirectX::XMMatrixTranslation(0,2,3);
-	DirectX::XMMATRIX cubeWorld = cubePosition;
+	DirectX::XMMATRIX playerWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(mPlayer->mEntity));
 
 	//view//
 	DirectX::XMMATRIX view = mCamera.GetViewMatrix();
@@ -105,14 +118,13 @@ void Renderer::Update(float _deltaTime) {
 	//UpdateViewMatrix
 	mCamera.UpdateViewMatrix();
 
-	for (auto item : mRenderItems)
+	//mGmManager.Update();
+
+	for (auto item : mEntities)
 	{
-		DirectX::XMMATRIX world;
+		RenderComponent& rend = ECS::GetInstance().getComponent<RenderComponent>(item);
 
-		if (item.name == "Cube")
-			world = cubeWorld;
-
-		DirectX::XMMATRIX wvp = world * view * projection;
+		DirectX::XMMATRIX wvp = playerWorld * view * projection;
 
 		ObjectConstants cb;
 		cb.UseLight = false;
@@ -121,9 +133,9 @@ void Renderer::Update(float _deltaTime) {
 
 		void* data;
 		D3D12_RANGE readRange = {};
-		item.constantBuffer->Map(0, &readRange, &data);
+		rend.constantBuffer->Map(0, &readRange, &data);
 		memcpy(data, &cb, sizeof(cb));
-		item.constantBuffer->Unmap(0, nullptr);
+		rend.constantBuffer->Unmap(0, nullptr);
 	}
 }
 
@@ -172,22 +184,20 @@ void Renderer::DrawScene()
 
 	auto commandList = mCommandManager.GetCommandList();
 
-	for (auto& item : mRenderItems)
+	for (auto& item : mEntities)
 	{
-		item.mesh->Bind(commandList);
+		RenderComponent& rend = ECS::GetInstance().getComponent<RenderComponent>(mPlayer->mEntity);
+		rend.mesh->Bind(commandList);
 
 		// Juste passer le constant buffer de l'objet (cube)
 		commandList->SetGraphicsRootConstantBufferView(
 			0,
-			item.constantBuffer->GetGPUVirtualAddress()
+			rend.constantBuffer->GetGPUVirtualAddress()
 		);
 
-		// Ne pas mettre de lumière ni de texture
-		// commandList->SetGraphicsRootConstantBufferView(1, mLightConstantBuffer->GetGPUVirtualAddress());
-		// commandList->SetGraphicsRootDescriptorTable(2, mDiffuseMapGpuHandle);
 
 		commandList->DrawIndexedInstanced(
-			item.mesh->GetIndexCount(),
+			rend.mesh->GetIndexCount(),
 			1,  // instance count
 			0,  // start index
 			0,  // base vertex
@@ -195,7 +205,7 @@ void Renderer::DrawScene()
 		);
 	}
 }
-void Renderer::CreateConstantBuffer(RenderItem& item)
+void Renderer::CreateConstantBuffer(RenderComponent& comp)
 {
 	UINT alignedSize = (sizeof(ObjectConstants) + 255) & ~255;
 
@@ -210,13 +220,12 @@ void Renderer::CreateConstantBuffer(RenderItem& item)
 	desc.MipLevels = 1;
 	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	desc.SampleDesc.Count = 1;
-
 	mDeviceManager.GetDevice()->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&item.constantBuffer)
+		IID_PPV_ARGS(&comp.constantBuffer)
 	);
 }
