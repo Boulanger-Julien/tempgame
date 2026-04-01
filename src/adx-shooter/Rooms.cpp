@@ -68,7 +68,6 @@ void Rooms::OnUpdate(float _dt)
 {
 	ECS::GetInstance().getComponent<ColliderComponent>(ground) = mCollider;
 	LimitMapSystem::CheckLimitMap(*mPlayer, *this);
-	mNumberOfRoomRenderer->DrawTxt("Room " + std::to_string(numberOfRoom), 40, 90, 24);
 
 	if (InputSystem::isKeyUp('E') && door.changeRoom == true)
 	{

@@ -8,9 +8,20 @@
 
 class GameManager;
 
+    enum RoomType
+    {
+        ENEMY_ROOM,
+        BOSS_ROOM,
+        TREASURE_ROOM,
+		LOBBY_ROOM
+	};
 class Rooms
 {
 public:
+
+
+	RoomType type = LOBBY_ROOM;
+
     Rooms();   
     ~Rooms();
      void Initialize(Window* _window);
@@ -37,15 +48,15 @@ public:
 	int RoomToBoss = 5;
 
     std::vector<Enemy*> EnemyRooms;
-	int numberOfRoom = -1;
+	int numberOfRoom = 0;
 
-    int numMaxInDunjeon = -2;
+    int numMaxInDunjeon = 0;
+    TextRenderer* mNumberOfRoomRenderer;
+    Player* mPlayer;
 protected: 
     void UpdateComponent();
 	Window* mWindow;
 
-    Player* mPlayer;
-    TextRenderer* mNumberOfRoomRenderer;
 
 
 };

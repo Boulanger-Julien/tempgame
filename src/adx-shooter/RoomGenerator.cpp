@@ -2,38 +2,77 @@
 #include "RoomGenerator.h"
 #include "GameManager.h"
 
-#define ENEMY_ROOM 1
-#define BOSS_ROOM 2
-#define TREASURE_ROOM 3
+#define NEXT_ENEMY 1
+#define NEXT_BOSS 2
+#define NEXT_TREASURE 3
+#define NEXT_LOBBY 4
 void RoomGenerator::GenerateRoom(Rooms& _room)
 {
-        //mWindow->RemoveEntityResources(currentRoom.ground);
+	int choiceRoom = NULL;
+    switch (_room.type)
+    {
+    case RoomType::ENEMY_ROOM:
+        _room.numberOfRoom++;
+        _room.RoomToBoss--;
+        break;
+    case RoomType::BOSS_ROOM:
+        _room.RoomToBoss = 5;
+		choiceRoom = NEXT_TREASURE;
+        break;
+    case RoomType::TREASURE_ROOM:
+        _room.numberOfRoom++;
+        _room.RoomToBoss--;
+        //TODO : Destroy Treasure
+        break;
+    case RoomType::LOBBY_ROOM:
+        _room.numberOfRoom = 1;
+		_room.numMaxInDunjeon = rand() % 10 + 6;
+        _room.RoomToBoss --;
+        //TODO : Destroy Treasure
+        break;
+	default:
+		break;
+    };
+
+
+    if (choiceRoom == NULL)
+    {
         int color = (rand() % _room.EnemyRateRoom + _room.TreasureRateRoom) + 1;
-        int choiceRoom= NULL;
-     if (color <= _room.EnemyRateRoom) {
-         choiceRoom = ENEMY_ROOM;
-	 }
-     else if (color <= _room.EnemyRateRoom + _room.TreasureRateRoom) {
-         choiceRoom = TREASURE_ROOM; // TREASURE ROOM
-     }
-
-	 _room.RoomToBoss--;
-
-     if (_room.RoomToBoss == 0)
-     {
-         choiceRoom = BOSS_ROOM;
-		 _room.RoomToBoss = 5;
-     }
+        if (color <= _room.EnemyRateRoom) {
+            choiceRoom = NEXT_ENEMY;
+        }
+        else if (color <= _room.EnemyRateRoom + _room.TreasureRateRoom) {
+            choiceRoom = NEXT_TREASURE;
+        }
+        if (_room.RoomToBoss == 0)
+        {
+            choiceRoom = NEXT_BOSS;
+            _room.RoomToBoss = 5;
+        }
+        if (_room.numberOfRoom > _room.numMaxInDunjeon)
+        {
+            choiceRoom = NEXT_LOBBY;
+            _room.numberOfRoom = 0;
+            _room.numMaxInDunjeon = 0;
+            _room.RoomToBoss = 5;
+        }
+    }
 
      switch (choiceRoom)
      {
-        case ENEMY_ROOM:
+        case NEXT_ENEMY:
+			_room.type = RoomType::ENEMY_ROOM;
             AddEnemies(_room);
 			break;
-        case BOSS_ROOM:
+        case NEXT_BOSS:
+            _room.type = RoomType::BOSS_ROOM;
             GameManager::GetInstance().SpawnBoss(0,0);
             break;
-		case TREASURE_ROOM:
+		case NEXT_TREASURE:
+            _room.type = RoomType::TREASURE_ROOM;
+            break;
+		case NEXT_LOBBY:
+            _room.type = RoomType::LOBBY_ROOM;
             break;
 		default:
 			break;
@@ -54,6 +93,10 @@ void RoomGenerator::AddEnemies(Rooms& _room)
 
 void RoomGenerator::PlaceDoor(Rooms& _room)
 {
+    if (_room.type == RoomType::LOBBY_ROOM || _room.type == RoomType::BOSS_ROOM) {
+        _room.door.mTransform.position = FLOAT3(0, 1, 48); // Porte en haut
+        return;
+    }
     int direction = (rand() % 2) + 1; 
 	int linePosition = (rand() % 80) - 40;
     if (direction == 1) {
@@ -66,6 +109,10 @@ void RoomGenerator::PlaceDoor(Rooms& _room)
 
 void RoomGenerator::PlacePlayer(Rooms& _room)
 {
+    if (_room.type == RoomType::LOBBY_ROOM) {
+        _room.mPlayer->GetTransform().position = FLOAT3(0, 2, 0);
+        return;
+	}
     FLOAT3 posDoor = _room.door.mTransform.position;
-  GameManager::GetInstance().GetPlayer()->GetTransform().position = FLOAT3(-posDoor.x, 2, -posDoor.z);
+    GameManager::GetInstance().GetPlayer()->GetTransform().position = FLOAT3(-posDoor.x, 2, -posDoor.z);
 }
