@@ -135,6 +135,7 @@ Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, flo
 	newBullet->m_speed = 0;
 	newBullet->mTransform.scale = FLOAT3(width, 0.5f, range);
 	newBullet->mCollider.updateCollider();
+    newBullet->type = BulletType::LINE;
 	transformSystem::RotateAround(newBullet->mTransform, ECS::GetInstance().getComponent<transformComponent>(sender), newBullet->mTransform.scale.z / 2);
 	ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
 	ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;

@@ -389,7 +389,11 @@ void GameManager::BulletUpdate()
             {
                 if (bullet->type == BULLET)
                 bullet->toBeDestroyed = true;
-			}
+                else {
+                    //bullet->mTransform.scale.z -=1 ;
+					transformSystem::MoveForward(bullet->mTransform, 577);
+                }
+            }
         }
 
         if (!bullet->toBeDestroyed) {
