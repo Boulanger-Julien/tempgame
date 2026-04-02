@@ -13,6 +13,7 @@ public:
 	Entity mEntity;
 	Weapon* mWeapon;
 
+
 	Player();
 	void ChooseClass(int classID);
 	void Update(const Ray& mouseRay);
@@ -31,7 +32,10 @@ public:
 	HealthComponent& GetHealthComponent() { return mHealthComponent; }
 	float GetHealth() { return mHealthComponent.mHealth; }
 	int aimType = AimType::Mouse;
+
+	Player* GetInstance() { return mInstance; }
 private:
+	Player* mInstance;
 
 	transformComponent mTransform;
 	ColliderComponent mCollider;

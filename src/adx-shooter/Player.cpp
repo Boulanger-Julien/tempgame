@@ -21,6 +21,8 @@ Player::Player() {
 	mStats.SetStats(100, 2, 0, 0, 20, 0, 35, 0, 0);
 	mHealthComponent.mMaxHealth = mStats.mHealth;
 	mHealthComponent.mHealth = mStats.mHealth;
+
+	mInstance = this;
 }
 
 void Player::ChooseClass(int classID) {
