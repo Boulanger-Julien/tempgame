@@ -27,6 +27,7 @@ public:
     ~Rooms();
      void Initialize(Window* _window);
 	 void Update();
+	 void Draw();
 	 void OnUpdate(float deltatime);
 
 	std::vector<MeshGeometry> roomMeshes;// à voir plus tard
@@ -54,7 +55,6 @@ public:
 	int numberOfRoom = 0;
 
     int numMaxInDunjeon = 0;
-    TextRenderer* mNumberOfRoomRenderer;
     Player* mPlayer;
     std::string timerStr;
 protected: 
@@ -65,7 +65,18 @@ protected:
     int minutes     = 0;
     int seconds     = 0;
     int centiemes   = 0;
+	int mdifficulty = 0;
+	bool isChoosingDifficulty = false;
 
+    TextRenderer* mNumberOfRoomRenderer;
+    TextRenderer* mChooseDifficultyRenderer;
+	std::string mDifficultyStr = "";
+	friend class RoomGenerator;
+
+
+
+
+    TextRenderer* mTimerTextRenderer; 
 
 };
 

@@ -193,11 +193,10 @@ void GameManager::Draw()
 	timer += Timer::GetInstance()->GetDeltatime();
 
     {
+        currentRoom.Draw();
 		mManaTextRenderer->DrawTxt(0/*std::to_string((int)mPlayer->GetStats().mManaPoints)*/ + "/" + std::to_string((int)mPlayer->GetStats().mMana), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
         mLifeTextRenderer->DrawTxt(mPlayer->GetHealth() > 0 ? std::to_string((int)mPlayer->GetHealth()) + "/" + std::to_string((int)mPlayer->GetStats().mHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
-        mTimerTextRenderer->DrawTxt(currentRoom.timerStr, 20, 60, 24);
-        currentRoom.mNumberOfRoomRenderer->DrawTxt("Room " + std::to_string(currentRoom.numberOfRoom) + " / " + std::to_string(currentRoom.numMaxInDunjeon), 40, 90, 24);
         //currentRoom.mNumberOfRoomRenderer->DrawTxt("Rooggegmy", 60, 220, 24);
 
         if (mBossList.size() > 0)

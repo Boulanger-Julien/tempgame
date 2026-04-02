@@ -56,8 +56,14 @@ void Rooms::Initialize(Window* _window)
 	mNumberOfRoomRenderer = new TextRenderer(_window);
 	mNumberOfRoomRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 
+	mTimerTextRenderer = new TextRenderer(mWindow);
+	mTimerTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+
+	mChooseDifficultyRenderer = new TextRenderer(mWindow);
+	mChooseDifficultyRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 
 }
+
 void Rooms::Update()
 {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
@@ -94,6 +100,22 @@ void Rooms::Update()
 		entity.updateCollider();
 	}
 }
+
+
+void Rooms::Draw()
+{
+	mTimerTextRenderer->DrawTxt(timerStr, 20, 60, 24); 
+	mNumberOfRoomRenderer->DrawTxt("Room " + std::to_string(numberOfRoom) + " / " + std::to_string(numMaxInDunjeon), 40, 90, 24);
+		mChooseDifficultyRenderer->DrawTxt(mDifficultyStr, 20, 220, 24);
+	if (isChoosingDifficulty)
+	{
+		mDifficultyStr = "Choose difficulty : 1 - Easy | 2 - Medium | 3 - Hard";
+	}
+	else mDifficultyStr = "";
+
+}
+
+
 void Rooms::OnUpdate(float _dt)
 {
 	ECS::GetInstance().getComponent<ColliderComponent>(ground) = mCollider;
@@ -131,9 +153,41 @@ void Rooms::OnUpdate(float _dt)
 	
 	if (InputSystem::isKeyUp('E') && door.changeRoom == true)
 	{
-
-		RoomGenerator::GenerateRoom(*this);
+		if (mdifficulty != 0)
+		{
+			RoomGenerator::GenerateRoom(*this);
+		}
+		else 
+		{
+			isChoosingDifficulty = true;
+		}
 	}
+
+	if (isChoosingDifficulty)
+	{
+		if (InputSystem::isKeyDown('1'))
+		{
+			mdifficulty = 1;
+			isChoosingDifficulty = false;
+			RoomGenerator::GenerateRoom(*this);
+		}
+		else if (InputSystem::isKeyDown('2'))
+		{
+			mdifficulty = 2;
+			isChoosingDifficulty = false;
+			RoomGenerator::GenerateRoom(*this);
+		}
+		else if (InputSystem::isKeyDown('3'))
+		{
+			mdifficulty = 3;
+			isChoosingDifficulty = false;
+			RoomGenerator::GenerateRoom(*this);
+		}
+	}
+
+
+
+
 	
 }
 
