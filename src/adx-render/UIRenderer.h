@@ -8,8 +8,12 @@
 class UIRenderer
 {
 public :
-	UIRenderer(int index, int width, int height, XMFLOAT4 color = XMFLOAT4(Colors::White), const wchar_t* filename = nullptr);
+	UIRenderer(XMFLOAT4 color, const wchar_t* filename = nullptr);
 	UIRenderer() = default;
 	MeshGeometry UIQuad;
+	void AddIndex(int index);
+	void PushIndex();
 private: 
+	std::vector<int> mIndexToPush;
+	std::wstring mFilename;
 };

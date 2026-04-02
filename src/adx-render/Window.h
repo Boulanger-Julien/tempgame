@@ -22,13 +22,14 @@ public:
 
 	void BeginFrame();
 	void EndFrame();
-	MeshGeometry BuildMesh(std::vector<Vertex>& vertices, std::vector<std::uint32_t>& indices, int index, const wchar_t* filename = nullptr);
+	MeshGeometry BuildMesh(std::vector<Vertex>& vertices, std::vector<std::uint32_t>& indices, const wchar_t* filename = nullptr);
 
 	void ResetCommandList();
-	MeshGeometry InitUI(const wchar_t* filename, int index, float width, float height, XMFLOAT4 color);
+	MeshGeometry InitUI(const wchar_t* filename, XMFLOAT4 color);
 
 	MeshGeometry CreateDynamicMesh(int index, UINT maxVertices, UINT maxIndices);
 	void RegisterExistingMeshForEntity(int entityID);
+	void SetTextureToIndex(std::vector<int> index, const wchar_t* filename = nullptr);
 	void RemoveEntityResources(int entityID);
 
 private:

@@ -117,7 +117,7 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
         window->RegisterExistingMeshForEntity(newBullet->mEntity);
         XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(newBullet->mTransform);
         window->Update(newBullet->mEntity, bulletWorld);
-        newBullet->mDamage = _damage/bullets;
+        newBullet->mDamage = (_damage / bullets)*2;
         newShot->bulletList.push_back(newBullet);
         ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
     }

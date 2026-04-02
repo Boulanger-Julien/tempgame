@@ -20,7 +20,7 @@ bool Enemy::CheckDistanceToAttackPlayer()
 //
 void Enemy::Init(int _playerIndex, Window* _window)
 {
-	healthBar = ECS::GetInstance().createEntity(transformComponent(0, 0));
+	healthBar = ECS::GetInstance().createEntity(transformComponent());
 	GameManager::GetInstance().mUIMesh.insert({ healthBar, GameManager::GetInstance().mHealthBarMesh.UIQuad});
 	ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = 100;
 	ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.y = 10;

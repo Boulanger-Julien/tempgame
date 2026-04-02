@@ -65,9 +65,6 @@ bool GameManager::Initialize()
 	newBoss = new Makhina_Boss(mPlayer->mEntity);
     MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), 1,1,1, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
-    Entity cloud = ecs.createEntity(transformComponent(0, 10, 0));
-    MeshGeometry cloudMesh = MeshCreator::CreateCustomMesh(mWindow, cloud, "..\\..\\res\\Json\\Cloud.json", 1000, (XMFLOAT4)Colors::White);
-    mEntityMesh.insert({ cloud, cloudMesh });
     //Setup camera
     {
         mCamera.SetPosition(0.0f, 3.0f, -10.0f);
@@ -88,26 +85,34 @@ bool GameManager::Initialize()
 
     //Generate health bar
     {
-        Entity healthExtBar = ecs.createEntity(transformComponent(offsetHBX, offsetHBY));
-        UIRenderer healthBarExtMesh(healthExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
-        mUIMesh.insert({ healthExtBar, healthBarExtMesh.UIQuad });
+		Entity healthExtBar = ecs.createEntity(transformComponent(offsetHBX, offsetHBY, 0, healthBarWidth, healthBarHeight));
+        UIRenderer healthBarExtMesh(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
+		healthBarExtMesh.AddIndex(healthExtBar);
+		healthBarExtMesh.PushIndex();
         healthBar = ecs.createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
-        UIRenderer healthBarMesh(healthBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Red));
-        mUIMesh.insert({ healthBar, healthBarMesh.UIQuad });
-		healthBossBar = ecs.createEntity(transformComponent(700, 70, 0, 500, 20));
-		healthBossBar2 = ecs.createEntity(transformComponent(700, 170, 0, 500, 20));
-        UIRenderer healthBarBossMesh(healthBossBar, 1, 1, XMFLOAT4(Colors::Red));
-        UIRenderer healthBarBoss2Mesh(healthBossBar2, 1, 1, XMFLOAT4(Colors::Red));
-		mUIMesh.insert({ healthBossBar, healthBarBossMesh.UIQuad });
-		mUIMesh.insert({ healthBossBar2, healthBarBoss2Mesh.UIQuad });
-		mHealthBarMesh = healthBarBossMesh;
+        healthBossBar = ecs.createEntity(transformComponent(700, 70, 0, 500, 20));
+        healthBossBar2 = ecs.createEntity(transformComponent(700, 170, 0, 500, 20));
+		UIRenderer healthBarMesh(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+		healthBarMesh.AddIndex(healthBar);
+		healthBarMesh.AddIndex(healthBossBar);
+		healthBarMesh.AddIndex(healthBossBar2);
+		healthBarMesh.PushIndex();
+        mUIMesh.insert({ healthExtBar, healthBarExtMesh.UIQuad });
+		mHealthBarMesh = healthBarMesh;
+        mUIMesh.insert({ healthBar, mHealthBarMesh.UIQuad });
+		mUIMesh.insert({ healthBossBar, mHealthBarMesh.UIQuad });
+		mUIMesh.insert({ healthBossBar2, mHealthBarMesh.UIQuad });
     }
     {
-        Entity manaExtBar = ecs.createEntity(transformComponent(offsetMBX, offsetMBY));
-        UIRenderer healthBarExtMesh(manaExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
+		Entity manaExtBar = ecs.createEntity(transformComponent(offsetMBX, offsetMBY, 0, healthBarWidth, healthBarHeight));
+        UIRenderer healthBarExtMesh(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
+		healthBarExtMesh.AddIndex(manaExtBar);
+		healthBarExtMesh.PushIndex();
         mUIMesh.insert({ manaExtBar, healthBarExtMesh.UIQuad });
         manaBar = ecs.createEntity(transformComponent(offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f));
-        UIRenderer healthBarMesh(manaBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Blue));
+        UIRenderer healthBarMesh(XMFLOAT4(0,0,1,1));
+		healthBarMesh.AddIndex(manaBar);
+		healthBarMesh.PushIndex();
         mUIMesh.insert({ manaBar, healthBarMesh.UIQuad });
     }
     mWindow->ExecuteInitCommands();
@@ -358,6 +363,7 @@ void GameManager::GenerateRoom()
     {
         mDoorOpened++;
     }
+	color = 5;
     //if (currentRoom.generated == false)
     //{
     //    currentRoom.road = MeshCreator::CreateBox(mWindow, currentRoom.ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray);
@@ -564,7 +570,8 @@ void GameManager::UpdateMatrix()
 
 void GameManager::UpdateBar()
 {
-    ecs.getComponent<transformComponent>(healthBar).scale.x = mPlayer->GetHealth() / mPlayer->GetStats().mHealth;
+    ecs.getComponent<transformComponent>(healthBar).scale.x = (mPlayer->GetHealth() / mPlayer->GetStats().mHealth) * healthBarWidth *0.9;
+	ecs.getComponent<transformComponent>(healthBar).scale.y = healthBarHeight * 0.35f;
 	if (mBossList.size() > 0)
     {
         ecs.getComponent<transformComponent>(healthBossBar).scale.x = (mBossList[0]->GetHealth() / mBossList[0]->GetMaxHealth()) * 500;

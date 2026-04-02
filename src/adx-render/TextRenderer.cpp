@@ -36,8 +36,8 @@ bool TextRenderer::Initialize(const wchar_t* spriteFile, int cols, int rows,
     std::vector<Vertex> dummyV;
     std::vector<uint32_t> dummyI;
     std::wstring fullPath = L"..\\..\\res\\Textures\\" + mSpriteFile;
-    mWindow->BuildMesh(dummyV, dummyI, mMeshIndex, fullPath.c_str());
-
+    mWindow->BuildMesh(dummyV, dummyI, fullPath.c_str());
+	mWindow->SetTextureToIndex({ mMeshIndex }, fullPath.c_str());
     mInitialized = true;
     return true;
 }

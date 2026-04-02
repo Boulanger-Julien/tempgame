@@ -99,12 +99,15 @@ MeshGeometry MeshCreator::CreateBox(Window* win, int index, float width, float h
 	{
 		path = L"..\\..\\res\\Textures\\";
 		path += filepath;
-		return win->BuildMesh(vertices, indices, index, path.c_str());
+		win->SetTextureToIndex({ index }, path.c_str());
+		return win->BuildMesh(vertices, indices, path.c_str());
 
 	}
 	else
 		{
-		return win->BuildMesh(vertices, indices, index, filepath);
+		win->SetTextureToIndex({ index }, filepath);
+
+		return win->BuildMesh(vertices, indices, filepath);
 	}
 }
 
@@ -289,11 +292,17 @@ Road MeshCreator::CreateRoad(Window* win, int index, float width, float length1,
 	{
 		path = L"..\\..\\res\\Textures\\";
 		path += filepath;
-		return Road(FLOAT2(0, 0), FLOAT2(xPos, zPos), points, win->BuildMesh(vertices, indices, index, path.c_str()));
+		win->SetTextureToIndex({ index }, path.c_str());
+
+		return Road(FLOAT2(0, 0), FLOAT2(xPos, zPos), points, win->BuildMesh(vertices, indices, path.c_str()));
 
 	}
 	else
-		return Road(FLOAT2(0, 0), FLOAT2(xPos, zPos), points, win->BuildMesh(vertices, indices, index, filepath));
+	{
+		win->SetTextureToIndex({ index }, filepath);
+
+		return Road(FLOAT2(0, 0), FLOAT2(xPos, zPos), points, win->BuildMesh(vertices, indices, filepath));
+	}
 }
 
 MeshGeometry MeshCreator::CreateMount(Window* win, int index, int rows, int cols, int height, XMFLOAT4 colorTop, XMFLOAT4 colorBottom)
@@ -337,7 +346,9 @@ MeshGeometry MeshCreator::CreateMount(Window* win, int index, int rows, int cols
 		}
 	}
 	ComputeNormals(vertices, indices);
-	return win->BuildMesh(vertices, indices, index, nullptr);
+	win->SetTextureToIndex({ index }, nullptr);
+
+	return win->BuildMesh(vertices, indices, nullptr);
 }
 
 MeshGeometry MeshCreator::CreateBall(Window* win, int index, float radius, int sliceCount, int stackCount, XMFLOAT4 color, const wchar_t* filepath)
@@ -379,11 +390,17 @@ MeshGeometry MeshCreator::CreateBall(Window* win, int index, float radius, int s
 	{
 		path = L"..\\..\\res\\Textures\\";
 		path += filepath;
-		return win->BuildMesh(vertices, indices, index, path.c_str());
+		win->SetTextureToIndex({ index }, path.c_str());
+
+		return win->BuildMesh(vertices, indices, path.c_str());
 
 	}
 	else 
-		return win->BuildMesh(vertices, indices, index, filepath);
+	{
+		win->SetTextureToIndex({ index }, filepath);
+
+		return win->BuildMesh(vertices, indices, filepath);
+	}
 }
 
 MeshGeometry MeshCreator::CreateDiamond(Window* win, int index, float width, float height, float midHeight, float depth, int sliceCount, XMFLOAT4 color, const wchar_t* filepath)
@@ -447,11 +464,17 @@ MeshGeometry MeshCreator::CreateDiamond(Window* win, int index, float width, flo
 	{
 		path = L"..\\..\\res\\Textures\\";
 		path += filepath;
-		return win->BuildMesh(vertices, indices, index, path.c_str());
+		win->SetTextureToIndex({ index }, path.c_str());
+
+		return win->BuildMesh(vertices, indices, path.c_str());
 
 	}
 	else
-		return win->BuildMesh(vertices, indices, index, filepath);
+	{
+		win->SetTextureToIndex({ index }, filepath);
+
+		return win->BuildMesh(vertices, indices, filepath);
+	}
 }
 
 MeshGeometry MeshCreator::CreateCylinder(Window* win, int index, float bottomRadius, float topRadius, float height, int sliceCount, int stackCount, XMFLOAT4 color, const wchar_t* filepath)
@@ -507,12 +530,16 @@ MeshGeometry MeshCreator::CreateCylinder(Window* win, int index, float bottomRad
 	{
 		path = L"..\\..\\res\\Textures\\";
 		path += filepath;
-		return win->BuildMesh(vertices, indices, index, path.c_str());
+		win->SetTextureToIndex({ index }, path.c_str());
+
+		return win->BuildMesh(vertices, indices, path.c_str());
 
 	}
 	else
 	{
-		return win->BuildMesh(vertices, indices, index, filepath);
+		win->SetTextureToIndex({ index }, filepath);
+
+		return win->BuildMesh(vertices, indices, filepath);
 	}
 }
 
@@ -565,12 +592,16 @@ MeshGeometry MeshCreator::CreateCone(Window* win, int index, float radius, float
 	{
 		path = L"..\\..\\res\\Textures\\";
 		path += filepath;
-		return win->BuildMesh(vertices, indices, index, path.c_str());
+		win->SetTextureToIndex({ index }, path.c_str());
+
+		return win->BuildMesh(vertices, indices, path.c_str());
 
 	}
 	else
-		{
-		return win->BuildMesh(vertices, indices, index, filepath);
+	{
+		win->SetTextureToIndex({ index }, filepath);
+
+		return win->BuildMesh(vertices, indices, filepath);
 	}
 }
 
@@ -613,12 +644,16 @@ MeshGeometry MeshCreator::CreateTorus(Window* win, int index, float majorRadius,
 	{
 		path = L"..\\..\\res\\Textures\\";
 		path += filepath;
-		return win->BuildMesh(vertices, indices, index, path.c_str());
+		win->SetTextureToIndex({ index }, path.c_str());
+
+		return win->BuildMesh(vertices, indices, path.c_str());
 
 	}
 	else
 	{
-		return win->BuildMesh(vertices, indices, index, filepath);
+		win->SetTextureToIndex({ index }, filepath);
+
+		return win->BuildMesh(vertices, indices, filepath);
 	}
 }
 
@@ -673,12 +708,16 @@ MeshGeometry MeshCreator::CreatePyramid(Window* win, int index, float width, flo
 	{
 		path = L"..\\..\\res\\Textures\\";
 		path += filepath;
-		return win->BuildMesh(vertices, indices, index, path.c_str());
+		win->SetTextureToIndex({ index }, path.c_str());
+
+		return win->BuildMesh(vertices, indices, path.c_str());
 
 	}
 	else
 	{
-		return win->BuildMesh(vertices, indices, index, filepath);
+		win->SetTextureToIndex({ index }, filepath);
+
+		return win->BuildMesh(vertices, indices, filepath);
 	}
 }
 
@@ -748,12 +787,16 @@ MeshGeometry MeshCreator::CreateCustomMesh(Window* win, int index, const char* j
 		{
 			path = L"..\\..\\res\\Textures\\";
 			path += filepath;
-			return win->BuildMesh(mergedVertices, mergedIndices, index, path.c_str());
+			win->SetTextureToIndex({ index }, path.c_str());
+
+			return win->BuildMesh(vertices, indices, path.c_str());
 
 		}
 		else
-			{
-			return win->BuildMesh(mergedVertices, mergedIndices, index, filepath);
+		{
+			win->SetTextureToIndex({ index }, filepath);
+
+			return win->BuildMesh(vertices, indices, filepath);
 		}
 	}
 	else
@@ -764,11 +807,16 @@ MeshGeometry MeshCreator::CreateCustomMesh(Window* win, int index, const char* j
 		{
 			path = L"..\\..\\res\\Textures\\";
 			path += filepath;
-			return win->BuildMesh(vertices, indices, index, path.c_str());
+			win->SetTextureToIndex({ index }, path.c_str());
+
+			return win->BuildMesh(vertices, indices, path.c_str());
+
 		}
 		else
-			{
-			return win->BuildMesh(vertices, indices, index, filepath);
+		{
+			win->SetTextureToIndex({ index }, filepath);
+
+			return win->BuildMesh(vertices, indices, filepath);
 		}
 	}
 }
