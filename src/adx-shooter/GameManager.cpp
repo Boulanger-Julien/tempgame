@@ -390,8 +390,8 @@ void GameManager::BulletUpdate()
                 if (bullet->type == BULLET)
                 bullet->toBeDestroyed = true;
                 else {
-                    //bullet->mTransform.scale.z -=1 ;
-					transformSystem::MoveForward(bullet->mTransform, 577);
+                    bullet->mTransform.scale.z -= 2;
+                    transformSystem::MoveForward(ECS::GetInstance().getComponent<transformComponent>(bullet->mEntity), -1);
                 }
             }
         }
