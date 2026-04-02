@@ -120,7 +120,7 @@ void Rooms::OnUpdate(float _dt)
 	}
 	else if (type != LOBBY_ROOM)
 	{
-		timer += Timer::GetInstance()->GetDeltatime();
+		timer += _dt;
 		seconds = (int)timer % 60;
 		minutes = ((int)timer % 3600) / 60;
 		hours = (int)timer / 3600;

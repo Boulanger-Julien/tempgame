@@ -16,19 +16,18 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
         _room.RoomToBoss--;
         break;
     case RoomType::BOSS_ROOM:
+        _room.numberOfRoom++;
         _room.RoomToBoss = 5;
 		choiceRoom = NEXT_TREASURE;
         break;
     case RoomType::TREASURE_ROOM:
         _room.numberOfRoom++;
         _room.RoomToBoss--;
-        //TODO : Destroy Treasure
         break;
     case RoomType::LOBBY_ROOM:
         _room.numberOfRoom = 1;
 		_room.numMaxInDunjeon = rand() % 10 + 6;
         _room.RoomToBoss --;
-        //TODO : Destroy Treasure
         break;
 	default:
 		break;
@@ -36,12 +35,10 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
 
     if (_room.mPlayer->GetHealthComponent().mHealth <= 0)
     {
-        //HealthSystem::RecoverHealth(_room.mPlayer->GetHealthComponent(), _room.mPlayer->GetHealthComponent().mMaxHealth);
         choiceRoom = NEXT_LOBBY;
         _room.numberOfRoom = 0;
         _room.numMaxInDunjeon = 0;
         _room.RoomToBoss = 5;
-       
 	}
 
     if (choiceRoom == NULL)

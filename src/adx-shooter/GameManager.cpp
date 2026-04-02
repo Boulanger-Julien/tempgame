@@ -191,13 +191,7 @@ void GameManager::Draw()
         mWindow->DrawUI(meshRef, entityID);
     }
 	timer += Timer::GetInstance()->GetDeltatime();
-    int hours = (int)timer / 3600;
-    int minutes = ((int)timer % 3600) / 60;
-    int seconds = (int)timer % 60;
-    int centiemes = (int)(timer * 100) % 100;
 
-    std::string timerStr = std::format("Timer : {:02}:{:02}:{:02}.{:02}",
-        hours, minutes, seconds, centiemes); 
     {
 		mManaTextRenderer->DrawTxt(0/*std::to_string((int)mPlayer->GetStats().mManaPoints)*/ + "/" + std::to_string((int)mPlayer->GetStats().mMana), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
@@ -238,10 +232,6 @@ void GameManager::Draw()
 
 void GameManager::Pause()
 {
-    //if (mPlayer->GetHealth() <= 0) {
-    //    mAppPaused = true;
-    //}
-
 	static bool spaceDown = false;
     // Toggle pause when F1 is pressed
     float playerHealth = mPlayer->GetHealth();
