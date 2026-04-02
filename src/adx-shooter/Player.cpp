@@ -128,7 +128,7 @@ void Player::Aim()
 			}
 		}
 
-		for (EnemyMarksman* enemy : GameManager::GetInstance().mEnemyList) {
+		for (Enemy* enemy : GameManager::GetInstance().mEnemyList) {
 			transformComponent& enemyTrans = ECS::GetInstance().getComponent<transformComponent>(enemy->mEntity);
 			float distance = sqrt(pow(playerTrans.position.x - enemyTrans.position.x, 2) + pow(playerTrans.position.z - enemyTrans.position.z, 2));
 			if (distance < closestDistance) {

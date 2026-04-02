@@ -4,6 +4,7 @@
 #include "Door.h"
 #include "MeshCreator.h" 
 #include "Enemy\Enemy.h"
+#include "Enemy/Boss.h"
 #include "adx-render/TextRenderer.h"
 
 class GameManager;
@@ -49,15 +50,21 @@ public:
 	int RoomToBoss = 5;
 
     std::vector<Enemy*> EnemyRooms;
+    std::vector<Boss*> BossList;
 	int numberOfRoom = 0;
 
     int numMaxInDunjeon = 0;
     TextRenderer* mNumberOfRoomRenderer;
     Player* mPlayer;
+    std::string timerStr;
 protected: 
     void UpdateComponent();
 	Window* mWindow;
-
+    float timer     = 0.0f;
+    int hours       = 0;
+    int minutes     = 0;
+    int seconds     = 0;
+    int centiemes   = 0;
 
 
 };

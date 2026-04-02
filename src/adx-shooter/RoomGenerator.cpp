@@ -34,6 +34,15 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
 		break;
     };
 
+    if (_room.mPlayer->GetHealthComponent().mHealth <= 0)
+    {
+        //HealthSystem::RecoverHealth(_room.mPlayer->GetHealthComponent(), _room.mPlayer->GetHealthComponent().mMaxHealth);
+        choiceRoom = NEXT_LOBBY;
+        _room.numberOfRoom = 0;
+        _room.numMaxInDunjeon = 0;
+        _room.RoomToBoss = 5;
+       
+	}
 
     if (choiceRoom == NULL)
     {
@@ -66,7 +75,7 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
 			break;
         case NEXT_BOSS:
             _room.type = RoomType::BOSS_ROOM;
-            GameManager::GetInstance().SpawnBoss(0,0);
+            _room.BossList.push_back( GameManager::GetInstance().SpawnBoss(0,0));
             break;
 		case NEXT_TREASURE:
             _room.type = RoomType::TREASURE_ROOM;

@@ -202,7 +202,7 @@ void GameManager::Draw()
 		mManaTextRenderer->DrawTxt(0/*std::to_string((int)mPlayer->GetStats().mManaPoints)*/ + "/" + std::to_string((int)mPlayer->GetStats().mMana), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
         mLifeTextRenderer->DrawTxt(mPlayer->GetHealth() > 0 ? std::to_string((int)mPlayer->GetHealth()) + "/" + std::to_string((int)mPlayer->GetStats().mHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
-        mTimerTextRenderer->DrawTxt(timerStr, 20, 60, 24);
+        mTimerTextRenderer->DrawTxt(currentRoom.timerStr, 20, 60, 24);
         currentRoom.mNumberOfRoomRenderer->DrawTxt("Room " + std::to_string(currentRoom.numberOfRoom) + " / " + std::to_string(currentRoom.numMaxInDunjeon), 40, 90, 24);
         //currentRoom.mNumberOfRoomRenderer->DrawTxt("Rooggegmy", 60, 220, 24);
 
@@ -238,9 +238,9 @@ void GameManager::Draw()
 
 void GameManager::Pause()
 {
-    if (mPlayer->GetHealth() <= 0) {
-        mAppPaused = true;
-    }
+    //if (mPlayer->GetHealth() <= 0) {
+    //    mAppPaused = true;
+    //}
 
 	static bool spaceDown = false;
     // Toggle pause when F1 is pressed
@@ -311,7 +311,7 @@ void GameManager::Shoot()
 }
 
 //?
-void GameManager::SpawnBoss(float x, float z) {
+Boss* GameManager::SpawnBoss(float x, float z) {
     newBoss = new Makhina_Boss(mPlayer->mEntity);
 
     newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
@@ -321,6 +321,7 @@ void GameManager::SpawnBoss(float x, float z) {
     mEntityMesh.insert({ newBoss->GetEntity(), MakhinaBossMesh });
     mWindow->Update(newBoss->GetEntity(), enemyWorld);
     mBossList.push_back(newBoss);
+	return newBoss;
 }
 
 void GameManager::CheckInput()
@@ -369,7 +370,7 @@ void GameManager::UpdateCam()
 
 void GameManager::EnemyUpdate()
 {
-    for (EnemyMarksman* enemy : mEnemyList) {
+    for (Enemy* enemy : mEnemyList) {
         enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
     }
     //Julien
@@ -399,7 +400,7 @@ void GameManager::BulletUpdate()
         if (!bullet->toBeDestroyed) {
             float maxS = max(bullet->mTransform.scale.x, max(bullet->mTransform.scale.z, bullet->mTransform.scale.y));
             float thresholdSq = (maxS + 3.0f) * (maxS + 3.0f);
-            for (EnemyMarksman* enemy : mEnemyList) {
+            for (Enemy* enemy : mEnemyList) {
                 if (enemy->isDead) continue;
                 if (bullet->entitiesToIgnore.count(enemy->mEntity)) continue;
                 float dx = bullet->mTransform.position.x - enemy->GetTransform().position.x;
@@ -534,7 +535,7 @@ void GameManager::Destroy() {
 
     // NETTOYAGE DES ENNEMIS (Même logique)
     if (!mDestroyEnemyList.empty()) {
-        for (EnemyMarksman* enemy : mDestroyEnemyList) {
+        for (Enemy* enemy : mDestroyEnemyList) {
             // 1. On le retire de la liste de l'Update LOGIQUE
             auto it = std::find(mEnemyList.begin(), mEnemyList.end(), enemy);
             if (it != mEnemyList.end()) {

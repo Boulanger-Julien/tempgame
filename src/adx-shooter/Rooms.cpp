@@ -12,7 +12,8 @@ Rooms::Rooms()
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(ground);
 	//road = MeshCreator::CreateBox(mWindow, ground, 100.0f, 1, 100, (XMFLOAT4)Colors::Gray); 
 	//mEntityMesh.insert({ ground, road });
-
+	timerStr = std::format("Timer : {:02}:{:02}:{:02}.{:02}",
+		hours, minutes, seconds, centiemes);
 	
 }
 
@@ -46,12 +47,16 @@ void Rooms::Initialize(Window* _window)
 		GameManager::GetInstance().mEntityMesh.insert({ wallEntities[i], wallMeshes[i]});
 	}
 
+	mWindow->RegisterExistingMeshForEntity(wallEntities[0]);
+	mWindow->RegisterExistingMeshForEntity(wallEntities[1]);
 
 
 	mPlayer = GameManager::GetInstance().GetPlayer();
 	door.Initialize(mWindow);
 	mNumberOfRoomRenderer = new TextRenderer(_window);
 	mNumberOfRoomRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+
+
 }
 void Rooms::Update()
 {
@@ -61,7 +66,7 @@ void Rooms::Update()
 	UpdateComponent();
 
 	OnUpdate(deltatime);
-	door.Update(EnemyRooms.size());
+	door.Update(EnemyRooms.size() + BossList.size());
 	for (Enemy* enemy : EnemyRooms)
 	{
 		if (enemy->isDead)
@@ -72,6 +77,18 @@ void Rooms::Update()
 			}
 		}
 	}
+
+	for (Boss* enemy : BossList)
+	{
+		if (enemy->IsAlive() == false)
+		{
+			auto it = std::find(BossList.begin(), BossList.end(), enemy);
+			if (it != BossList.end()) {
+				BossList.erase(it);
+			}
+		}
+	}
+
 	for (ColliderComponent entity : wallColliders)
 	{
 		entity.updateCollider();
@@ -82,6 +99,36 @@ void Rooms::OnUpdate(float _dt)
 	ECS::GetInstance().getComponent<ColliderComponent>(ground) = mCollider;
 	LimitMapSystem::CheckLimitMap(*mPlayer, *this);
 
+	
+	if (mPlayer->GetHealthComponent().mHealth <= 0)
+	{
+		GameManager* gameManager = &GameManager::GetInstance();
+		for (Bullet* bullet : GameManager::GetInstance().mBulletList) {
+			bullet->toBeDestroyed = true;
+		}
+		for (Enemy* enemy : EnemyRooms) {
+			GameManager::GetInstance().mDestroyEnemyList.push_back(enemy);
+			enemy->isDead = true;
+		}
+		for (Boss* boss : BossList) {
+			GameManager::GetInstance().mDestroyBossList.push_back(boss);
+			boss->TakeDamage(boss->GetHealth());
+		}
+		//GameManager::GetInstance().Destroy();
+		RoomGenerator::GenerateRoom(*this);
+		timer = 0.0f;
+	}
+	else if (type != LOBBY_ROOM)
+	{
+		timer += Timer::GetInstance()->GetDeltatime();
+		seconds = (int)timer % 60;
+		minutes = ((int)timer % 3600) / 60;
+		hours = (int)timer / 3600;
+		centiemes = (int)(timer * 100) % 100;
+		timerStr = std::format("Timer : {:02}:{:02}:{:02}.{:02}",
+			hours, minutes, seconds, centiemes);
+	}
+	
 	if (InputSystem::isKeyUp('E') && door.changeRoom == true)
 	{
 

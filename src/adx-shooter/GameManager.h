@@ -30,7 +30,7 @@ public:
 	void SpeedDown();
 	void Destroy();
 	Enemy* SpawnMob(float x, float z, int mob);
-	void SpawnBoss(float x, float z);
+	Boss* SpawnBoss(float x, float z);
 	float GetDeltatime();
 	void UpdateCam();
 	void Shoot();
@@ -51,8 +51,11 @@ public:
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;
 	std::vector<Boss*> mBossList;
-	std::vector<EnemyMarksman*> mEnemyList;
+	std::vector<Enemy*> mEnemyList;
 
+	std::vector<Enemy*> mDestroyEnemyList;
+
+	std::vector<Boss*> mDestroyBossList;
 private:
 	static GameManager* instance;//SINGELTON
 
@@ -103,9 +106,6 @@ private:
 
 	Road road;
 
-	std::vector<EnemyMarksman*> mDestroyEnemyList;
-
-	std::vector<Boss*> mDestroyBossList;
 
 	std::vector<Bullet*> mDestroyBulletList;
 
