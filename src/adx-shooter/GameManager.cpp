@@ -13,14 +13,18 @@ GameManager* GameManager::instance = nullptr;
 GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
 {
     instance = this;
+    instance->mhInstance = hInstance;
 
-    mhInstance = hInstance;
+}
+
+bool GameManager::Initialize()
+{
     //Initialize window
     {
         mWindow = new Window(mhInstance);
         mWindow->Initialize(1920, 1080);
     }
-	mPlayer = new Player();
+    mPlayer = new Player();
     mLifeTextRenderer = new TextRenderer(mWindow);
     mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
     mManaTextRenderer = new TextRenderer(mWindow);
@@ -33,10 +37,7 @@ GameManager::GameManager(HINSTANCE hInstance, int winW, int winH)
     mBossNameTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
     mBossName2TextRenderer = new TextRenderer(mWindow);
     mBossName2TextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-}
 
-bool GameManager::Initialize()
-{
     srand(time(NULL));
     ecs = ECS::GetInstance();
 
@@ -88,27 +89,27 @@ bool GameManager::Initialize()
     //Generate health bar
     {
         Entity healthExtBar = ecs.createEntity(transformComponent(offsetHBX, offsetHBY));
-        UIRenderer healthBarExtMesh(*mWindow, healthExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
+        UIRenderer healthBarExtMesh(healthExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
         mUIMesh.insert({ healthExtBar, healthBarExtMesh.UIQuad });
         healthBar = ecs.createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
+        UIRenderer healthBarMesh(healthBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Red));
+        mUIMesh.insert({ healthBar, healthBarMesh.UIQuad });
 		healthBossBar = ecs.createEntity(transformComponent(700, 70, 0, 500, 20));
 		healthBossBar2 = ecs.createEntity(transformComponent(700, 170, 0, 500, 20));
-        UIRenderer healthBarMesh(*mWindow, healthBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Red));
-        UIRenderer healthBarBossMesh(*mWindow, healthBossBar, 1, 1, XMFLOAT4(Colors::Red));
-        UIRenderer healthBarBoss2Mesh(*mWindow, healthBossBar2, 1, 1, XMFLOAT4(Colors::Red));
-        mUIMesh.insert({ healthBar, healthBarMesh.UIQuad });
+        UIRenderer healthBarBossMesh(healthBossBar, 1, 1, XMFLOAT4(Colors::Red));
+        UIRenderer healthBarBoss2Mesh(healthBossBar2, 1, 1, XMFLOAT4(Colors::Red));
 		mUIMesh.insert({ healthBossBar, healthBarBossMesh.UIQuad });
 		mUIMesh.insert({ healthBossBar2, healthBarBoss2Mesh.UIQuad });
+		mHealthBarMesh = healthBarBossMesh;
     }
     {
         Entity manaExtBar = ecs.createEntity(transformComponent(offsetMBX, offsetMBY));
-        UIRenderer healthBarExtMesh(*mWindow, manaExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
+        UIRenderer healthBarExtMesh(manaExtBar, healthBarWidth, healthBarHeight, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
         mUIMesh.insert({ manaExtBar, healthBarExtMesh.UIQuad });
         manaBar = ecs.createEntity(transformComponent(offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f));
-        UIRenderer healthBarMesh(*mWindow, manaBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Blue));
+        UIRenderer healthBarMesh(manaBar, healthBarWidth * 0.9f, healthBarHeight * 0.35f, XMFLOAT4(Colors::Blue));
         mUIMesh.insert({ manaBar, healthBarMesh.UIQuad });
     }
-
     mWindow->ExecuteInitCommands();
     mWindow->FlushCommandQueue();
     return true;
@@ -212,7 +213,7 @@ void GameManager::Draw()
                 size = 22;
             else
                 size = 500 / size;
-            mBossNameTextRenderer->DrawTxt(mBossList[0]->GetName(), 700, 10, size);
+            mBossNameTextRenderer->DrawTxt(mBossList[0]->GetName(), 700, 50, size);
             if (mBossList.size() > 1)
             {
 				size = mBossList[1]->GetName().size();
@@ -220,7 +221,7 @@ void GameManager::Draw()
 					size = 22;
 				else
 					size = 500 / size;
-                mBossName2TextRenderer->DrawTxt(mBossList[1]->GetName(), 700, 110, 24);
+                mBossName2TextRenderer->DrawTxt(mBossList[1]->GetName(), 700, 110, size);
             }
         }
         else
@@ -632,12 +633,24 @@ void GameManager::Destroy() {
 
 void GameManager::SpawnMob(float x, float z, int mob) {
     EnemyMarksman* newEnemy = new EnemyMarksman();
-    newEnemy->Init(mPlayer->mEntity);
+    newEnemy->Init(mPlayer->mEntity, mWindow);
+
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
-    mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
+
+    // On enregistre les meshs dans nos dictionnaires
     mEntityMesh.insert({ newEnemy->mEntity, mEnemyMesh });
+
+    // IMPORTANT: On enregistre l'entité dans Window SANS appeler ExecuteInitCommands immédiatement
+    mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
+    mWindow->RegisterExistingMeshForEntity(newEnemy->healthBar);
+
+    // Update de la matrice
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
-	mEnemyList.push_back(newEnemy);
+
+    mEnemyList.push_back(newEnemy);
+
+    // Si on est dans l'Initialize, on peut laisser le GameManager appeler ExecuteInitCommands à la fin.
+    // SI TU SPAWN EN PLEIN JEU (Update), ne rajoute SURTOUT PAS ExecuteInitCommands ici.
 }

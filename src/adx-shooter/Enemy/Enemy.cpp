@@ -18,8 +18,13 @@ bool Enemy::CheckDistanceToAttackPlayer()
 }
 
 //
-void Enemy::Init(int _playerIndex)
+void Enemy::Init(int _playerIndex, Window* _window)
 {
+	healthBar = ECS::GetInstance().createEntity(transformComponent(0, 0));
+	GameManager::GetInstance().mUIMesh.insert({ healthBar, GameManager::GetInstance().mHealthBarMesh.UIQuad});
+	ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.x = 100;
+	ECS::GetInstance().getComponent<transformComponent>(healthBar).scale.y = 10;
+
 	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 2, 0), ColliderComponent(), StatsComponent(), HealthComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
@@ -63,7 +68,6 @@ void Enemy::InitStats(float _health, float _healthRegen, float _mana, float _man
 
 void Enemy::Update() {
 	float deltaTime = Timer::GetInstance()->GetDeltatime();
-	
 	OnUpdate(deltaTime);
 
 	UpdateComponent();
@@ -132,6 +136,21 @@ void Enemy::UpdateComponent()
 		mHealthComponent.mHealth = mStats.mHealth;
 	}
 	ECS::GetInstance().getComponent<HealthComponent>(mEntity) = mHealthComponent;
+	auto& uiTransform = ECS::GetInstance().getComponent<transformComponent>(healthBar);
+	XMFLOAT3 enemyPos = toXMFLOAT3(mTransform.position);
+	XMVECTOR screenPos = XMVector3Project(
+		XMLoadFloat3(&enemyPos),
+		0, 0, GameManager::GetInstance().GetWindow()->mWindowRect.right, GameManager::GetInstance().GetWindow()->mWindowRect.bottom,
+		0.0f, 1.0f,
+		GameManager::GetInstance().GetCamera().Proj(),
+		GameManager::GetInstance().GetCamera().View(),
+		XMMatrixIdentity()
+	);
+	uiTransform.position.x = XMVectorGetX(screenPos) - uiTransform.scale.x/2;
+	uiTransform.position.y = XMVectorGetY(screenPos) - 50; 
+
+	float healthRatio = (float)mHealthComponent.mHealth / (float)mStats.mHealth;
+	uiTransform.scale.x = 100.0f * healthRatio;
 }
 
 void Enemy::AddBullet() {

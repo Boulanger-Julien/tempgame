@@ -8,9 +8,8 @@
 class UIRenderer
 {
 public :
-	UIRenderer(Window& win, int index, int width, int height, XMFLOAT4 color = XMFLOAT4(Colors::White), const wchar_t* filename = nullptr) {
-		UIQuad = win.InitUI(filename, index, width, height, color);
-	};
+	UIRenderer(int index, int width, int height, XMFLOAT4 color = XMFLOAT4(Colors::White), const wchar_t* filename = nullptr);
+	UIRenderer() = default;
 	MeshGeometry UIQuad;
 private: 
 };

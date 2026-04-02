@@ -1,6 +1,7 @@
 #pragma once
 #include "adx-engine/framework.h"
 #include "Player.h"
+#include "adx-render/UIRenderer.h"
 
 class Enemy
 {
@@ -22,6 +23,7 @@ protected:
 		AttackPlayer
 	};
 	int currentEnemyState = 0;
+
 private:
 	int shootPatternIndex = 0;
 	float mCurrentShootCooldown = 0;
@@ -34,13 +36,14 @@ public:
 	Player* mPlayer;
 	StatsComponent mStats;
 	HealthComponent mHealthComponent;
+	Entity healthBar;
 	//TO DO : voir ou est include HealthComponent
 
 	bool canShoot = false;
 	bool isDead = false;
 
-	void Init(int _playerIndex);
-	void Update(); 
+	void Init(int _playerIndex, Window* _window);
+	void Update();
 
 	void MoveTowardPlayer(float _deltaTime);
 	virtual void Attack(float _deltaTime);

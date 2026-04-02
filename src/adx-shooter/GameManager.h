@@ -51,7 +51,8 @@ public:
 	std::vector<Bullet*> mPlayerbulletList;
 	std::vector<Boss*> mBossList;
 	std::vector<EnemyMarksman*> mEnemyList;
-
+	std::unordered_map<int, MeshGeometry> mUIMesh;
+	UIRenderer mHealthBarMesh;
 private:
 	static GameManager* instance;//SINGELTON
 
@@ -108,7 +109,6 @@ private:
 
 	std::vector<Bullet*> mDestroyBulletList;
 
-	std::unordered_map<int, MeshGeometry> mUIMesh;
 
 
 	TextRenderer* mScoreTextRenderer;
