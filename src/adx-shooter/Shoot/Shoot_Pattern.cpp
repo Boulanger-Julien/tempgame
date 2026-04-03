@@ -165,13 +165,13 @@ Shot* Shoot_Pattern_Thunder::Shoot(Entity sender, float _damage, FLOAT3 range, W
 	Bullet* lightningBullet = new Bullet();
 	lightningBullet->mTransform = senderTrans;
 	lightningBullet->mTransform.position = range;
-    lightningBullet->mTransform.position.y = 30;
+    lightningBullet->mTransform.position.y = 210;
+    lightningBullet->mTransform.scale.z = 30;
 	lightningBullet->mTransform.rotation = { -XM_PIDIV2, 0, 0 };
 	lightningBullet->mDamage = _damage*2;
 	lightningBullet->isPersistantBullet = true;
 	lightningBullet->maxLifetime = 1.0f;
-	lightningBullet->m_speed = 30;
-	lightningBullet->mCollider.depth = 10;
+	lightningBullet->m_speed = 200;
 	lightningBullet->mCollider.width = 10;
 	lightningBullet->mCollider.height = 10;
     lightningBullet->mCollider.updateCollider();

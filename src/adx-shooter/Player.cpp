@@ -40,17 +40,16 @@ void Player::ChooseClass(int classID) {
 	}
 }
 
-void Player::Update(const Ray& mouseRay) {
+void Player::Update(const Ray& mouseray) {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
 	OnUpdate(deltatime);
 
-
-
-	float t = (mTransform.position.y - XMVectorGetY(mouseRay.origin)) / XMVectorGetY(mouseRay.direction);
-	XMVECTOR intersectPoint = XMVectorAdd(mouseRay.origin, XMVectorScale(mouseRay.direction, t));
+	float t = (mTransform.position.y - XMVectorGetY(mouseray.origin)) / XMVectorGetY(mouseray.direction);
+	XMVECTOR intersectPoint = XMVectorAdd(mouseray.origin, XMVectorScale(mouseray.direction, t));
 	float targetX = XMVectorGetX(intersectPoint);
 	float targetZ = XMVectorGetZ(intersectPoint);
+	mousePos = {targetX, targetZ };
 	float dx = targetX - mTransform.position.x;
 	float dz = targetZ - mTransform.position.z;
 	float angle = atan2f(dx, dz);
@@ -128,6 +127,7 @@ void Player::Aim()
 				float dz = enemyTrans.position.z - playerTrans.position.z;
 				float angle = atan2f(dx, dz);
 				playerTrans.rotation.y = angle;
+				mousePos = { enemyTrans.position.x, enemyTrans.position.z };
 			}
 		}
 
@@ -146,6 +146,7 @@ void Player::Aim()
 				float dz = enemyTrans.position.z - playerTrans.position.z;
 				float angle = atan2f(dx, dz);
 				playerTrans.rotation.y = angle;
+				mousePos = { enemyTrans.position.x, enemyTrans.position.z };
 			}
 		}
 	}
@@ -171,9 +172,10 @@ void Player::AddExplosionBullet() {
 	}
 }
 
-void Player::AddLighting(FLOAT3 pos)
+void Player::AddLighting()
 {
-	Shot* newShot = Shoot_Pattern_Thunder::Shoot(mEntity, mStats.mStrength, pos, GameManager::GetInstance().GetWindow());
+	
+	Shot* newShot = Shoot_Pattern_Thunder::Shoot(mEntity, mStats.mStrength*4,{mousePos.x,0,mousePos.y}, GameManager::GetInstance().GetWindow());
 	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[0]->mEntity, GameManager::GetInstance().mCircleMesh });
 	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[1]->mEntity, GameManager::GetInstance().mLineBulletMesh });
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
@@ -210,7 +212,7 @@ void Player::Shoot()
 	if (InputSystem::isKeyDown(VK_LBUTTON))
 	{
 		if (!cDownLastFrame) {
-			AddLighting({0,0,0});
+			AddLighting();
 			cDownLastFrame = true;
 		}
 	}

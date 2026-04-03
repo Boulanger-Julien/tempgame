@@ -24,7 +24,7 @@ public:
 	void AddBullet();
 	void AddLineBullet();
 	void AddExplosionBullet();
-	void AddLighting(FLOAT3 pos);
+	void AddLighting();
 	void TestShootPattern();
 	void Shoot();
 	transformComponent& GetTransform() { return mTransform; }
@@ -34,7 +34,7 @@ public:
 	float GetHealth() { return mHealthComponent.mHealth; }
 	int aimType = AimType::Mouse;
 private:
-
+	FLOAT2 mousePos;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
 	StatsComponent mStats;
