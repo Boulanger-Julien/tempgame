@@ -24,7 +24,9 @@ public:
 	void AddBullet();
 	void AddLineBullet();
 	void AddExplosionBullet();
+	void AddLighting(FLOAT3 pos);
 	void TestShootPattern();
+	void Shoot();
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
 	StatsComponent& GetStats() { return mStats; }

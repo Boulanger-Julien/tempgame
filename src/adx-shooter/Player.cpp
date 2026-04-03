@@ -69,6 +69,7 @@ void Player::OnUpdate(float _deltatime)
 	transformComponent weaponTransform = mTransform;
 	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
 	ECS::GetInstance().getComponent<transformComponent>(mWeapon->GetEntity()) = weaponTransform;
+	Shoot();
 	transformSystem::MoveByKey(mTransform, mStats.mSpeed, -45, _deltatime);
 }
 void Player::takeDamage(int _damage) {
@@ -170,6 +171,17 @@ void Player::AddExplosionBullet() {
 	}
 }
 
+void Player::AddLighting(FLOAT3 pos)
+{
+	Shot* newShot = Shoot_Pattern_Thunder::Shoot(mEntity, mStats.mStrength, pos, GameManager::GetInstance().GetWindow());
+	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[0]->mEntity, GameManager::GetInstance().mCircleMesh });
+	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[1]->mEntity, GameManager::GetInstance().mLineBulletMesh });
+	for (int i = 0; i < newShot->bulletList.size(); ++i)
+	{
+		GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
+	}
+}
+
 void Player::TestShootPattern()
 {
 	static int patternIndex = 0;
@@ -187,4 +199,51 @@ void Player::TestShootPattern()
 		break;
 	}
 	patternIndex = (patternIndex + 1) % (ShootPatternType::Amount - 1);
+}
+
+void Player::Shoot()
+{
+	static bool cDownLastFrame = false;
+	static bool cDownLastFrame2 = false;
+	static bool cDownLastFrame3 = false;
+	static bool cDownLastFrame4 = false;
+	if (InputSystem::isKeyDown(VK_LBUTTON))
+	{
+		if (!cDownLastFrame) {
+			AddLighting({0,0,0});
+			cDownLastFrame = true;
+		}
+	}
+	else {
+		cDownLastFrame = false;
+	}
+	if (InputSystem::isKeyDown(VK_SPACE)) {
+		if (!cDownLastFrame2) {
+			AddExplosionBullet();
+			cDownLastFrame2 = true;
+		}
+	}
+	else {
+		cDownLastFrame2 = false;
+	}
+	if (InputSystem::isKeyDown(VK_RBUTTON))
+	{
+		if (!cDownLastFrame3) {
+			AddLineBullet();
+			cDownLastFrame3 = true;
+		}
+	}
+	else {
+		cDownLastFrame3 = false;
+	}
+	if (InputSystem::isKeyDown('W')) {
+		if (!cDownLastFrame4) {
+			TestShootPattern();
+			cDownLastFrame4 = true;
+		}
+	}
+	else {
+		cDownLastFrame4 = false;
+	}
+
 }

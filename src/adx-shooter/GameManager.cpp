@@ -53,6 +53,7 @@ bool GameManager::Initialize()
 	Shoot_Pattern_Line::GetInstance().SetPlayerIndex(mPlayer->mEntity);
 	mBulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
 	mLineBulletMesh = MeshCreator::CreateBox(mWindow, 5, 1, 1, 1, (XMFLOAT4)Colors::Blue, L"Diamond2.dds");
+	mCircleMesh = MeshCreator::CreateCylinder(mWindow, 6, 10, 1, 1,30,10,(XMFLOAT4)Colors::Red);
     mEnemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
 	currentRoom.Initialize(mWindow);
@@ -269,48 +270,6 @@ void GameManager::Pause()
 
 void GameManager::Shoot()
 {
-    static bool cDownLastFrame = false;
-    static bool cDownLastFrame2 = false;
-	static bool cDownLastFrame3 = false;
-	static bool cDownLastFrame4 = false;
-    if (InputSystem::isKeyDown(VK_LBUTTON))
-    {
-        if (!cDownLastFrame) {
-            mPlayer->AddBullet();
-            cDownLastFrame = true;
-        }
-    }
-    else {
-        cDownLastFrame = false;
-    }
-    if (InputSystem::isKeyDown(VK_SPACE)) {
-        if (!cDownLastFrame2) {
-            mPlayer->AddExplosionBullet();
-            cDownLastFrame2 = true;
-        }
-    }
-    else {
-        cDownLastFrame2 = false;
-    }
-    if (InputSystem::isKeyDown(VK_RBUTTON))
-    {
-        if (!cDownLastFrame3) {
-            mPlayer->AddLineBullet();
-            cDownLastFrame3 = true;
-        }
-    }
-    else {
-        cDownLastFrame3 = false;
-    }
-    if (InputSystem::isKeyDown('W')) {
-        if (!cDownLastFrame4) {
-            mPlayer->TestShootPattern();
-            cDownLastFrame4 = true;
-        }
-    }
-    else {
-        cDownLastFrame4 = false;
-	}
 }
 
 //?

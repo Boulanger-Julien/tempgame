@@ -46,6 +46,7 @@ public:
 
 	std::unordered_map<int, MeshGeometry> mEntityMesh;
 	MeshGeometry mBulletMesh;
+	MeshGeometry mCircleMesh;
 	MeshGeometry mLineBulletMesh;
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;

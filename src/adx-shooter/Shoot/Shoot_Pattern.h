@@ -108,3 +108,24 @@ public:
 	int mPlayerIndex = -1;
 	static Bullet* Shoot(Entity sender, float _damage, float range, float width, Window* window);
 };
+
+class Shoot_Pattern_Thunder
+{
+public:
+	Shoot_Pattern_Thunder() {}
+	~Shoot_Pattern_Thunder() {}
+	inline static Shoot_Pattern_Thunder* instance;
+
+	inline static Shoot_Pattern_Thunder& GetInstance() {
+		if (instance == nullptr)
+		{
+			instance = new Shoot_Pattern_Thunder();
+		}
+		return *instance;
+	}
+	void Update(float _deltaTime);
+	void Reset();
+	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
+	int mPlayerIndex = -1;
+	static Shot* Shoot(Entity sender, float _damage, FLOAT3 range, Window* window);
+};

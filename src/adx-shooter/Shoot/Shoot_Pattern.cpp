@@ -143,3 +143,43 @@ Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, flo
 	newBullet->isPersistantBullet = true;
     return newBullet;
 }
+
+Shot* Shoot_Pattern_Thunder::Shoot(Entity sender, float _damage, FLOAT3 range, Window* window)
+{
+    transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
+
+    Shot* newShot = new Shot();
+
+    transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
+    Bullet* circleBullet = new Bullet();
+    circleBullet->mTransform = senderTrans;
+    circleBullet->mTransform.position = range;
+    circleBullet->mDamage = 0;
+    circleBullet->isPersistantBullet = true;
+    circleBullet->maxLifetime = 1.0f;
+    circleBullet->m_speed = 0;
+    window->RegisterExistingMeshForEntity(circleBullet->mEntity);
+    ECS::GetInstance().getComponent<transformComponent>(circleBullet->mEntity) = circleBullet->mTransform;
+    ECS::GetInstance().getComponent<ColliderComponent>(circleBullet->mEntity) = circleBullet->mCollider;
+	newShot->bulletList.push_back(circleBullet);
+	Bullet* lightningBullet = new Bullet();
+	lightningBullet->mTransform = senderTrans;
+	lightningBullet->mTransform.position = range;
+    lightningBullet->mTransform.position.y = 30;
+	lightningBullet->mTransform.rotation = { -XM_PIDIV2, 0, 0 };
+	lightningBullet->mDamage = _damage*2;
+	lightningBullet->isPersistantBullet = true;
+	lightningBullet->maxLifetime = 1.0f;
+	lightningBullet->m_speed = 30;
+	lightningBullet->mCollider.depth = 10;
+	lightningBullet->mCollider.width = 10;
+	lightningBullet->mCollider.height = 10;
+    lightningBullet->mCollider.updateCollider();
+    window->RegisterExistingMeshForEntity(lightningBullet->mEntity);
+	ECS::GetInstance().getComponent<transformComponent>(lightningBullet->mEntity) = lightningBullet->mTransform;
+	ECS::GetInstance().getComponent<ColliderComponent>(lightningBullet->mEntity) = lightningBullet->mCollider;
+	newShot->bulletList.push_back(lightningBullet);
+
+    return newShot;
+
+}
