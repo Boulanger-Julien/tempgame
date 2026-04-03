@@ -23,9 +23,6 @@ void Makhina_Boss::init()
 	mHeadTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 	mHeadTransform.position.y = 2.0f;
 	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);
-	mCollider.depth = mTransform.scale.z;
-	mCollider.width = mTransform.scale.x;
-	mCollider.height = mTransform.scale.y;
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
 	mStats.SetStats(300, 0, 0, 0, 30, 10, 0, 60, 0);

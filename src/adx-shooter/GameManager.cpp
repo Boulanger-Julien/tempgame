@@ -63,7 +63,7 @@ bool GameManager::Initialize()
 	currentRoom.door.mPlayer = mPlayer->mEntity;
     
 	newBoss = new Makhina_Boss(mPlayer->mEntity);
-    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), 1,1,1, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
+    MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), 1,1,1, (XMFLOAT4)Colors::DarkRed);
 
     //Setup camera
     {
@@ -142,7 +142,7 @@ void GameManager::Update()
 	BulletUpdate();
     EnemyUpdate();
 
-	currentRoom.door.Update(mEnemyList.size());
+	currentRoom.door.Update(mEnemyList.size() + mBossList.size());
 
     // Nettoyage final des entités supprimées cette frame
     Destroy();
@@ -317,7 +317,6 @@ void GameManager::Shoot()
 
 //?
 void GameManager::SpawnBoss(float x, float z) {
-    newBoss = new Makhina_Boss(mPlayer->mEntity);
 
     newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
     newBoss->GetTransform().position = FLOAT3(x, newBoss->GetTransform().scale.y/2, z);
@@ -496,9 +495,9 @@ void GameManager::BulletUpdate()
             if (!bullet->toBeDestroyed) {
                 for (Boss* boss : mBossList) {
                     if (!boss->IsAlive() || bullet->entitiesToIgnore.count(boss->GetEntity())) continue;
-
                     float dx = bullet->mTransform.position.x - boss->GetTransform().position.x;
                     float dz = bullet->mTransform.position.z - boss->GetTransform().position.z;
+					thresholdSq = (maxS + 10.0f) * (maxS + 10.0f);
                     if ((dx * dx + dz * dz) < thresholdSq) {
                         if (ecs.getComponent<ColliderComponent>(bullet->mEntity).collisionCheck(boss->GetEntity())) {
                             boss->TakeDamage(bullet->mDamage);
