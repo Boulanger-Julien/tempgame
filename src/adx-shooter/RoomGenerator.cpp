@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "RoomGenerator.h"
 #include "GameManager.h"
+#include "MobGenerator.h"
 
 #define NEXT_ENEMY 1
 #define NEXT_BOSS 2
@@ -67,7 +68,7 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
 			break;
         case NEXT_BOSS:
             _room.type = RoomType::BOSS_ROOM;
-            _room.BossList.push_back( GameManager::GetInstance().SpawnBoss(0,0));
+            _room.BossList.push_back( MobGenerator::SpawnBoss(0,0));
             _room.RoomToBoss = 5;
             break;
 		case NEXT_TREASURE:
@@ -94,7 +95,7 @@ void RoomGenerator::AddEnemies(Rooms& _room)
 {
     int numberOfEnnemies = (rand() % 5*_room.mdifficulty) + _room.numberOfRoom;
     for (int i = 0; i < numberOfEnnemies; i++) {
-        _room.EnemyRooms.push_back(GameManager::GetInstance().SpawnMob(rand() % 100 - 45, rand() % 100 - 45, 0));
+        _room.EnemyRooms.push_back(MobGenerator::SpawnMob(rand() % 90 - 45, rand() % 90 - 45, 0));
     }
 }
 

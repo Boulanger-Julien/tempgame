@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "EnemyMarksman.h"
 #include "adx-core/Timer.h"
+#include "State.h"
 
 void EnemyMarksman::OnInit()
 {
@@ -13,6 +14,25 @@ void EnemyMarksman::OnInit()
 
 void EnemyMarksman::OnUpdate(float _deltaTime)
 {
+	switch (currentEnemyState)
+	{
+	case Enemy::NONE:
+		break;
+	case Enemy::FOLLOWPLAYER:
+		FollowState::OnExecute(*this);
+		break;
+	case Enemy::ATTACKPLAYER:
+		AttackState::OnExecute(*this);
+		break;
+	case Enemy::STUNTED:
+		StuntedState::OnExecute(*this);
+		break;
+	default:
+		break;
+	}
+
+
+
 	if (CheckDistanceToFollowPlayer()) {
 		LookPlayer();
 

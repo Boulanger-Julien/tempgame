@@ -29,8 +29,8 @@ public:
 	void Pause();
 	void SpeedDown();
 	void Destroy();
-	Enemy* SpawnMob(float x, float z, int mob);
-	Boss* SpawnBoss(float x, float z);
+	//Enemy* SpawnMob(float x, float z, int mob);
+	//Boss* SpawnBoss(float x, float z);
 	float GetDeltatime();
 	void UpdateCam();
 	void Shoot();
@@ -54,6 +54,9 @@ public:
 	std::vector<Enemy*> mDestroyEnemyList;
 
 	std::vector<Boss*> mDestroyBossList;
+
+	MeshGeometry gEnemyMesh() { return mEnemyMesh; }
+	MeshGeometry gBossMesh() { return MakhinaBossMesh; }
 private:
 	static GameManager* instance;//SINGELTON
 

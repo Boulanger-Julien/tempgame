@@ -101,6 +101,7 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
         sign = (i % 2 == 0) ? 1 : -1;
 
         Bullet* newBullet = new Bullet();
+		newBullet->type = BulletType::SHOTGUN;
         newBullet->mTransform = senderTrans;
         newBullet->mTransform.scale = FLOAT3(1, 1, 1) * scale;
         newBullet->mCollider.updateCollider();

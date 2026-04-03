@@ -6,6 +6,7 @@
 enum BulletType
 {
 	BULLET,
+	SHOTGUN,
 	LINE
 };
 class Bullet

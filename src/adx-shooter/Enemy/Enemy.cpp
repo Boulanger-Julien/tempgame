@@ -9,7 +9,10 @@
 //Protected
 bool Enemy::CheckDistanceToFollowPlayer()
 {
-	return transformSystem::GetDistance(mTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex)) <= distFollowPlayer;
+	if (transformSystem::GetDistance(mTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex)) <= distFollowPlayer)
+	{
+		currentEnemyState = EnemyState::NONE;
+	}
 }
 
 bool Enemy::CheckDistanceToAttackPlayer()
