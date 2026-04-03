@@ -82,13 +82,12 @@ bool GameManager::Initialize()
         mLight = Light(XMFLOAT3(1.0f, -1.0f, 0.0f), 1, XMFLOAT4(1.0f, 1.f, 1.0f, 1.0f));
         mWindow->SetLight(mLight);
     }
+    UIRenderer healthBarExtMesh(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
 
     //Generate health bar
     {
 		Entity healthExtBar = ecs.createEntity(transformComponent(offsetHBX, offsetHBY, 0, healthBarWidth, healthBarHeight));
-        UIRenderer healthBarExtMesh(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
 		healthBarExtMesh.AddIndex(healthExtBar);
-		healthBarExtMesh.PushIndex();
         healthBar = ecs.createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
         healthBossBar = ecs.createEntity(transformComponent(700, 70, 0, 500, 20));
         healthBossBar2 = ecs.createEntity(transformComponent(700, 170, 0, 500, 20));
@@ -105,7 +104,6 @@ bool GameManager::Initialize()
     }
     {
 		Entity manaExtBar = ecs.createEntity(transformComponent(offsetMBX, offsetMBY, 0, healthBarWidth, healthBarHeight));
-        UIRenderer healthBarExtMesh(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), L"HealthBar.dds");
 		healthBarExtMesh.AddIndex(manaExtBar);
 		healthBarExtMesh.PushIndex();
         mUIMesh.insert({ manaExtBar, healthBarExtMesh.UIQuad });
@@ -207,7 +205,7 @@ void GameManager::Draw()
     std::string timerStr = std::format("Timer : {:02}:{:02}:{:02}.{:02}",
         hours, minutes, seconds, centiemes); 
     {
-		mManaTextRenderer->DrawTxt(0/*std::to_string((int)mPlayer->GetStats().mManaPoints)*/ + "/" + std::to_string((int)mPlayer->GetStats().mMana), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
+		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->GetStats().mMana) + "/" + std::to_string((int)mPlayer->GetStats().mMana), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
         mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
         mLifeTextRenderer->DrawTxt(mPlayer->GetHealth() > 0 ? std::to_string((int)mPlayer->GetHealth()) + "/" + std::to_string((int)mPlayer->GetStats().mHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
         mTimerTextRenderer->DrawTxt(timerStr, 20, 60, 24);
