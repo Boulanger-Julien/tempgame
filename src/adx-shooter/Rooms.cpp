@@ -51,7 +51,7 @@ void Rooms::Initialize(Window* _window)
 	mWindow->RegisterExistingMeshForEntity(wallEntities[1]);
 
 
-	mPlayer = GameManager::GetInstance().GetPlayer();
+	mPlayer = &Player::GetInstance();
 	door.Initialize(mWindow);
 	mNumberOfRoomRenderer = new TextRenderer(_window);
 	mNumberOfRoomRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);

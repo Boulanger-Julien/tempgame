@@ -6,7 +6,7 @@
 
 Enemy* MobGenerator::SpawnMob(float x, float z, int mob)
 {
-	//EnemyMarksman* newEnemy = new EnemyMarksman();
+	EnemyMarksman* newEnemy = new EnemyMarksman();
 	//newEnemy->Init(mPlayer->mEntity);
 	//newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
 	//newEnemy->GetTransform().position = FLOAT3(x, 2, z);
@@ -15,12 +15,12 @@ Enemy* MobGenerator::SpawnMob(float x, float z, int mob)
 	//XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
 	//mWindow->Update(newEnemy->mEntity, enemyWorld);
 	//mEnemyList.push_back(newEnemy);
-	//return newEnemy;
+	return newEnemy;
 }
 
 Boss* MobGenerator::SpawnBoss(float x, float z)
 {
-	//Boss* newBoss = new Makhina_Boss(mPlayer->mEntity);
+	Boss* newBoss = new Makhina_Boss(Player::GetInstance().mEntity);
 
 	//newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
 	//newBoss->GetTransform().position = FLOAT3(x, newBoss->GetTransform().scale.y / 2, z);
@@ -29,5 +29,5 @@ Boss* MobGenerator::SpawnBoss(float x, float z)
 	//mEntityMesh.insert({ newBoss->GetEntity(), MakhinaBossMesh });
 	//mWindow->Update(newBoss->GetEntity(), enemyWorld);
 	//mBossList.push_back(newBoss);
-	//return newBoss;
+	return newBoss;
 }

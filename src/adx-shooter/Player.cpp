@@ -5,8 +5,10 @@
 #include "Weapon/Basic_Sword.h"
 #include "GameManager.h"
 
+Player* Player::mInstance = nullptr;
 
 Player::Player() {
+	mInstance = this;
 	mEntity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent(), HealthComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
@@ -22,7 +24,6 @@ Player::Player() {
 	mHealthComponent.mMaxHealth = mStats.mHealth;
 	mHealthComponent.mHealth = mStats.mHealth;
 
-	mInstance = this;
 }
 
 void Player::ChooseClass(int classID) {

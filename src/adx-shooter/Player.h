@@ -33,9 +33,9 @@ public:
 	float GetHealth() { return mHealthComponent.mHealth; }
 	int aimType = AimType::Mouse;
 
-	Player* GetInstance() { return mInstance; }
+	static Player& GetInstance() { return *mInstance; }
 private:
-	Player* mInstance;
+	static Player* mInstance;
 
 	transformComponent mTransform;
 	ColliderComponent mCollider;

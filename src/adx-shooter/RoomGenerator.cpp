@@ -121,5 +121,5 @@ void RoomGenerator::PlacePlayer(Rooms& _room)
         return;
 	}
     FLOAT3 posDoor = _room.door.mTransform.position;
-    GameManager::GetInstance().GetPlayer()->GetTransform().position = FLOAT3(-posDoor.x, 2, -posDoor.z);
+    _room.mPlayer->GetTransform().position = FLOAT3(-posDoor.x, 2, -posDoor.z);
 }
