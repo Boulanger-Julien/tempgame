@@ -25,6 +25,7 @@ public:
 	void AddLineBullet();
 	void AddExplosionBullet();
 	void AddLighting();
+	void AddChoc();
 	void TestShootPattern();
 	void Shoot();
 	transformComponent& GetTransform() { return mTransform; }

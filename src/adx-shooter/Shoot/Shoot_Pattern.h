@@ -129,3 +129,25 @@ public:
 	int mPlayerIndex = -1;
 	static Shot* Shoot(Entity sender, float _damage, FLOAT3 range, Window* window);
 };
+
+class Shoot_Pattern_Choc
+{
+public:
+	Shoot_Pattern_Choc() {}
+	~Shoot_Pattern_Choc() {}
+	inline static Shoot_Pattern_Choc* instance;
+
+	inline static Shoot_Pattern_Choc& GetInstance() {
+		if (instance == nullptr)
+		{
+			instance = new Shoot_Pattern_Choc();
+		}
+		return *instance;
+	}
+
+	void Update(float _deltaTime);
+	void Reset();
+	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
+	int mPlayerIndex = -1;
+	static Bullet* Shoot(Entity sender, float _damage, int bounces, int accuracy);
+};

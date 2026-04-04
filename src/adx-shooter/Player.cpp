@@ -184,6 +184,15 @@ void Player::AddLighting()
 	}
 }
 
+void Player::AddChoc() {
+	Bullet* newBullet = Shoot_Pattern_Choc::Shoot(mEntity, 50, 4, (aimType == AimType::Mouse ? 100 : 85));
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
+	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
+}
+
 void Player::TestShootPattern()
 {
 	static int patternIndex = 0;
@@ -212,7 +221,7 @@ void Player::Shoot()
 	if (InputSystem::isKeyDown(VK_LBUTTON))
 	{
 		if (!cDownLastFrame) {
-			AddLighting();
+			AddChoc();
 			cDownLastFrame = true;
 		}
 	}

@@ -182,7 +182,6 @@ void GameManager::Draw()
 {
     mWindow->BeginFrame();
 
-    // Draw all entities
     for (auto it = mEntityMesh.begin(); it != mEntityMesh.end(); ++it)
     {
         int entityID = it->first;
@@ -247,7 +246,6 @@ void GameManager::Pause()
     }
 
 	static bool spaceDown = false;
-    // Toggle pause when F1 is pressed
     float playerHealth = mPlayer->GetHealth();
     if (playerHealth <= 0)
     {
@@ -266,13 +264,10 @@ void GameManager::Pause()
     CheckInput();
 }
 
-/////////////////////////
-
 void GameManager::Shoot()
 {
 }
 
-//?
 void GameManager::SpawnBoss(float x, float z) {
 
     newBoss->GetTransform() = ecs.getComponent<transformComponent>(newBoss->GetEntity());
@@ -408,11 +403,10 @@ void GameManager::UpdateCam()
 void GameManager::EnemyUpdate()
 {
     for (EnemyMarksman* enemy : mEnemyList) {
-        enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
+        enemy->Update();
     }
-    //Julien
     for (Boss* boss : mBossList) {
-        boss->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
+        boss->Update();
     }
 }
 
@@ -443,6 +437,38 @@ void GameManager::BulletUpdate()
                         if (!bullet->isPersistantBullet) {
                             bullet->toBeDestroyed = true;
                             break;
+                        }
+                        if (bullet->isBoucingBullet)
+                        {
+                            if(bullet->allowedBounces > 0)
+                            {
+                                bullet->allowedBounces--;
+								bullet->currentLifetime -= 0.25f;
+								float closestDistance = FLT_MAX;
+                                for (EnemyMarksman* enemy : mEnemyList) {
+                                    if (enemy->isDead) continue;
+                                    if (bullet->entitiesToIgnore.count(enemy->mEntity)) continue;
+                                    float distance = sqrt(pow(bullet->mTransform.position.x - enemy->GetTransform().position.x, 2) + pow(bullet->mTransform.position.z - enemy->GetTransform().position.z, 2));
+                                    if (distance < closestDistance) {
+                                        closestDistance = distance;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                    if (distance < 70) {
+                                        float dx = enemy->GetTransform().position.x - bullet->mTransform.position.x;
+                                        float dz = enemy->GetTransform().position.z - bullet->mTransform.position.z;
+                                        float angle = atan2f(dx, dz);
+                                        bullet->mTransform.rotation.y = angle;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                bullet->toBeDestroyed = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -543,38 +569,29 @@ void GameManager::UpdateBar()
 }
 
 void GameManager::Destroy() {
-    // NETTOYAGE DES BULLETS
     if (!mDestroyBulletList.empty()) {
         for (Bullet* bullet : mDestroyBulletList) {
-            // 1. Libérer les ressources DirectX (Slots de descripteurs)
             mWindow->RemoveEntityResources(bullet->mEntity);
 
-            // 2. Retirer du système de rendu
             mEntityMesh.erase(bullet->mEntity);
 
-            // 4. Supprimer l'objet C++
             delete bullet;
 
         }
         mDestroyBulletList.clear();
     }
 
-    // NETTOYAGE DES ENNEMIS (Même logique)
     if (!mDestroyEnemyList.empty()) {
         for (EnemyMarksman* enemy : mDestroyEnemyList) {
-            // 1. On le retire de la liste de l'Update LOGIQUE
             auto it = std::find(mEnemyList.begin(), mEnemyList.end(), enemy);
             if (it != mEnemyList.end()) {
                 mEnemyList.erase(it);
             }
 
-            // 2. On retire les ressources DirectX
             mWindow->RemoveEntityResources(enemy->mEntity);
 
-            // 3. On le retire du dictionnaire de rendu
             mEntityMesh.erase(enemy->mEntity);
 
-            // 4. Supprimer l'objet C++
             delete enemy;
         }
         mDestroyEnemyList.clear();
@@ -600,19 +617,13 @@ void GameManager::SpawnMob(float x, float z, int mob) {
     newEnemy->GetTransform() = ecs.getComponent<transformComponent>(newEnemy->mEntity);
     newEnemy->GetTransform().position = FLOAT3(x, 2, z);
 
-    // On enregistre les meshs dans nos dictionnaires
     mEntityMesh.insert({ newEnemy->mEntity, mEnemyMesh });
 
-    // IMPORTANT: On enregistre l'entité dans Window SANS appeler ExecuteInitCommands immédiatement
     mWindow->RegisterExistingMeshForEntity(newEnemy->mEntity);
     mWindow->RegisterExistingMeshForEntity(newEnemy->healthBar);
 
-    // Update de la matrice
     XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ecs.getComponent<transformComponent>(newEnemy->mEntity));
     mWindow->Update(newEnemy->mEntity, enemyWorld);
 
     mEnemyList.push_back(newEnemy);
-
-    // Si on est dans l'Initialize, on peut laisser le GameManager appeler ExecuteInitCommands à la fin.
-    // SI TU SPAWN EN PLEIN JEU (Update), ne rajoute SURTOUT PAS ExecuteInitCommands ici.
 }

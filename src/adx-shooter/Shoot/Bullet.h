@@ -16,6 +16,8 @@ public:
 	bool toBeDestroyed = false;
 	int mDamage;
 	bool isPersistantBullet = false;
+	bool isBoucingBullet = false;
+	int allowedBounces = 0;
 
 	Bullet();
 	~Bullet();
