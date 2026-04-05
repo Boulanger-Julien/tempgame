@@ -151,3 +151,27 @@ public:
 	int mPlayerIndex = -1;
 	static Bullet* Shoot(Entity sender, float _damage, int bounces, int accuracy);
 };
+
+
+class Shoot_Pattern_Bomb
+{
+public:
+	Shoot_Pattern_Bomb() {}
+	~Shoot_Pattern_Bomb() {}
+	inline static Shoot_Pattern_Bomb* instance;
+
+	inline static Shoot_Pattern_Bomb& GetInstance() {
+		if (instance == nullptr)
+		{
+			instance = new Shoot_Pattern_Bomb();
+		}
+		return *instance;
+	}
+
+	void Update(float _deltaTime);
+	void Reset();
+	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
+	int mPlayerIndex = -1;
+	static Bullet* Shoot(Entity sender, float _damage, int radius, int accuracy);
+};
+

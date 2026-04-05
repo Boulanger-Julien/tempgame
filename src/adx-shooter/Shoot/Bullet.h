@@ -18,6 +18,9 @@ public:
 	bool isPersistantBullet = false;
 	bool isBoucingBullet = false;
 	int allowedBounces = 0;
+	bool isBomb = false;
+	int bombRadius = 0;
+	int bombDamage = 0;
 
 	Bullet();
 	~Bullet();

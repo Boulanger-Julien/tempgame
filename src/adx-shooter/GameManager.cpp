@@ -419,6 +419,10 @@ void GameManager::BulletUpdate()
         if (!bullet->toBeDestroyed) {
             float maxS = max(bullet->mTransform.scale.x, max(bullet->mTransform.scale.z, bullet->mTransform.scale.y));
             float thresholdSq = (maxS + 3.0f) * (maxS + 3.0f);
+            if (bullet->currentLifetime >= bullet->maxLifetime) {
+                bullet->toBeDestroyed = true;
+            }
+
             for (EnemyMarksman* enemy : mEnemyList) {
                 if (enemy->isDead) continue;
                 if (bullet->entitiesToIgnore.count(enemy->mEntity)) continue;
@@ -497,6 +501,19 @@ void GameManager::BulletUpdate()
                 }
             }
         }
+        if (bullet->isBomb)
+        {
+            if (bullet->toBeDestroyed)
+            {
+                Shot* newShot = Shoot_Pattern_Explosion::Shoot(bullet->mEntity, 9, bullet->bombDamage, GameManager::GetInstance().GetWindow(), 1, 50);
+                for (int i = 0; i < newShot->bulletList.size(); ++i)
+                {
+                    mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });
+                    mPlayerbulletList.push_back(newShot->bulletList[i]);
+                }
+
+            }
+        }
 
         if (mPlayerbulletList[i]->toBeDestroyed) {
             mDestroyBulletList.push_back(mPlayerbulletList[i]);
@@ -509,6 +526,9 @@ void GameManager::BulletUpdate()
 		Bullet* bullet = mBulletList[i];
         if (!bullet->toBeDestroyed) {
             if (bullet->entitiesToIgnore.count(mPlayer->mEntity)) continue;
+            if (bullet->currentLifetime >= bullet->maxLifetime) {
+                bullet->toBeDestroyed = true;
+            }
 
             float maxS = max(bullet->mTransform.scale.x, max(bullet->mTransform.scale.z, bullet->mTransform.scale.y));
             float thresholdSq = (maxS + 3.0f) * (maxS + 3.0f);

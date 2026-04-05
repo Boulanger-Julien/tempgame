@@ -21,10 +21,6 @@ Bullet::~Bullet() {
 void Bullet::Update() {
 	float deltaTime = Timer::GetInstance()->GetDeltatime();
 
-	if (currentLifetime >= maxLifetime) {
-		toBeDestroyed = true;
-		return;
-	}
 	currentLifetime += deltaTime;
 
 	transformSystem::MoveForward(ECS::GetInstance().getComponent<transformComponent>(mEntity), m_speed*deltaTime);
