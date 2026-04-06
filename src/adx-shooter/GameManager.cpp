@@ -505,7 +505,7 @@ void GameManager::BulletUpdate()
         {
             if (bullet->toBeDestroyed)
             {
-                Shot* newShot = Shoot_Pattern_Explosion::Shoot(bullet->mEntity, 9, bullet->bombDamage, GameManager::GetInstance().GetWindow(), 1, 50);
+                Shot* newShot = Shoot_Pattern_Explosion::Shoot(bullet->mEntity, 9, bullet->bombDamage, GetWindow(), 1, 50);
                 for (int i = 0; i < newShot->bulletList.size(); ++i)
                 {
                     mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });

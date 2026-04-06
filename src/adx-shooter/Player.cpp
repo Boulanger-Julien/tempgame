@@ -18,7 +18,7 @@ Player::Player() {
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
 
-	mStats.SetStats(100, 2, 0, 0, 20, 0, 35, 0, 0);
+	mStats.SetStats(100, 2, 0, 0, 40, 0, 35, 0, 0);
 	mHealthComponent.mMaxHealth = mStats.mHealth;
 	mHealthComponent.mHealth = mStats.mHealth;
 }
@@ -85,13 +85,11 @@ void Player::ChangeAimType()
 }
 void Player::AddBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 50, (aimType == AimType::Mouse ? 100:85));
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 50, (aimType == AimType::Mouse ? 100:85), mStats.mStrength);
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
 	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
-
-	newBullet->mDamage = mStats.mStrength;
 	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
 }
 
@@ -185,7 +183,10 @@ void Player::AddLighting()
 }
 
 void Player::AddChoc() {
-	Bullet* newBullet = Shoot_Pattern_Choc::Shoot(mEntity, 50, 4, (aimType == AimType::Mouse ? 100 : 85));
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 75, (aimType == AimType::Mouse ? 100 : 85), mStats.mStrength);
+	newBullet->isPersistantBullet = true;
+	newBullet->isBoucingBullet = true;
+	newBullet->allowedBounces = 4;
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
@@ -195,7 +196,9 @@ void Player::AddChoc() {
 
 void Player::AddBomb()
 {
-	Bullet* newBullet = Shoot_Pattern_Bomb::Shoot(mEntity, 50, 20, (aimType == AimType::Mouse ? 100 : 85));
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 25, (aimType == AimType::Mouse ? 100 : 85), mStats.mStrength*3);
+	newBullet->isBomb = true;
+	newBullet->bombDamage = mStats.mStrength;
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));

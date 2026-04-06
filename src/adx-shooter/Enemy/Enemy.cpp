@@ -155,13 +155,11 @@ void Enemy::UpdateComponent()
 
 void Enemy::AddBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 50,85);
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 50,85, mStats.mStrength);
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
 	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
-
-	newBullet->mDamage = mStats.mStrength;
 	GameManager::GetInstance().mBulletList.push_back(newBullet);
 
 }

@@ -39,9 +39,7 @@ public:
 		}
 		return *instance;
 	}
-	void Update(float _deltaTime);
-	static Bullet* Shoot(Entity sender, float scale, float speedBullet, float accuracy);
-	void Reset();
+	static Bullet* Shoot(Entity sender, float scale, float speedBullet, float accuracy, int damage);
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
 };
@@ -60,8 +58,6 @@ class Shoot_Pattern_Explosion
 		}
 		return *instance;
 	}
-	void Update(float _deltaTime);
-	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
 	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet);
@@ -81,8 +77,6 @@ class Shoot_Pattern_Pump
 		}
 		return *instance;
 	}
-	void Update(float _deltaTime);
-	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
 	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet);
@@ -102,8 +96,6 @@ public:
 		}
 		return *instance;
 	}
-	void Update(float _deltaTime);
-	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
 	static Bullet* Shoot(Entity sender, float _damage, float range, float width, Window* window);
@@ -123,55 +115,9 @@ public:
 		}
 		return *instance;
 	}
-	void Update(float _deltaTime);
-	void Reset();
 	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
 	int mPlayerIndex = -1;
 	static Shot* Shoot(Entity sender, float _damage, FLOAT3 range, Window* window);
 };
 
-class Shoot_Pattern_Choc
-{
-public:
-	Shoot_Pattern_Choc() {}
-	~Shoot_Pattern_Choc() {}
-	inline static Shoot_Pattern_Choc* instance;
-
-	inline static Shoot_Pattern_Choc& GetInstance() {
-		if (instance == nullptr)
-		{
-			instance = new Shoot_Pattern_Choc();
-		}
-		return *instance;
-	}
-
-	void Update(float _deltaTime);
-	void Reset();
-	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
-	int mPlayerIndex = -1;
-	static Bullet* Shoot(Entity sender, float _damage, int bounces, int accuracy);
-};
-
-
-class Shoot_Pattern_Bomb
-{
-public:
-	Shoot_Pattern_Bomb() {}
-	~Shoot_Pattern_Bomb() {}
-	inline static Shoot_Pattern_Bomb* instance;
-
-	inline static Shoot_Pattern_Bomb& GetInstance() {
-		if (instance == nullptr)
-		{
-			instance = new Shoot_Pattern_Bomb();
-		}
-		return *instance;
-	}
-
-	void Update(float _deltaTime);
-	void Reset();
-	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
-	int mPlayerIndex = -1;
-	static Bullet* Shoot(Entity sender, float _damage, int radius, int accuracy);
-};
-
+// VOID / BOOMERANG / BOMB / CHOC

@@ -2,12 +2,9 @@
 #include "Shoot_Pattern.h"
 //include file for max
 #include <algorithm>
-void Shoot_Pattern_Single_Shot::Update(float _deltaTime)
-{
-}
 
 
-Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale, float speedBullet, float accuracy)
+Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale, float speedBullet, float accuracy, int damage)
 {
     
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
@@ -32,12 +29,8 @@ Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale, float speed
     ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;
     transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
     bulletTrans.forward = bulletTrans.forward * -1;
-    newBullet->isPersistantBullet = false;
+	newBullet->mDamage = damage;
     return newBullet;
-}
-
-void Shoot_Pattern_Single_Shot::Reset()
-{
 }
 
 Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet)
@@ -110,7 +103,7 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
         float randomOffset = rand() % minOffset;
 
         newAccuracy += randomOffset;
-        newBullet->mTransform.rotation.y = senderTrans.rotation.y + /*(XM_PI / 2)*/  + (valeurAbsolue* sign * angleStep* ((100 / newAccuracy) - 1));
+        newBullet->mTransform.rotation.y = senderTrans.rotation.y + (valeurAbsolue* sign * angleStep* ((100 / newAccuracy) - 1));
         transformSystem::UpdateForward(newBullet->mTransform);
         float distFromPlayer = 5.0f;
         transformSystem::MoveForward(newBullet->mTransform, distFromPlayer);
@@ -182,62 +175,4 @@ Shot* Shoot_Pattern_Thunder::Shoot(Entity sender, float _damage, FLOAT3 range, W
 	newShot->bulletList.push_back(lightningBullet);
 
     return newShot;
-}
-
-Bullet* Shoot_Pattern_Choc::Shoot(Entity sender, float _damage, int bounces, int accuracy)
-{
-    transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
-    transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
-    Bullet* newBullet = new Bullet();
-    newBullet->mTransform = senderTrans;
-    newBullet->mCollider.updateCollider();
-    float signe = (rand() % 2 == 0) ? -1.0f : 1.0f;
-    if (accuracy < 100)
-    {
-        int minOffset = 100.0f - accuracy;
-        float randomOffset = rand() % minOffset;
-        accuracy += randomOffset;
-
-
-        newBullet->mTransform.rotation.y = senderTrans.rotation.y + (signe * XM_PI / 2) * ((100 / accuracy) - 1);
-    }
-    transformSystem::RotateAround(newBullet->mTransform, ECS::GetInstance().getComponent<transformComponent>(sender), newBullet->mTransform.scale.z * 2);
-    ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
-    ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;
-    transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
-    bulletTrans.forward = bulletTrans.forward * -1;
-	newBullet->mDamage = _damage;
-    newBullet->isPersistantBullet = true;
-    newBullet->isBoucingBullet = true;
-    newBullet->allowedBounces = bounces;
-    return newBullet;
-}
-
-Bullet* Shoot_Pattern_Bomb::Shoot(Entity sender, float _damage, int radius, int accuracy)
-{
-    transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
-    transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
-    Bullet* newBullet = new Bullet();
-    newBullet->mTransform = senderTrans;
-    newBullet->mCollider.updateCollider();
-    float signe = (rand() % 2 == 0) ? -1.0f : 1.0f;
-    if (accuracy < 100)
-    {
-        int minOffset = 100.0f - accuracy;
-        float randomOffset = rand() % minOffset;
-        accuracy += randomOffset;
-
-
-        newBullet->mTransform.rotation.y = senderTrans.rotation.y + (signe * XM_PI / 2) * ((100 / accuracy) - 1);
-    }
-    transformSystem::RotateAround(newBullet->mTransform, ECS::GetInstance().getComponent<transformComponent>(sender), newBullet->mTransform.scale.z * 2);
-    ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
-    ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;
-    transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
-    bulletTrans.forward = bulletTrans.forward * -1;
-	newBullet->mDamage = _damage*3;
-	newBullet->isBomb = true;
-	newBullet->bombDamage = _damage;
-	newBullet->bombRadius = radius;
-    return newBullet;
 }
