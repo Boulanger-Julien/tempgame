@@ -33,7 +33,7 @@ Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale, float speed
     return newBullet;
 }
 
-Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet)
+Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, float scale, float speedBullet)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
     transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -64,11 +64,6 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
 
         transformSystem::Move(newBullet->mTransform, 0, 0, 2);
 
-        window->RegisterExistingMeshForEntity(newBullet->mEntity);
-
-        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(newBullet->mTransform);
-        window->Update(newBullet->mEntity, bulletWorld);
-
         newBullet->mDamage = _damage;
 		newShot->bulletList.push_back(newBullet);
 	    ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
@@ -76,7 +71,7 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
     return newShot;
 }
 
-Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale,float speedBullet)
+Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, float scale,float speedBullet)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
     transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -108,9 +103,6 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
         float distFromPlayer = 5.0f;
         transformSystem::MoveForward(newBullet->mTransform, distFromPlayer);
         transformSystem::Move(newBullet->mTransform, 0, 0, 2);
-        window->RegisterExistingMeshForEntity(newBullet->mEntity);
-        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(newBullet->mTransform);
-        window->Update(newBullet->mEntity, bulletWorld);
         newBullet->mDamage = (_damage / bullets)*2;
         newShot->bulletList.push_back(newBullet);
         ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
@@ -118,7 +110,7 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
 	return newShot;
 }
 
-Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width, Window* window)
+Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
 	transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -138,7 +130,7 @@ Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, flo
     return newBullet;
 }
 
-Shot* Shoot_Pattern_Thunder::Shoot(Entity sender, float _damage, FLOAT3 range, Window* window)
+Shot* Shoot_Pattern_Thunder::Shoot(Entity sender, float _damage, FLOAT3 range)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
 
@@ -152,7 +144,6 @@ Shot* Shoot_Pattern_Thunder::Shoot(Entity sender, float _damage, FLOAT3 range, W
     circleBullet->isPersistantBullet = true;
     circleBullet->maxLifetime = 1.0f;
     circleBullet->m_speed = 0;
-    window->RegisterExistingMeshForEntity(circleBullet->mEntity);
     ECS::GetInstance().getComponent<transformComponent>(circleBullet->mEntity) = circleBullet->mTransform;
     ECS::GetInstance().getComponent<ColliderComponent>(circleBullet->mEntity) = circleBullet->mCollider;
 	newShot->bulletList.push_back(circleBullet);
@@ -169,7 +160,6 @@ Shot* Shoot_Pattern_Thunder::Shoot(Entity sender, float _damage, FLOAT3 range, W
 	lightningBullet->mCollider.width = 10;
 	lightningBullet->mCollider.height = 10;
     lightningBullet->mCollider.updateCollider();
-    window->RegisterExistingMeshForEntity(lightningBullet->mEntity);
 	ECS::GetInstance().getComponent<transformComponent>(lightningBullet->mEntity) = lightningBullet->mTransform;
 	ECS::GetInstance().getComponent<ColliderComponent>(lightningBullet->mEntity) = lightningBullet->mCollider;
 	newShot->bulletList.push_back(lightningBullet);

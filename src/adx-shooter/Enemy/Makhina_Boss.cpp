@@ -52,11 +52,13 @@ void Makhina_Boss::Attack(float _deltaTime)
 
 			case 2:
 			{
-				Shot* newShot = Shoot_Pattern_Explosion::Shoot(mHeadEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow(), 2,100);
+				Shot* newShot = Shoot_Pattern_Explosion::Shoot(mHeadEntity, 9, mStats.mStrength, 2,100);
 				for (int i = 0; i < newShot->bulletList.size(); ++i)
 				{
 					GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
 					GameManager::GetInstance().mBulletList.push_back(newShot->bulletList[i]);
+					GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newShot->bulletList[i]->mEntity);
+
 				}
 				mCurrentShootCooldown = mShootCooldown;
 				break;
@@ -64,7 +66,7 @@ void Makhina_Boss::Attack(float _deltaTime)
 
 			case 3:
 			{
-				Bullet* newLineBullet = Shoot_Pattern_Line::Shoot(mHeadEntity, mStats.mStrength, 25, 1, GameManager::GetInstance().GetWindow());
+				Bullet* newLineBullet = Shoot_Pattern_Line::Shoot(mHeadEntity, mStats.mStrength, 25, 1);
 				GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newLineBullet->mEntity);
 				GameManager::GetInstance().mEntityMesh.insert({ newLineBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
 				XMMATRIX lineBulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newLineBullet->mEntity));

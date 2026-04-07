@@ -48,9 +48,6 @@ bool GameManager::Initialize()
 		MeshGeometry weaponMesh = MeshCreator::CreateBox(mWindow, mPlayer->mWeapon->GetEntity(), 1, 0.5f, 3, (XMFLOAT4)Colors::Red, L"Diamond2.dds");
 		mEntityMesh.insert({ mPlayer->mWeapon->GetEntity(), weaponMesh });
     }
-	Shoot_Pattern_Explosion::GetInstance().SetPlayerIndex(mPlayer->mEntity);
-	Shoot_Pattern_Single_Shot::GetInstance().SetPlayerIndex(mPlayer->mEntity);
-	Shoot_Pattern_Line::GetInstance().SetPlayerIndex(mPlayer->mEntity);
 	mBulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
 	mLineBulletMesh = MeshCreator::CreateBox(mWindow, 5, 1, 1, 1, (XMFLOAT4)Colors::Blue, L"Diamond2.dds");
 	mCircleMesh = MeshCreator::CreateCylinder(mWindow, 6, 10, 1, 1,30,10,(XMFLOAT4)Colors::Red);
@@ -505,11 +502,12 @@ void GameManager::BulletUpdate()
         {
             if (bullet->toBeDestroyed)
             {
-                Shot* newShot = Shoot_Pattern_Explosion::Shoot(bullet->mEntity, 9, bullet->bombDamage, GetWindow(), 1, 50);
+                Shot* newShot = Shoot_Pattern_Explosion::Shoot(bullet->mEntity, 9, bullet->bombDamage, 1, 50);
                 for (int i = 0; i < newShot->bulletList.size(); ++i)
                 {
                     mEntityMesh.insert({ newShot->bulletList[i]->mEntity, mBulletMesh });
                     mPlayerbulletList.push_back(newShot->bulletList[i]);
+                    GetWindow()->RegisterExistingMeshForEntity(newShot->bulletList[i]->mEntity);
                 }
 
             }

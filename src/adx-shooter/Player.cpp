@@ -151,7 +151,9 @@ void Player::Aim()
 }
 void Player::AddLineBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 25,1,GameManager::GetInstance().GetWindow());
+	Bullet* newBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 25,1);
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
@@ -162,10 +164,11 @@ void Player::AddLineBullet() {
 
 
 void Player::AddExplosionBullet() {
-	Shot* newShot = Shoot_Pattern_Pump::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow(), 1, 50);
+	Shot* newShot = Shoot_Pattern_Pump::Shoot(mEntity, 9, mStats.mStrength, 1, 50);
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
 	{
 		GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
+		GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newShot->bulletList[i]->mEntity);
 		GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
 	}
 }
@@ -173,12 +176,13 @@ void Player::AddExplosionBullet() {
 void Player::AddLighting()
 {
 	
-	Shot* newShot = Shoot_Pattern_Thunder::Shoot(mEntity, mStats.mStrength*4,{mousePos.x,0,mousePos.y}, GameManager::GetInstance().GetWindow());
+	Shot* newShot = Shoot_Pattern_Thunder::Shoot(mEntity, mStats.mStrength*4,{mousePos.x,0,mousePos.y});
 	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[0]->mEntity, GameManager::GetInstance().mCircleMesh });
 	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[1]->mEntity, GameManager::GetInstance().mLineBulletMesh });
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
 	{
 		GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
+		GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newShot->bulletList[i]->mEntity);
 	}
 }
 
@@ -218,6 +222,15 @@ void Player::TestShootPattern()
 		break;
 	case 2:
 		AddLineBullet();
+		break;
+	case 3:
+		AddLighting();
+		break;
+	case 4:
+		AddChoc();
+		break;
+	case 5:
+		AddBomb();
 		break;
 	default:
 		break;
