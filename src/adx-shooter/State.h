@@ -1,6 +1,6 @@
 #pragma once
+#include "adx-core/Timer.h"
 #include "Enemy/Enemy.h"
-
 
 // State des ennemies
 struct FollowState

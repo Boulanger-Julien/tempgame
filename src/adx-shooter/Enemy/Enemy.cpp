@@ -12,7 +12,9 @@ bool Enemy::CheckDistanceToFollowPlayer()
 	if (transformSystem::GetDistance(mTransform, ECS::GetInstance().getComponent<transformComponent>(mPlayerIndex)) <= distFollowPlayer)
 	{
 		currentEnemyState = EnemyState::NONE;
+		return true;
 	}
+	return false;
 }
 
 bool Enemy::CheckDistanceToAttackPlayer()
