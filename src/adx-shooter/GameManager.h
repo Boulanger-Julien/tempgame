@@ -47,6 +47,7 @@ public:
 	MeshGeometry mBulletMesh;
 	MeshGeometry mCircleMesh;
 	MeshGeometry mLineBulletMesh;
+	MeshGeometry mThorusMesh;
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;
 	std::vector<Boss*> mBossList;

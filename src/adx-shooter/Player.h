@@ -28,6 +28,7 @@ public:
 	void AddLighting();
 	void AddChoc();
 	void AddBomb();
+	void AddWindBoomerang();
 	void TestShootPattern();
 	void Shoot();
 	void MoveByKey();

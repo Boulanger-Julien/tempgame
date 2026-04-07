@@ -13,6 +13,7 @@ class Bullet
 {
 public:
 	std::unordered_map<int, bool > entitiesToIgnore;
+	std::unordered_map<int, bool > entitiesToWind;
 	Entity mEntity;
 	ColliderComponent mCollider;
 	transformComponent mTransform;
@@ -26,6 +27,7 @@ public:
 	int allowedBounces = 0;
 	bool isBomb = false;
 	int bombDamage = 0;
+	bool isWind = false;
 
 	BulletType type = BULLET;
 	Bullet();

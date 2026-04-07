@@ -211,6 +211,18 @@ void Player::AddBomb()
 	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
 }
 
+void Player::AddWindBoomerang()
+{
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 75, (aimType == AimType::Mouse ? 100 : 85), mStats.mStrength * 3);
+	newBullet->isWind = true;
+	newBullet->isPersistantBullet = true;
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mThorusMesh });
+	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
+}
+
 void Player::TestShootPattern()
 {
 	static int patternIndex = 0;
@@ -248,7 +260,7 @@ void Player::Shoot()
 	if (InputSystem::isKeyDown(VK_LBUTTON))
 	{
 		if (!cDownLastFrame) {
-			AddBomb();
+			AddWindBoomerang();
 			cDownLastFrame = true;
 		}
 	}

@@ -51,6 +51,7 @@ bool GameManager::Initialize()
 	mBulletMesh = MeshCreator::CreateBall(mWindow, 4, 1.0f, 10, 10, (XMFLOAT4)Colors::Blue);
 	mLineBulletMesh = MeshCreator::CreateBox(mWindow, 5, 1, 1, 1, (XMFLOAT4)Colors::Blue, L"Diamond2.dds");
 	mCircleMesh = MeshCreator::CreateCylinder(mWindow, 6, 10, 1, 1,30,10,(XMFLOAT4)Colors::Red);
+	mThorusMesh = MeshCreator::CreateTorus(mWindow, 7, 1, 0.5f, 30, 30, (XMFLOAT4)Colors::Blue);
     mEnemyMesh = MeshCreator::CreateBox(mWindow, 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 
 	currentRoom.Initialize(mWindow);
@@ -377,6 +378,10 @@ void GameManager::BulletUpdate()
                         if (!bullet->isPersistantBullet) {
                             bullet->toBeDestroyed = true;
                             break;
+                        }
+                        if (bullet->isWind)
+                        {
+                            enemy->GetTransform().position = bullet->mTransform.position;
                         }
                         if (bullet->isBoucingBullet)
                         {
