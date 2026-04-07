@@ -14,7 +14,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, i
 		if (!App.Initialize())
 			return 0;
 
-		return App.Run();
+		return App.GetInstance().Run();
 	}
 	catch (DxException& e)
 	{

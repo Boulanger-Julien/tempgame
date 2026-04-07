@@ -34,9 +34,12 @@ void Door::Update(int _enemyleft)
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	//mCollider.collisionCheck(mPlayer);
 
-	if (mCollider.collisionCheck(mPlayer) && _enemyleft <= 0) // Utilisation de VK_LBUTTON pour plus de fiabilité
+	if (_enemyleft <= 0) // Utilisation de VK_LBUTTON pour plus de fiabilité
 	{
-		changeRoom = true;
+		if (mCollider.collisionCheck(mPlayer))
+		{
+			changeRoom = true;
+		}
 	}
 	else
 	{

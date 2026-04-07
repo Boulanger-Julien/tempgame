@@ -45,18 +45,16 @@ public:
 
 	std::unordered_map<int, MeshGeometry> mEntityMesh;
 	MeshGeometry mBulletMesh;
+	MeshGeometry mCircleMesh;
 	MeshGeometry mLineBulletMesh;
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;
 	std::vector<Boss*> mBossList;
-	std::vector<Enemy*> mEnemyList;
-
-	std::vector<Enemy*> mDestroyEnemyList;
-
-	std::vector<Boss*> mDestroyBossList;
-
 	MeshGeometry gEnemyMesh() { return mEnemyMesh; }
 	MeshGeometry gBossMesh() { return MakhinaBossMesh; }
+	std::vector<EnemyMarksman*> mEnemyList;
+	std::unordered_map<int, MeshGeometry> mUIMesh;
+	UIRenderer mHealthBarMesh;
 private:
 	static GameManager* instance;//SINGELTON
 
@@ -110,8 +108,9 @@ private:
 
 	std::vector<Bullet*> mDestroyBulletList;
 
-	std::unordered_map<int, MeshGeometry> mUIMesh;
+	std::vector<Enemy*> mDestroyEnemyList;
 
+	std::vector<Boss*> mDestroyBossList;
 
 	TextRenderer* mScoreTextRenderer;
 	TextRenderer* mLifeTextRenderer;

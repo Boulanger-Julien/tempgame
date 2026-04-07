@@ -22,6 +22,10 @@ public:
 	bool toBeDestroyed = false;
 	int mDamage;
 	bool isPersistantBullet = false;
+	bool isBoucingBullet = false;
+	int allowedBounces = 0;
+	bool isBomb = false;
+	int bombDamage = 0;
 
 	BulletType type = BULLET;
 	Bullet();

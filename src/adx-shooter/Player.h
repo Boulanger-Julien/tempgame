@@ -25,7 +25,11 @@ public:
 	void AddBullet();
 	void AddLineBullet();
 	void AddExplosionBullet();
+	void AddLighting();
+	void AddChoc();
+	void AddBomb();
 	void TestShootPattern();
+	void Shoot();
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
 	StatsComponent& GetStats() { return mStats; }
@@ -35,8 +39,7 @@ public:
 
 	static Player& GetInstance() { return *mInstance; }
 private:
-	static Player* mInstance;
-
+	FLOAT2 mousePos;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
 	StatsComponent mStats;

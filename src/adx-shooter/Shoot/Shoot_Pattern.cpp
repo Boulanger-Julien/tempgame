@@ -2,11 +2,9 @@
 #include "Shoot_Pattern.h"
 //include file for max
 #include <algorithm>
-void Shoot_Pattern_Single_Shot::Update(float _deltaTime)
-{
-}
 
-Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale, float speedBullet, float accuracy)
+
+Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale, float speedBullet, float accuracy, int damage)
 {
     
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
@@ -31,15 +29,11 @@ Bullet* Shoot_Pattern_Single_Shot::Shoot(Entity sender, float scale, float speed
     ECS::GetInstance().getComponent<ColliderComponent>(newBullet->mEntity) = newBullet->mCollider;
     transformComponent& bulletTrans = ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity);
     bulletTrans.forward = bulletTrans.forward * -1;
-    newBullet->isPersistantBullet = false;
+	newBullet->mDamage = damage;
     return newBullet;
 }
 
-void Shoot_Pattern_Single_Shot::Reset()
-{
-}
-
-Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet)
+Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage, float scale, float speedBullet)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
     transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -70,11 +64,6 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
 
         transformSystem::Move(newBullet->mTransform, 0, 0, 2);
 
-        window->RegisterExistingMeshForEntity(newBullet->mEntity);
-
-        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(newBullet->mTransform);
-        window->Update(newBullet->mEntity, bulletWorld);
-
         newBullet->mDamage = _damage;
 		newShot->bulletList.push_back(newBullet);
 	    ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
@@ -82,7 +71,7 @@ Shot* Shoot_Pattern_Explosion::Shoot(Entity sender, float bullets, float _damage
     return newShot;
 }
 
-Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Window* window, float scale,float speedBullet)
+Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, float scale,float speedBullet)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
     transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -110,22 +99,19 @@ Shot* Shoot_Pattern_Pump::Shoot(Entity sender, float bullets, float _damage, Win
         float randomOffset = rand() % minOffset;
 
         newAccuracy += randomOffset;
-        newBullet->mTransform.rotation.y = senderTrans.rotation.y + /*(XM_PI / 2)*/  + (valeurAbsolue* sign * angleStep* ((100 / newAccuracy) - 1));
+        newBullet->mTransform.rotation.y = senderTrans.rotation.y + (valeurAbsolue* sign * angleStep* ((100 / newAccuracy) - 1));
         transformSystem::UpdateForward(newBullet->mTransform);
         float distFromPlayer = 5.0f;
         transformSystem::MoveForward(newBullet->mTransform, distFromPlayer);
         transformSystem::Move(newBullet->mTransform, 0, 0, 2);
-        window->RegisterExistingMeshForEntity(newBullet->mEntity);
-        XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(newBullet->mTransform);
-        window->Update(newBullet->mEntity, bulletWorld);
-        newBullet->mDamage = _damage/bullets;
+        newBullet->mDamage = (_damage / bullets)*2;
         newShot->bulletList.push_back(newBullet);
         ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity) = newBullet->mTransform;
     }
 	return newShot;
 }
 
-Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width, Window* window)
+Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, float width)
 {
     transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
 	transformComponent senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
@@ -144,4 +130,41 @@ Bullet* Shoot_Pattern_Line::Shoot(Entity sender, float _damage, float range, flo
     bulletTrans.forward = bulletTrans.forward * -1;
 	newBullet->isPersistantBullet = true;
     return newBullet;
+}
+
+Shot* Shoot_Pattern_Thunder::Shoot(Entity sender, float _damage, FLOAT3 range)
+{
+    transformSystem::UpdateForward(ECS::GetInstance().getComponent<transformComponent>(sender));
+
+    Shot* newShot = new Shot();
+
+    transformComponent& senderTrans = ECS::GetInstance().getComponent<transformComponent>(sender);
+    Bullet* circleBullet = new Bullet();
+    circleBullet->mTransform = senderTrans;
+    circleBullet->mTransform.position = range;
+    circleBullet->mDamage = 0;
+    circleBullet->isPersistantBullet = true;
+    circleBullet->maxLifetime = 1.0f;
+    circleBullet->m_speed = 0;
+    ECS::GetInstance().getComponent<transformComponent>(circleBullet->mEntity) = circleBullet->mTransform;
+    ECS::GetInstance().getComponent<ColliderComponent>(circleBullet->mEntity) = circleBullet->mCollider;
+	newShot->bulletList.push_back(circleBullet);
+	Bullet* lightningBullet = new Bullet();
+	lightningBullet->mTransform = senderTrans;
+	lightningBullet->mTransform.position = range;
+    lightningBullet->mTransform.position.y = 210;
+    lightningBullet->mTransform.scale.z = 30;
+	lightningBullet->mTransform.rotation = { -XM_PIDIV2, 0, 0 };
+	lightningBullet->mDamage = _damage*2;
+	lightningBullet->isPersistantBullet = true;
+	lightningBullet->maxLifetime = 1.0f;
+	lightningBullet->m_speed = 200;
+	lightningBullet->mCollider.width = 10;
+	lightningBullet->mCollider.height = 10;
+    lightningBullet->mCollider.updateCollider();
+	ECS::GetInstance().getComponent<transformComponent>(lightningBullet->mEntity) = lightningBullet->mTransform;
+	ECS::GetInstance().getComponent<ColliderComponent>(lightningBullet->mEntity) = lightningBullet->mCollider;
+	newShot->bulletList.push_back(lightningBullet);
+
+    return newShot;
 }

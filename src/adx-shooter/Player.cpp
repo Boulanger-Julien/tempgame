@@ -20,7 +20,7 @@ Player::Player() {
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
 
-	mStats.SetStats(100, 2, 0, 0, 20, 0, 35, 0, 0);
+	mStats.SetStats(100, 2, 0, 0, 40, 0, 35, 0, 0);
 	mHealthComponent.mMaxHealth = mStats.mHealth;
 	mHealthComponent.mHealth = mStats.mHealth;
 
@@ -43,7 +43,7 @@ void Player::ChooseClass(int classID) {
 	}
 }
 
-void Player::Update(const Ray& mouseRay) {
+void Player::Update(const Ray& mouseray) {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
 	OnUpdate(deltatime);
@@ -52,6 +52,7 @@ void Player::Update(const Ray& mouseRay) {
 	XMVECTOR intersectPoint = XMVectorAdd(mouseRay.origin, XMVectorScale(mouseRay.direction, t));
 	float targetX = XMVectorGetX(intersectPoint);
 	float targetZ = XMVectorGetZ(intersectPoint);
+	mousePos = {targetX, targetZ };
 	float dx = targetX - mTransform.position.x;
 	float dz = targetZ - mTransform.position.z;
 	float angle = atan2f(dx, dz);
@@ -70,6 +71,7 @@ void Player::OnUpdate(float _deltatime)
 	transformComponent weaponTransform = mTransform;
 	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
 	ECS::GetInstance().getComponent<transformComponent>(mWeapon->GetEntity()) = weaponTransform;
+	Shoot();
 	transformSystem::MoveByKey(mTransform, mStats.mSpeed, -45, _deltatime);
 }
 void Player::takeDamage(int _damage) {
@@ -86,13 +88,11 @@ void Player::ChangeAimType()
 }
 void Player::AddBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 50, (aimType == AimType::Mouse ? 100:85));
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 50, (aimType == AimType::Mouse ? 100:85), mStats.mStrength);
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
 	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
-
-	newBullet->mDamage = mStats.mStrength;
 	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
 }
 
@@ -128,6 +128,7 @@ void Player::Aim()
 				float dz = enemyTrans.position.z - playerTrans.position.z;
 				float angle = atan2f(dx, dz);
 				playerTrans.rotation.y = angle;
+				mousePos = { enemyTrans.position.x, enemyTrans.position.z };
 			}
 		}
 
@@ -146,13 +147,16 @@ void Player::Aim()
 				float dz = enemyTrans.position.z - playerTrans.position.z;
 				float angle = atan2f(dx, dz);
 				playerTrans.rotation.y = angle;
+				mousePos = { enemyTrans.position.x, enemyTrans.position.z };
 			}
 		}
 	}
 }
 void Player::AddLineBullet() {
 
-	Bullet* newBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 25,1,GameManager::GetInstance().GetWindow());
+	Bullet* newBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 25,1);
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
 	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
@@ -163,12 +167,50 @@ void Player::AddLineBullet() {
 
 
 void Player::AddExplosionBullet() {
-	Shot* newShot = Shoot_Pattern_Pump::Shoot(mEntity, 9, mStats.mStrength, GameManager::GetInstance().GetWindow(), 1, 50);
+	Shot* newShot = Shoot_Pattern_Pump::Shoot(mEntity, 9, mStats.mStrength, 1, 50);
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
 	{
 		GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
+		GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newShot->bulletList[i]->mEntity);
 		GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
 	}
+}
+
+void Player::AddLighting()
+{
+	
+	Shot* newShot = Shoot_Pattern_Thunder::Shoot(mEntity, mStats.mStrength*4,{mousePos.x,0,mousePos.y});
+	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[0]->mEntity, GameManager::GetInstance().mCircleMesh });
+	GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[1]->mEntity, GameManager::GetInstance().mLineBulletMesh });
+	for (int i = 0; i < newShot->bulletList.size(); ++i)
+	{
+		GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
+		GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newShot->bulletList[i]->mEntity);
+	}
+}
+
+void Player::AddChoc() {
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 75, (aimType == AimType::Mouse ? 100 : 85), mStats.mStrength);
+	newBullet->isPersistantBullet = true;
+	newBullet->isBoucingBullet = true;
+	newBullet->allowedBounces = 4;
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
+	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
+}
+
+void Player::AddBomb()
+{
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 25, (aimType == AimType::Mouse ? 100 : 85), mStats.mStrength*3);
+	newBullet->isBomb = true;
+	newBullet->bombDamage = mStats.mStrength;
+	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+	GameManager::GetInstance().mEntityMesh.insert({ newBullet->mEntity, GameManager::GetInstance().mBulletMesh });
+	XMMATRIX bulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBullet->mEntity));
+	GameManager::GetInstance().GetWindow()->Update(newBullet->mEntity, bulletWorld);
+	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
 }
 
 void Player::TestShootPattern()
@@ -184,8 +226,64 @@ void Player::TestShootPattern()
 	case 2:
 		AddLineBullet();
 		break;
+	case 3:
+		AddLighting();
+		break;
+	case 4:
+		AddChoc();
+		break;
+	case 5:
+		AddBomb();
+		break;
 	default:
 		break;
 	}
 	patternIndex = (patternIndex + 1) % (ShootPatternType::Amount - 1);
+}
+
+void Player::Shoot()
+{
+	static bool cDownLastFrame = false;
+	static bool cDownLastFrame2 = false;
+	static bool cDownLastFrame3 = false;
+	static bool cDownLastFrame4 = false;
+	if (InputSystem::isKeyDown(VK_LBUTTON))
+	{
+		if (!cDownLastFrame) {
+			AddBomb();
+			cDownLastFrame = true;
+		}
+	}
+	else {
+		cDownLastFrame = false;
+	}
+	if (InputSystem::isKeyDown(VK_SPACE)) {
+		if (!cDownLastFrame2) {
+			AddChoc();
+			cDownLastFrame2 = true;
+		}
+	}
+	else {
+		cDownLastFrame2 = false;
+	}
+	if (InputSystem::isKeyDown(VK_RBUTTON))
+	{
+		if (!cDownLastFrame3) {
+			AddLineBullet();
+			cDownLastFrame3 = true;
+		}
+	}
+	else {
+		cDownLastFrame3 = false;
+	}
+	if (InputSystem::isKeyDown('W')) {
+		if (!cDownLastFrame4) {
+			TestShootPattern();
+			cDownLastFrame4 = true;
+		}
+	}
+	else {
+		cDownLastFrame4 = false;
+	}
+
 }

@@ -52,8 +52,8 @@ bool Window::Initialize(int winW, int winH)
 	// Chargement du Splash Screen
 	{
 		// InitUI appellera BuildMesh, qui verra que l'ID 0 a déjà un slot (le 0)
-		mSplashScreenMesh = std::make_unique<MeshGeometry>(InitUI(L"SplashScreen.dds", 0, 1920, 1080, XMFLOAT4(1, 1, 1, 1)));
-
+		SetTextureToIndex({ 0 }, L"..\\..\\res\\Textures\\SplashScreen.dds");
+		mSplashScreenMesh = std::make_unique<MeshGeometry>(InitUI(L"SplashScreen.dds", XMFLOAT4(1, 1, 1, 1)));
 		ExecuteInitCommands();
 		DrawSplash();
 		FlushCommandQueue();
@@ -248,61 +248,9 @@ void Window::SetLight(const Light& light)
 	mDescriptorManager.UpdateLightConstants(lc);
 }
 
-MeshGeometry Window::BuildMesh(std::vector<Vertex>& vertices, std::vector<std::uint32_t>& indices, int entityID, const wchar_t* filename) {
+MeshGeometry Window::BuildMesh(std::vector<Vertex>& vertices, std::vector<std::uint32_t>& indices, const wchar_t* filename) {
 
 	// --- 1. GESTION DU SLOT DE DESCRIPTEUR (RECYCLAGE) ---
-	if (sEntityToDescriptor.find(entityID) == sEntityToDescriptor.end()) {
-		if (!sFreeDescriptors.empty()) {
-			int slot = sFreeDescriptors.back();
-			sFreeDescriptors.pop_back();
-			sEntityToDescriptor[entityID] = slot;
-		}
-		else {
-			OutputDebugStringA("CRITICAL ERROR: No more descriptor slots available!\n");
-			return MeshGeometry();
-		}
-	}
-	int currentDescriptorSlot = sEntityToDescriptor[entityID];
-
-	// --- 2. GESTION DE LA TEXTURE (SI EXISTANTE) ---
-	static int sNextTextureIndex = 1;
-	if (filename != nullptr) {
-		// Code pour charger la texture (seulement si pas déjà fait pour cet ID)
-		if (sIndexUseTexture.find(entityID) == sIndexUseTexture.end()) {
-			auto texture = std::make_unique<Texture>();
-			texture->Filename = filename;
-			texture->Name = "Text" + std::to_string(entityID);
-
-			ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
-				mCommandList.Get(), texture->Filename.c_str(),
-				texture->Resource, texture->UploadHeap));
-
-			if (texture->Resource != nullptr) {
-				UINT mCbvSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(mDescriptorManager.GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart());
-
-				// On place la texture APRES les 1024 slots de constantes
-				hDescriptor.Offset(mDescriptorManager.GetMaxDescriptors() + sNextTextureIndex, mCbvSize);
-
-				auto desc = texture->Resource->GetDesc();
-				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-				srvDesc.Format = desc.Format;
-				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-				srvDesc.Texture2D.MipLevels = desc.MipLevels;
-
-				md3dDevice->CreateShaderResourceView(texture->Resource.Get(), &srvDesc, hDescriptor);
-				mTextures[texture->Name] = std::move(texture);
-
-				sIndexUseTexture[entityID] = sNextTextureIndex;
-				sNextTextureIndex++;
-			}
-		}
-	}
-	else {
-		// Pas de texture : on met l'index à 0 (ou un index par défaut)
-		sIndexUseTexture[entityID] = 0;
-	}
 
 	// --- 3. CRÉATION DES BUFFERS GÉOMÉTRIQUES ---
 	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
@@ -337,31 +285,38 @@ void Window::ResetCommandList()
 }
 void Window::DrawSplash()
 {
+    BeginFrame();
 
-		BeginFrame();
-		XMMATRIX identity = XMMatrixIdentity();
-		UpdateUI(0, identity);
-		DrawUI(*mSplashScreenMesh, 0);
-		EndFrame();
+    // 1. Créer une matrice de mise à l'échelle pour passer de 1x1 à 1920x1080
+    // Comme tes vertices sont (0,0) à (1,1), cela les étire parfaitement
+    XMMATRIX scale = XMMatrixScaling(1920.0f, 1080.0f, 1.0f);
+
+    // 2. On passe cette matrice de transformation à UpdateUI
+    // UpdateUI va multiplier 'scale' par la projection Ortho et l'envoyer au GPU
+    UpdateUI(0, scale);
+
+    // 3. Dessin du mesh avec l'ID 0
+    DrawUI(*mSplashScreenMesh, 0);
+
+    EndFrame();
 }
-
-MeshGeometry Window::InitUI(const wchar_t* filename, int index, float width, float height, XMFLOAT4 color)
+MeshGeometry Window::InitUI(const wchar_t* filename, XMFLOAT4 color)
 {
 	std::vector<Vertex> vertices;
 	vertices.push_back({ XMFLOAT3(0.0f, 0.0f, 0.0f), color, XMFLOAT3(0,0,-1), XMFLOAT2(0,0) }); // 0 : Haut-Gauche
-	vertices.push_back({ XMFLOAT3(width, 0.0f, 0.0f), color, XMFLOAT3(0,0,-1), XMFLOAT2(1,0) }); // 1 : Haut-Droite
-	vertices.push_back({ XMFLOAT3(width, height, 0.0f), color, XMFLOAT3(0,0,-1), XMFLOAT2(1,1) }); // 2 : Bas-Droite
-	vertices.push_back({ XMFLOAT3(0.0f, height, 0.0f), color, XMFLOAT3(0,0,-1), XMFLOAT2(0,1) }); // 3 : Bas-Gauche
+	vertices.push_back({ XMFLOAT3(1, 0.0f, 0.0f), color, XMFLOAT3(0,0,-1), XMFLOAT2(1,0) }); // 1 : Haut-Droite
+	vertices.push_back({ XMFLOAT3(1, 1, 0.0f), color, XMFLOAT3(0,0,-1), XMFLOAT2(1,1) }); // 2 : Bas-Droite
+	vertices.push_back({ XMFLOAT3(0.0f, 1, 0.0f), color, XMFLOAT3(0,0,-1), XMFLOAT2(0,1) }); // 3 : Bas-Gauche
 	std::vector<std::uint32_t> indices = { 0, 1, 2, 0, 2, 3 };
 	std::wstring textureFilename;
 	if (filename != nullptr)
 	{
 		textureFilename = L"..\\..\\res\\Textures\\" + std::wstring(filename);
-		return MeshGeometry(BuildMesh(vertices, indices, index, textureFilename.c_str()));
+		return MeshGeometry(BuildMesh(vertices, indices, textureFilename.c_str()));
 	}
 	else 
 	{
-		return MeshGeometry(BuildMesh(vertices, indices, index, filename));
+		return MeshGeometry(BuildMesh(vertices, indices, filename));
 	}
 }
 MeshGeometry Window::CreateDynamicMesh(int index, UINT maxVertices, UINT maxIndices) {
@@ -411,6 +366,64 @@ void Window::RegisterExistingMeshForEntity(int entityID) {
 			sFreeDescriptors.pop_back();
 			sEntityToDescriptor[entityID] = slot;
 			// On peut aussi lui assigner une texture par défaut (index 0)
+			sIndexUseTexture[entityID] = 0;
+		}
+	}
+}
+
+void Window::SetTextureToIndex(std::vector<int> index, const wchar_t* filename)
+{
+	for (auto entityID : index)
+	{
+		if (sEntityToDescriptor.find(entityID) == sEntityToDescriptor.end()) {
+			if (!sFreeDescriptors.empty()) {
+				int slot = sFreeDescriptors.back();
+				sFreeDescriptors.pop_back();
+				sEntityToDescriptor[entityID] = slot;
+			}
+			else {
+				OutputDebugStringA("CRITICAL ERROR: No more descriptor slots available!\n");
+			}
+		}
+		int currentDescriptorSlot = sEntityToDescriptor[entityID];
+
+		// --- 2. GESTION DE LA TEXTURE (SI EXISTANTE) ---
+		static int sNextTextureIndex = 1;
+		if (filename != nullptr) {
+			// Code pour charger la texture (seulement si pas déjà fait pour cet ID)
+			if (sIndexUseTexture.find(entityID) == sIndexUseTexture.end()) {
+				auto texture = std::make_unique<Texture>();
+				texture->Filename = filename;
+				texture->Name = "Text" + std::to_string(entityID);
+
+				ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
+					mCommandList.Get(), texture->Filename.c_str(),
+					texture->Resource, texture->UploadHeap));
+
+				if (texture->Resource != nullptr) {
+					UINT mCbvSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(mDescriptorManager.GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart());
+
+					// On place la texture APRES les 1024 slots de constantes
+					hDescriptor.Offset(mDescriptorManager.GetMaxDescriptors() + sNextTextureIndex, mCbvSize);
+
+					auto desc = texture->Resource->GetDesc();
+					D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+					srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+					srvDesc.Format = desc.Format;
+					srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+					srvDesc.Texture2D.MipLevels = desc.MipLevels;
+
+					md3dDevice->CreateShaderResourceView(texture->Resource.Get(), &srvDesc, hDescriptor);
+					mTextures[texture->Name] = std::move(texture);
+
+					sIndexUseTexture[entityID] = sNextTextureIndex;
+					sNextTextureIndex++;
+				}
+			}
+		}
+		else {
+			// Pas de texture : on met l'index à 0 (ou un index par défaut)
 			sIndexUseTexture[entityID] = 0;
 		}
 	}

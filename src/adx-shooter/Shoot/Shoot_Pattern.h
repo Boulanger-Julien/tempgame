@@ -22,89 +22,31 @@ enum ShootPatternType
 class Shoot_Pattern_Single_Shot
 {
 public:
-	Shoot_Pattern_Single_Shot() {
-		if (instance == nullptr)
-		{
-			instance = this;
-		}
-
-	}
-	~Shoot_Pattern_Single_Shot() {}
-	inline static Shoot_Pattern_Single_Shot* instance;
-
-	inline static Shoot_Pattern_Single_Shot& GetInstance() {
-		if (instance == nullptr)
-		{
-			instance = new Shoot_Pattern_Single_Shot();
-		}
-		return *instance;
-	}
-	void Update(float _deltaTime);
-	static Bullet* Shoot(Entity sender, float scale, float speedBullet, float accuracy);
-	void Reset();
-	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
-	int mPlayerIndex = -1;
+	static Bullet* Shoot(Entity sender, float scale, float speedBullet, float accuracy, int damage);
 };
 
 class Shoot_Pattern_Explosion
 {
-	public:
-	Shoot_Pattern_Explosion() {}
-	~Shoot_Pattern_Explosion() {}
-	inline static Shoot_Pattern_Explosion* instance;
-
-	inline static Shoot_Pattern_Explosion& GetInstance() {
-		if (instance == nullptr)
-		{
-			instance = new Shoot_Pattern_Explosion();
-		}
-		return *instance;
-	}
-	void Update(float _deltaTime);
-	void Reset();
-	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
-	int mPlayerIndex = -1;
-	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet);
+public:
+	static Shot* Shoot(Entity sender, float bullets, float _damage, float scale, float speedBullet);
 };
 
 class Shoot_Pattern_Pump
 {
-	public:
-		Shoot_Pattern_Pump() {}
-	~Shoot_Pattern_Pump() {}
-	inline static Shoot_Pattern_Pump* instance;
-
-	inline static Shoot_Pattern_Pump& GetInstance() {
-		if (instance == nullptr)
-		{
-			instance = new Shoot_Pattern_Pump();
-		}
-		return *instance;
-	}
-	void Update(float _deltaTime);
-	void Reset();
-	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
-	int mPlayerIndex = -1;
-	static Shot* Shoot(Entity sender, float bullets, float _damage, Window* window, float scale, float speedBullet);
+public:
+	static Shot* Shoot(Entity sender, float bullets, float _damage, float scale, float speedBullet);
 };
 
 class Shoot_Pattern_Line
 {
 public:
-	Shoot_Pattern_Line() {}
-	~Shoot_Pattern_Line() {}
-	inline static Shoot_Pattern_Line* instance;
-
-	inline static Shoot_Pattern_Line& GetInstance() {
-		if (instance == nullptr)
-		{
-			instance = new Shoot_Pattern_Line();
-		}
-		return *instance;
-	}
-	void Update(float _deltaTime);
-	void Reset();
-	static void SetPlayerIndex(int index) { instance->mPlayerIndex = index; }
-	int mPlayerIndex = -1;
-	static Bullet* Shoot(Entity sender, float _damage, float range, float width, Window* window);
+	static Bullet* Shoot(Entity sender, float _damage, float range, float width);
 };
+
+class Shoot_Pattern_Thunder
+{
+public:
+	static Shot* Shoot(Entity sender, float _damage, FLOAT3 range);
+};
+
+// VOID / BOOMERANG / BOMB / CHOC
