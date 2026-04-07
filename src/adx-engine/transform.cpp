@@ -13,34 +13,6 @@ void transformSystem::Move(transformComponent& transform, float x, float y, floa
 	return;
 }
 
-void transformSystem::MoveByKey(transformComponent& transform,float velo, float yAngle, float deltaTime)
-{
-	// On convertit l'angle de degrés en radians si nécessaire
-	// float rad = angle.y * (3.14159f / 180.0f); 
-	float rad = yAngle * XM_PI / 180.0f;
-
-	// Calcul des vecteurs forward (Z) et right (X)
-	float forwardX = sin(rad) * deltaTime * velo;
-	float forwardZ = cos(rad) * deltaTime * velo;
-
-	float rightX = cos(rad) * deltaTime * velo;
-	float rightZ = -sin(rad) * deltaTime * velo;
-
-	// Z / S : Avancer / Reculer
-	if (InputSystem::isKeyDown('Z'))
-		Move(transform, forwardX, 0, forwardZ);
-	if (InputSystem::isKeyDown('S'))
-		Move(transform, -forwardX, 0, -forwardZ);
-
-	// Q / D : Strafe Gauche / Droite
-	if (InputSystem::isKeyDown('Q'))
-		Move(transform, -rightX, 0, -rightZ);
-	if (InputSystem::isKeyDown('D'))
-		Move(transform, rightX, 0, rightZ);
-
-	return;
-}
-
 void transformSystem::MoveForward(transformComponent& transform, float distance) {
 	/**/
 	float yaw = transform.rotation.y;

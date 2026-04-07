@@ -30,14 +30,13 @@ public:
 	void AddBomb();
 	void TestShootPattern();
 	void Shoot();
+	void MoveByKey();
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
 	StatsComponent& GetStats() { return mStats; }
 	HealthComponent& GetHealthComponent() { return mHealthComponent; }
 	float GetHealth() { return mHealthComponent.mHealth; }
 	int aimType = AimType::Mouse;
-
-	static Player& GetInstance() { return *mInstance; }
 private:
 	FLOAT2 mousePos;
 	transformComponent mTransform;

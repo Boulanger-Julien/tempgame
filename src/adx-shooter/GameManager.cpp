@@ -302,10 +302,35 @@ void GameManager::UpdateCam()
 void GameManager::EnemyUpdate()
 {
     for (Enemy* enemy : mEnemyList) {
-        enemy->Update(); //<- Maybe give PLAYER & have ENEMY turn towards PLAYER
+        enemy->Update();
+		bool alreadyInDestroyList = false;
+		for (Enemy* enemy2 : mDestroyEnemyList)
+        {
+            if (enemy == enemy2)
+            {
+                alreadyInDestroyList = true;
+                break;
+			}
+        }
+		if (enemy->isDead && !alreadyInDestroyList) {
+            mDestroyEnemyList.push_back(enemy);
+        }
+
     }
     for (Boss* boss : mBossList) {
         boss->Update();
+		bool alreadyInDestroyList = false;
+        for (Boss* boss2 : mDestroyBossList)
+        {
+            if (boss == boss2)
+            {
+                alreadyInDestroyList = true;
+                break;
+            }
+        }
+        if (!boss->IsAlive() && !alreadyInDestroyList) {
+            mDestroyBossList.push_back(boss);
+        }
     }
 }
 

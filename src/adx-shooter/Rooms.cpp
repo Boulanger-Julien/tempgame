@@ -51,7 +51,7 @@ void Rooms::Initialize(Window* _window)
 	mWindow->RegisterExistingMeshForEntity(wallEntities[1]);
 
 
-	mPlayer = &Player::GetInstance();
+	mPlayer = GameManager::GetInstance().mPlayer;
 	door.Initialize(mWindow);
 	mNumberOfRoomRenderer = new TextRenderer(_window);
 	mNumberOfRoomRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
@@ -119,8 +119,6 @@ void Rooms::Draw()
 void Rooms::OnUpdate(float _dt)
 {
 	ECS::GetInstance().getComponent<ColliderComponent>(ground) = mCollider;
-	LimitMapSystem::CheckLimitMap(*mPlayer, *this);
-
 	
 	if (mPlayer->GetHealthComponent().mHealth <= 0)
 	{
@@ -129,11 +127,9 @@ void Rooms::OnUpdate(float _dt)
 			bullet->toBeDestroyed = true;
 		}
 		for (Enemy* enemy : EnemyRooms) {
-			GameManager::GetInstance().mDestroyEnemyList.push_back(enemy);
 			enemy->isDead = true;
 		}
 		for (Boss* boss : BossList) {
-			GameManager::GetInstance().mDestroyBossList.push_back(boss);
 			boss->TakeDamage(boss->GetHealth());
 		}
 		//GameManager::GetInstance().Destroy();

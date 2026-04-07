@@ -42,7 +42,7 @@ public:
 	bool canShoot = false;
 	bool isDead = false;
 
-	void Init(int _playerIndex, Window* _window);
+	void Init(int _playerIndex);
 	void Update();
 
 	void MoveTowardPlayer(float _deltaTime);

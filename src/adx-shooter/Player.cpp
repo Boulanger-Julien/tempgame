@@ -4,11 +4,9 @@
 #include "adx-engine\framework.h"
 #include "Weapon/Basic_Sword.h"
 #include "GameManager.h"
-
-Player* Player::mInstance = nullptr;
+#include "LimitMapSystem.h"
 
 Player::Player() {
-	mInstance = this;
 	mEntity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent(), HealthComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
@@ -43,7 +41,7 @@ void Player::ChooseClass(int classID) {
 	}
 }
 
-void Player::Update(const Ray& mouseray) {
+void Player::Update(const Ray& mouseRay) {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
 	OnUpdate(deltatime);
@@ -72,7 +70,7 @@ void Player::OnUpdate(float _deltatime)
 	transformSystem::RotateAround(weaponTransform, mTransform, 1.5f);
 	ECS::GetInstance().getComponent<transformComponent>(mWeapon->GetEntity()) = weaponTransform;
 	Shoot();
-	transformSystem::MoveByKey(mTransform, mStats.mSpeed, -45, _deltatime);
+	MoveByKey();
 }
 void Player::takeDamage(int _damage) {
 	HealthSystem::TakeDamage(mHealthComponent, _damage);
@@ -286,4 +284,38 @@ void Player::Shoot()
 		cDownLastFrame4 = false;
 	}
 
+}
+
+void Player::MoveByKey()
+{
+	float dt = Timer::GetInstance()->GetDeltatime();
+	int velo = mStats.mSpeed;
+	// On convertit l'angle de degrés en radians si nécessaire
+	// float rad = angle.y * (3.14159f / 180.0f); 
+	float rad = -45 * XM_PI / 180.0f;
+
+	// Calcul des vecteurs forward (Z) et right (X)
+	float forwardX = sin(rad) * dt * velo;
+	float forwardZ = cos(rad) * dt * velo;
+
+	float rightX = cos(rad) * dt * velo;
+	float rightZ = -sin(rad) * dt * velo;
+
+	transformComponent newTransform = mTransform;
+	// Z / S : Avancer / Reculer
+	if (InputSystem::isKeyDown('Z'))
+		transformSystem::Move(newTransform, forwardX, 0, forwardZ);
+	if (InputSystem::isKeyDown('S'))
+		transformSystem::Move(newTransform, -forwardX, 0, -forwardZ);
+
+	// Q / D : Strafe Gauche / Droite
+	if (InputSystem::isKeyDown('Q'))
+		transformSystem::Move(newTransform, -rightX, 0, -rightZ);
+	if (InputSystem::isKeyDown('D'))
+		transformSystem::Move(newTransform, rightX, 0, rightZ);
+
+	if (!LimitMapSystem::CheckLimitMap(newTransform, GameManager::GetInstance().currentRoom))
+		mTransform = newTransform;
+
+	return;
 }

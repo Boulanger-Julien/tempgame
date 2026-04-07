@@ -55,6 +55,9 @@ public:
 	std::vector<EnemyMarksman*> mEnemyList;
 	std::unordered_map<int, MeshGeometry> mUIMesh;
 	UIRenderer mHealthBarMesh;
+	Player* mPlayer;
+	Rooms currentRoom;
+
 private:
 	static GameManager* instance;//SINGELTON
 
@@ -87,13 +90,11 @@ private:
 
 	ECS ecs;
 
-	Player* mPlayer;
 	Entity weapon;
 	Entity healthBar;
 	Entity healthBossBar;
 	Entity healthBossBar2;
 	Entity manaBar;
-	Rooms currentRoom;
 	Boss* newBoss;
 
 	MeshGeometry mPlayerMesh;

@@ -4,6 +4,6 @@
 #include "Rooms.h"
 struct LimitMapSystem
 {
-	static void CheckLimitMap(Player& _transform, Rooms& _currentRoom);
+	static bool CheckLimitMap(transformComponent& _transform, Rooms& _currentRoom);
 };
 
