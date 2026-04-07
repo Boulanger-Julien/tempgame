@@ -362,61 +362,70 @@ void GameManager::BulletUpdate()
 
             for (Enemy* enemy : mEnemyList) {
                 if (enemy->isDead) continue;
-                if (bullet->entitiesToIgnore.count(enemy->mEntity)) continue;
-                float dx = bullet->mTransform.position.x - enemy->GetTransform().position.x;
-                float dz = bullet->mTransform.position.z - enemy->GetTransform().position.z;
-                float distSq = (dx * dx + dz * dz);
-                if (distSq < thresholdSq) {
-                    if (ecs.getComponent<ColliderComponent>(bullet->mEntity).collisionCheck(enemy->mEntity)) {
-                        enemy->TakeDamage(bullet->mDamage);
-                        bullet->entitiesToIgnore[enemy->mEntity] = true;
-                        if (!enemy->IsAlive()) {
-                            mDestroyEnemyList.push_back(enemy);
+                if (!bullet->entitiesToIgnore.count(enemy->mEntity))
+                {
+                    float dx = bullet->mTransform.position.x - enemy->GetTransform().position.x;
+                    float dz = bullet->mTransform.position.z - enemy->GetTransform().position.z;
+                    float distSq = (dx * dx + dz * dz);
+                    if (distSq < thresholdSq) {
+                        if (ecs.getComponent<ColliderComponent>(bullet->mEntity).collisionCheck(enemy->mEntity)) {
+                            enemy->TakeDamage(bullet->mDamage);
+                            bullet->entitiesToIgnore[enemy->mEntity] = true;
+                            if (!enemy->IsAlive()) {
+                                mDestroyEnemyList.push_back(enemy);
 
-                            mPlayer->GetStats().mExp += 10;
-                        }
-                        if (!bullet->isPersistantBullet) {
-                            bullet->toBeDestroyed = true;
-                            break;
-                        }
-                        if (bullet->isWind)
-                        {
-                            enemy->GetTransform().position = bullet->mTransform.position;
-                        }
-                        if (bullet->isBoucingBullet)
-                        {
-                            if(bullet->allowedBounces > 0)
-                            {
-                                bullet->allowedBounces--;
-								bullet->currentLifetime -= 0.25f;
-								float closestDistance = FLT_MAX;
-                                for (EnemyMarksman* enemy : mEnemyList) {
-                                    if (enemy->isDead) continue;
-                                    if (bullet->entitiesToIgnore.count(enemy->mEntity)) continue;
-                                    float distance = sqrt(pow(bullet->mTransform.position.x - enemy->GetTransform().position.x, 2) + pow(bullet->mTransform.position.z - enemy->GetTransform().position.z, 2));
-                                    if (distance < closestDistance) {
-                                        closestDistance = distance;
-                                    }
-                                    else
-                                    {
-                                        continue;
-                                    }
-                                    if (distance < 70) {
-                                        float dx = enemy->GetTransform().position.x - bullet->mTransform.position.x;
-                                        float dz = enemy->GetTransform().position.z - bullet->mTransform.position.z;
-                                        float angle = atan2f(dx, dz);
-                                        bullet->mTransform.rotation.y = angle;
-                                    }
-                                }
+                                mPlayer->GetStats().mExp += 10;
                             }
-                            else
-                            {
+                            if (!bullet->isPersistantBullet) {
                                 bullet->toBeDestroyed = true;
                                 break;
+                            }
+                            if (bullet->isWind)
+                            {
+								bullet->entitiesToWind[enemy->mEntity] = true;
+                            }
+                            if (bullet->isBoucingBullet)
+                            {
+                                if (bullet->allowedBounces > 0)
+                                {
+                                    bullet->allowedBounces--;
+                                    bullet->currentLifetime -= 0.25f;
+                                    float closestDistance = FLT_MAX;
+                                    for (EnemyMarksman* enemy : mEnemyList) {
+                                        if (enemy->isDead) continue;
+                                        if (bullet->entitiesToIgnore.count(enemy->mEntity)) continue;
+                                        float distance = sqrt(pow(bullet->mTransform.position.x - enemy->GetTransform().position.x, 2) + pow(bullet->mTransform.position.z - enemy->GetTransform().position.z, 2));
+                                        if (distance < closestDistance) {
+                                            closestDistance = distance;
+                                        }
+                                        else
+                                        {
+                                            continue;
+                                        }
+                                        if (distance < 70) {
+                                            float dx = enemy->GetTransform().position.x - bullet->mTransform.position.x;
+                                            float dz = enemy->GetTransform().position.z - bullet->mTransform.position.z;
+                                            float angle = atan2f(dx, dz);
+                                            bullet->mTransform.rotation.y = angle;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    bullet->toBeDestroyed = true;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
+                else if (bullet->isWind)
+                {
+                    if (bullet->entitiesToWind.count(enemy->mEntity))
+                    {
+						enemy->GetTransform().position = bullet->mTransform.position;
+                    }
+				}
             }
 
             if (!bullet->toBeDestroyed) {
@@ -456,6 +465,18 @@ void GameManager::BulletUpdate()
 
             }
         }
+        if (bullet->isWind)
+        {
+            if (bullet->toBeDestroyed)
+            {
+				Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(bullet->mEntity, 1, -bullet->m_speed/2, 100, bullet->mDamage);
+                newBullet->isPersistantBullet = true;
+				newBullet->entitiesToIgnore = bullet->entitiesToIgnore;
+                mEntityMesh.insert({ newBullet->mEntity, mThorusMesh });
+                mPlayerbulletList.push_back(newBullet);
+				GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
+            }
+		}
 
         if (mPlayerbulletList[i]->toBeDestroyed) {
             mDestroyBulletList.push_back(mPlayerbulletList[i]);

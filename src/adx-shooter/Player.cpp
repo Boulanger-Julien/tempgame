@@ -213,7 +213,7 @@ void Player::AddBomb()
 
 void Player::AddWindBoomerang()
 {
-	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 75, (aimType == AimType::Mouse ? 100 : 85), mStats.mStrength * 3);
+	Bullet* newBullet = Shoot_Pattern_Single_Shot::Shoot(mEntity, 1, 40, (aimType == AimType::Mouse ? 100 : 85), mStats.mStrength * 1.5f);
 	newBullet->isWind = true;
 	newBullet->isPersistantBullet = true;
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newBullet->mEntity);
@@ -244,6 +244,8 @@ void Player::TestShootPattern()
 		break;
 	case 5:
 		AddBomb();
+	case 6:
+		AddWindBoomerang();
 		break;
 	default:
 		break;
@@ -302,7 +304,7 @@ void Player::MoveByKey()
 {
 	float dt = Timer::GetInstance()->GetDeltatime();
 	int velo = mStats.mSpeed;
-	// On convertit l'angle de degrés en radians si nécessaire
+	// On convertit l'angle de degrÃ©s en radians si nÃ©cessaire
 	// float rad = angle.y * (3.14159f / 180.0f); 
 	float rad = -45 * XM_PI / 180.0f;
 
