@@ -18,7 +18,6 @@ public:
 	Entity mEntity;
 	
 	ColliderComponent mCollider;
-	TeleportComponent mTeleport;
 	MeshGeometry doorMesh;
 	bool changeRoom = false;
 	Entity mPlayer;

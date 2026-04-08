@@ -56,6 +56,7 @@ bool GameManager::Initialize()
 	currentRoom.Initialize(mWindow);
 
 	currentRoom.door.mPlayer = mPlayer->mEntity;
+	currentRoom.totem.mPlayer = mPlayer->mEntity;
     
 	newBoss = new Makhina_Boss(mPlayer->mEntity);
     MakhinaBossMesh = MeshCreator::CreateBox(mWindow, newBoss->GetEntity(), 1,1,1, (XMFLOAT4)Colors::DarkRed);

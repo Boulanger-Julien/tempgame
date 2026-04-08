@@ -118,7 +118,7 @@ void RoomGenerator::PlaceDoor(Rooms& _room)
 void RoomGenerator::PlacePlayer(Rooms& _room)
 {
     if (_room.type == RoomType::LOBBY_ROOM) {
-        _room.mPlayer->GetTransform().position = FLOAT3(0, 2, 0);
+        _room.mPlayer->GetTransform().position = FLOAT3(5, 2, -5);
         return;
 	}
     FLOAT3 posDoor = _room.door.mTransform.position;

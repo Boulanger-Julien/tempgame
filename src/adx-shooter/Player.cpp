@@ -7,7 +7,7 @@
 #include "LimitMapSystem.h"
 
 Player::Player() {
-	mEntity = ECS::GetInstance().createEntity(transformComponent(0,2,0), ColliderComponent(), HealthComponent());
+	mEntity = ECS::GetInstance().createEntity(transformComponent(5, 2, -5), ColliderComponent(), HealthComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);

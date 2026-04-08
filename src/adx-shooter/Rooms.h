@@ -2,6 +2,7 @@
 #include "adx-render/framework.h"
 #include "adx-engine/framework.h"
 #include "Door.h"
+#include "Totem.h"
 #include "MeshCreator.h" 
 #include "Enemy\Enemy.h"
 #include "Enemy/Boss.h"
@@ -37,6 +38,7 @@ public:
 	//std::vector<Door> doors;// à voir plus tard
     ECS ecs;  
     Door door;
+    Totem totem;
 
     Entity ground;
     ColliderComponent mCollider;
@@ -71,12 +73,9 @@ protected:
     TextRenderer* mNumberOfRoomRenderer;
     TextRenderer* mChooseDifficultyRenderer;
 	std::string mDifficultyStr = "";
+    TextRenderer* mTimerTextRenderer;  
+
+
 	friend class RoomGenerator;
-
-
-
-
-    TextRenderer* mTimerTextRenderer; 
-
 };
 

@@ -2,7 +2,7 @@
 #include "Door.h"
 #include "GameManager.h"
 
-Door::Door()
+Door::Door() 
 {
 	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 1, 0), ColliderComponent());
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
@@ -12,6 +12,7 @@ Door::Door()
 	mCollider.depth = mTransform.scale.z; 
 	mCollider.width = mTransform.scale.x;
 	mCollider.height = mTransform.scale.y;
+	mCollider.compOwner = mEntity;
 	//mCollider.isTrigger = true;
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
@@ -31,7 +32,7 @@ void Door::Initialize(Window* _window)
 
 void Door::Update(int _enemyleft) 
 {
-	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
+	//mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	//mCollider.collisionCheck(mPlayer);
 
 	if (_enemyleft <= 0) // Utilisation de VK_LBUTTON pour plus de fiabilité
@@ -40,6 +41,7 @@ void Door::Update(int _enemyleft)
 		{
 			changeRoom = true;
 		}
+		else changeRoom = false;
 	}
 	else
 	{

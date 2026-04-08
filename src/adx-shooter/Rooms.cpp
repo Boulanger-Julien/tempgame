@@ -20,6 +20,7 @@ Rooms::Rooms()
 Rooms::~Rooms()
 {
 	mWindow->RemoveEntityResources(door.mEntity);
+	mWindow->RemoveEntityResources(totem.mEntityfeur);
 }
 
 void Rooms::Initialize(Window* _window)
@@ -53,6 +54,7 @@ void Rooms::Initialize(Window* _window)
 
 	mPlayer = GameManager::GetInstance().mPlayer;
 	door.Initialize(mWindow);
+	totem.Initialize(mWindow);
 	mNumberOfRoomRenderer = new TextRenderer(_window);
 	mNumberOfRoomRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
 
@@ -72,6 +74,7 @@ void Rooms::Update()
 	UpdateComponent();
 
 	OnUpdate(deltatime);
+	totem.Update(type);
 	door.Update(EnemyRooms.size() + BossList.size());
 	for (Enemy* enemy : EnemyRooms)
 	{
