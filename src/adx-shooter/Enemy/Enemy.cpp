@@ -182,11 +182,8 @@ void Enemy::ExplosionBullets()
 
 void Enemy::LineBullets()
 {
-	Bullet* newLineBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 10, 1);
+	Bullet* newLineBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength*1.5f, 10, 1);
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newLineBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newLineBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
-	XMMATRIX lineBulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newLineBullet->mEntity));
-	GameManager::GetInstance().GetWindow()->Update(newLineBullet->mEntity, lineBulletWorld);
-	newLineBullet->mDamage = mStats.mStrength;
 	GameManager::GetInstance().mBulletList.push_back(newLineBullet);
 }

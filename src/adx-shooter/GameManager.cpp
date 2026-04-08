@@ -487,11 +487,11 @@ void GameManager::BulletUpdate()
     for (int i = mBulletList.size() - 1; i >= 0; i--) {
         mBulletList[i]->Update();
 		Bullet* bullet = mBulletList[i];
+        if (bullet->currentLifetime >= bullet->maxLifetime) {
+            bullet->toBeDestroyed = true;
+        }
         if (!bullet->toBeDestroyed) {
             if (bullet->entitiesToIgnore.count(mPlayer->mEntity)) continue;
-            if (bullet->currentLifetime >= bullet->maxLifetime) {
-                bullet->toBeDestroyed = true;
-            }
 
             float maxS = max(bullet->mTransform.scale.x, max(bullet->mTransform.scale.z, bullet->mTransform.scale.y));
             float thresholdSq = (maxS + 3.0f) * (maxS + 3.0f);
