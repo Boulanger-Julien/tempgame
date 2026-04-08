@@ -37,11 +37,11 @@ void EnemyMarksman::OnUpdate(float _deltaTime)
 		LookPlayer();
 
 		if (CheckDistanceToAttackPlayer()) {
-			Attack(_deltaTime);
+			currentEnemyState = EnemyState::ATTACKPLAYER;
 		}
 		else
 		{
-			MoveTowardPlayer(_deltaTime);
+			currentEnemyState = EnemyState::FOLLOWPLAYER;
 		}
 	}
 }
