@@ -56,10 +56,12 @@ void DyingState::OnEnter(Enemy& cur)
 	 
 void DyingState::OnExecute(Enemy& cur)
 {	
-	cur.currentDieCooldown += Timer::GetInstance()->GetDeltatime();
-	cur.mCollider.isTrigger = true;
-	transformSystem::Rotate(cur.mTransform, 0, 0, 100 * Timer::GetInstance()->GetDeltatime());
-	if (cur.currentDieCooldown >= cur.timeToDie) {
+	float dt = Timer::GetInstance()->GetDeltatime();
+	//cur.currentDieCooldown += Timer::GetInstance()->GetDeltatime();
+	cur.mCollider.isTrigger = false;
+	transformSystem::Rotate(cur.mTransform, 0, 500 * dt, 0);
+	cur.mTransform.scale = FLOAT3(cur.mTransform.scale.x - dt, cur.mTransform.scale.y - dt, cur.mTransform.scale.z - dt);
+	if (cur.mTransform.scale.x <=0) {
 		cur.isDead = true;
 	}
 }	

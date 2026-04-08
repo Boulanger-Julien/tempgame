@@ -25,8 +25,8 @@ protected:
 		STUNTED
 	};
 	EnemyState currentEnemyState = NONE;
-	float timeToDie = 2.0f;
-	float currentDieCooldown = 0;
+	//float timeToDie = 2.0f;
+	//float currentDieCooldown = 0;
 private:
 	int shootPatternIndex = 0;
 	float mCurrentShootCooldown = 0;
