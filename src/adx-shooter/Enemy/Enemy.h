@@ -21,9 +21,12 @@ protected:
 		NONE,
 		FOLLOWPLAYER,
 		ATTACKPLAYER,
+		DYING,
 		STUNTED
 	};
 	EnemyState currentEnemyState = NONE;
+	float timeToDie = 2.0f;
+	float currentDieCooldown = 0;
 private:
 	int shootPatternIndex = 0;
 	float mCurrentShootCooldown = 0;
@@ -64,5 +67,9 @@ public:
 	float GetHealth() { return mHealthComponent.mHealth; }
 	Entity GetEntity() const { return mEntity; }
 
-
+	friend struct NoneState;
+	friend struct FollowState;
+	friend struct AttackState;
+	friend struct DyingState;
+	friend struct StuntedState;
 };

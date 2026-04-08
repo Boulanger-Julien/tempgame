@@ -17,6 +17,7 @@ void EnemyMarksman::OnUpdate(float _deltaTime)
 	switch (currentEnemyState)
 	{
 	case Enemy::NONE:
+		NoneState::OnExecute(*this);
 		break;
 	case Enemy::FOLLOWPLAYER:
 		FollowState::OnExecute(*this);
@@ -24,25 +25,14 @@ void EnemyMarksman::OnUpdate(float _deltaTime)
 	case Enemy::ATTACKPLAYER:
 		AttackState::OnExecute(*this);
 		break;
-	case Enemy::STUNTED:
-		StuntedState::OnExecute(*this);
+	case Enemy::DYING:
+		DyingState::OnExecute(*this);
 		break;
+		//case Enemy::STUNTED:				//n'existe pas encore
+	//	StuntedState::OnExecute(*this);
+	//	break;
 	default:
 		break;
-	}
-
-
-
-	if (CheckDistanceToFollowPlayer()) {
-		LookPlayer();
-
-		if (CheckDistanceToAttackPlayer()) {
-			currentEnemyState = EnemyState::ATTACKPLAYER;
-		}
-		else
-		{
-			currentEnemyState = EnemyState::FOLLOWPLAYER;
-		}
 	}
 }
 

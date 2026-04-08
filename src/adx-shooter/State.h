@@ -3,6 +3,12 @@
 #include "Enemy/Enemy.h"
 
 // State des ennemies
+struct NoneState
+{
+	static void OnEnter(Enemy& cur);
+	static void OnExecute(Enemy& cur);
+	static void OnExit(Enemy& cur);
+};
 struct FollowState
 {
 	static void OnEnter(Enemy& cur);
@@ -10,6 +16,12 @@ struct FollowState
 	static void OnExit(Enemy& cur);
 };
 struct AttackState
+{
+	static void OnEnter(Enemy& cur);
+	static void OnExecute(Enemy& cur);
+	static void OnExit(Enemy& cur);
+};
+struct DyingState
 {
 	static void OnEnter(Enemy& cur);
 	static void OnExecute(Enemy& cur);

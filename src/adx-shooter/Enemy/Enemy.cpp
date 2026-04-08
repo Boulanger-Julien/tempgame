@@ -120,7 +120,7 @@ void Enemy::TakeDamage(int _damage) {
 bool Enemy::IsAlive()
 {
 	if (GetHealth() <= 0) {
-		isDead = true;
+		currentEnemyState = EnemyState::DYING;
 	}
 
 	return !isDead;

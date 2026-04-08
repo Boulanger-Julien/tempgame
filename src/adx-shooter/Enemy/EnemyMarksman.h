@@ -9,7 +9,7 @@ public:
 	void OnUpdate(float _deltaTime) override;
 
 	bool Test();
-protected:
+protected: 
 
 };
 
