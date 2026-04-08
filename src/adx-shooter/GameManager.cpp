@@ -99,6 +99,7 @@ bool GameManager::Initialize()
 		mUIMesh.insert({ healthBossBar, mHealthBarMesh.UIQuad });
 		mUIMesh.insert({ healthBossBar2, mHealthBarMesh.UIQuad });
     }
+
     mWindow->ExecuteInitCommands();
     mWindow->FlushCommandQueue();
     return true;

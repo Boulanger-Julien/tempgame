@@ -46,6 +46,17 @@ Player::Player() {
 	InitUI(STRBar, {1,0,0,1});
 	InitUI(DEFBar, {0,0,1,1});
 	InitUI(SPDBar, {1,1,0,1});
+	ShootPatternCooldowns.insert({ 0, 0.0f });
+	ShootPatternCooldowns.insert({ 1, 0.5f });
+	ShootPatternCooldowns.insert({ 2, 3.0f });
+	ShootPatternCooldowns.insert({ 3, 2.0f });
+	ShootPatternCooldowns.insert({ 4, 0.75f });
+	ShootPatternCooldowns.insert({ 5, 1.5f });
+	ShootPatternCooldowns.insert({ 6, 5.0f });
+	ShootPatternCooldowns.insert({ 7, 3.0f });
+	ShootPatternCooldowns.insert({ 8, 5.0f });
+
+	mSShootColdown = ShootPatternCooldowns[1];
 }
 void Player::InitUI(int index, FLOAT4 color)
 {
@@ -54,6 +65,116 @@ void Player::InitUI(int index, FLOAT4 color)
 	barMesh.PushIndex();
 	barMesh.UIQuad.isRendered = false;
 	GameManager::GetInstance().mUIMesh.insert({ index, barMesh.UIQuad });
+}
+
+void Player::EnableShooting(int shotindex)
+{
+
+
+	switch (shotindex) {
+	case 0:
+		break;
+	case 1:
+		if (mNextFShootTimer > mFShootColdown && mFShootColdown != 0) {
+			AddBullet();
+			mNextFShootTimer = 0;
+		}
+		else if (mNextSShootTimer > mSShootColdown && mSShootColdown != 0) {
+			AddBullet();
+			mNextSShootTimer = 0;
+		}
+		else if (mNextTShootTimer > mTShootColdown && mTShootColdown != 0) {
+			AddBullet();
+			mNextTShootTimer = 0;
+		}
+		break;
+	case 2:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+			AddExplosionBullet();
+			mNextFShootTimer = 0;
+		}
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+			AddExplosionBullet();
+			mNextSShootTimer = 0;
+		}
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+			AddExplosionBullet();
+			mNextTShootTimer = 0;
+		}
+		break;
+	case 3:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+			AddLineBullet();
+			mNextFShootTimer = 0;
+		}
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+			AddLineBullet();
+			mNextSShootTimer = 0;
+		}
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+			AddLineBullet();
+			mNextTShootTimer = 0;
+		}
+		break;
+	case 4:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+			AddChoc();
+			mNextFShootTimer = 0;
+		}
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+			AddChoc();
+			mNextSShootTimer = 0;
+		}
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+			AddChoc();
+			mNextTShootTimer = 0;
+		}
+		break;
+	case 5:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+			AddLighting();
+			mNextFShootTimer = 0;
+		}
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+			AddLighting();
+			mNextSShootTimer = 0;
+		}
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+			AddLighting();
+			mNextTShootTimer = 0;
+		}
+		break;
+	case 6:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+			AddWindBoomerang();
+			mNextFShootTimer = 0;
+		}
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+			AddWindBoomerang();
+			mNextSShootTimer = 0;
+		}
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+			AddWindBoomerang();
+			mNextTShootTimer = 0;
+		}
+		break;
+	case 7:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+			AddBomb();
+			mNextFShootTimer = 0;
+		}
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+			AddBomb();
+			mNextSShootTimer = 0;
+		}
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+			AddBomb();
+			mNextTShootTimer = 0;
+		}
+		break;
+	default:
+		break;
+	}
 }
 
 void Player::ChooseClass(int classID) {
@@ -284,38 +405,23 @@ void Player::TestShootPattern()
 }
 void Player::Shoot()
 {
-	static bool cDownLastFrame = false;
-	static bool cDownLastFrame2 = false;
-	static bool cDownLastFrame3 = false;
 	static bool cDownLastFrame4 = false;
-	if (InputSystem::isKeyDown(VK_LBUTTON))
-	{
-		if (!cDownLastFrame) {
-			AddWindBoomerang();
-			cDownLastFrame = true;
-		}
-	}
-	else {
-		cDownLastFrame = false;
-	}
-	if (InputSystem::isKeyDown(VK_SPACE)) {
-		if (!cDownLastFrame2) {
-			AddChoc();
-			cDownLastFrame2 = true;
-		}
-	}
-	else {
-		cDownLastFrame2 = false;
-	}
+	mNextFShootTimer += Timer::GetDeltatime();
+	mNextSShootTimer += Timer::GetDeltatime();
+	mNextFShootTimer += Timer::GetDeltatime();
+
 	if (InputSystem::isKeyDown(VK_RBUTTON))
 	{
-		if (!cDownLastFrame3) {
-			AddLineBullet();
-			cDownLastFrame3 = true;
-		}
+		EnableShooting(mFirstShootPattern);
 	}
-	else {
-		cDownLastFrame3 = false;
+
+	if (InputSystem::isKeyDown(VK_LBUTTON))
+	{
+		EnableShooting(mSecondShootPattern);
+	}
+
+	if (InputSystem::isKeyDown(VK_SPACE)) {
+		EnableShooting(mThirdShootPattern);
 	}
 	if (InputSystem::isKeyDown('W')) {
 		if (!cDownLastFrame4) {

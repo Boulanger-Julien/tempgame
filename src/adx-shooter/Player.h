@@ -7,6 +7,8 @@ enum AimType {
 	Mouse
 };
 
+
+
 class Player
 {
 public:
@@ -47,11 +49,22 @@ public:
 	Entity DEFBar;
 	Entity SPDBar;
 private:
+	std::unordered_map<int, float> ShootPatternCooldowns;
 	FLOAT2 mousePos;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
 	StatsComponent mStats;
 	HealthComponent mHealthComponent;
 	void InitUI(int index, FLOAT4 color);
+	void EnableShooting(int shotindex);
+	float mFShootColdown = 0.0;
+	float mNextFShootTimer = 0;
+	float mSShootColdown = 0.0;
+	float mNextSShootTimer = 0;
+	float mTShootColdown = 0.0;
+	float mNextTShootTimer = 0;
+	int mFirstShootPattern = 1;
+	int mSecondShootPattern = 0;
+	int mThirdShootPattern = 0;
 };
 

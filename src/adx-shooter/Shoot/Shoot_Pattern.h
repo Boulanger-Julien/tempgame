@@ -3,6 +3,8 @@
 #include "Bullet.h"
 #include "adx-render\Window.h"
 
+
+
 struct Shot
 {
 	std::vector<Bullet*> bulletList;
@@ -15,8 +17,13 @@ enum ShootPatternType
 	Explosion,
 	Pump,
 	Line,
+	Choc,
+	Thunder,
+	Boomerang,
+	Bomb,
 	Amount
 };
+
 
 
 class Shoot_Pattern_Single_Shot
