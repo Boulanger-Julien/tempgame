@@ -23,7 +23,7 @@ class Makhina_Boss : public Boss
 	}
 	virtual void InitStats() override
 	{
-		mStats.SetStats(3000, 0, 0, 0, 30, 10, 0, 60, 0);
+		mStats.SetStats(3000, 0, 30, 10, 0, 1000);
 		mHealthComponent.mHealth = mStats.mHealth;
 	}
 	virtual void Move(float _deltaTime) override

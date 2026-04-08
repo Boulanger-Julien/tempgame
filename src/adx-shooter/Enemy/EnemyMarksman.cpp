@@ -9,7 +9,7 @@ void EnemyMarksman::OnInit()
 	distAttackPlayer = 30;
 	mShootCooldown = 2;
 
-	InitStats(200, 0, 0, 0, 7, 0, 25, 0, 0);
+	InitStats(100, 0, 7, 0, 25, 40);
 }
 
 void EnemyMarksman::OnUpdate(float _deltaTime)

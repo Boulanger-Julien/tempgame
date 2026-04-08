@@ -12,7 +12,7 @@ class Player
 public:
 	Entity mEntity;
 	Weapon* mWeapon;
-
+	
 
 	Player();
 	void ChooseClass(int classID);
@@ -32,17 +32,26 @@ public:
 	void TestShootPattern();
 	void Shoot();
 	void MoveByKey();
+	void LevelUp();
+	void CanAllocatePoints();
 	transformComponent& GetTransform() { return mTransform; }
 	ColliderComponent& GetCollider() { return mCollider; }
 	StatsComponent& GetStats() { return mStats; }
 	HealthComponent& GetHealthComponent() { return mHealthComponent; }
 	float GetHealth() { return mHealthComponent.mHealth; }
 	int aimType = AimType::Mouse;
+	Entity mPointsToAllocate;
+	Entity HPBar;
+	Entity HPRBar;
+	Entity STRBar;
+	Entity DEFBar;
+	Entity SPDBar;
 private:
 	FLOAT2 mousePos;
 	transformComponent mTransform;
 	ColliderComponent mCollider;
 	StatsComponent mStats;
 	HealthComponent mHealthComponent;
+	void InitUI(int index, FLOAT4 color);
 };
 

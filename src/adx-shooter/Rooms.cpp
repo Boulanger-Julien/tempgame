@@ -53,14 +53,11 @@ void Rooms::Initialize(Window* _window)
 
 	mPlayer = GameManager::GetInstance().mPlayer;
 	door.Initialize(mWindow);
-	mNumberOfRoomRenderer = new TextRenderer(_window);
-	mNumberOfRoomRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+	mNumberOfRoomRenderer = new TextRenderer();
 
-	mTimerTextRenderer = new TextRenderer(mWindow);
-	mTimerTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+	mTimerTextRenderer = new TextRenderer();
 
-	mChooseDifficultyRenderer = new TextRenderer(mWindow);
-	mChooseDifficultyRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+	mChooseDifficultyRenderer = new TextRenderer();
 
 }
 

@@ -25,18 +25,18 @@ bool GameManager::Initialize()
         mWindow->Initialize(1920, 1080);
     }
     mPlayer = new Player();
-    mLifeTextRenderer = new TextRenderer(mWindow);
-    mLifeTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-    mManaTextRenderer = new TextRenderer(mWindow);
-    mManaTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-    mScoreTextRenderer = new TextRenderer(mWindow);
-    mScoreTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-    mTimerTextRenderer = new TextRenderer(mWindow);
-    mTimerTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-    mBossNameTextRenderer = new TextRenderer(mWindow);
-    mBossNameTextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
-    mBossName2TextRenderer = new TextRenderer(mWindow);
-    mBossName2TextRenderer->Initialize(L"sheet.dds", 15, 8, 1.0f, 1.0f, 32);
+    mLifeTextRenderer = new TextRenderer();
+    mScoreTextRenderer = new TextRenderer();
+    mTimerTextRenderer = new TextRenderer();
+    mBossNameTextRenderer = new TextRenderer();
+    mBossName2TextRenderer = new TextRenderer();
+	mChooseStatsTextRenderer = new TextRenderer();
+	mChooseHPTextRenderer = new TextRenderer();
+	mChooseHPRTextRenderer = new TextRenderer();
+	mChooseSTRTextRenderer = new TextRenderer();
+	mChooseDEFTextRenderer = new TextRenderer();
+	mChooseSPDTextRenderer = new TextRenderer();
+
 
     srand(time(NULL));
     ecs = ECS::GetInstance();
@@ -84,6 +84,7 @@ bool GameManager::Initialize()
     {
 		Entity healthExtBar = ecs.createEntity(transformComponent(offsetHBX, offsetHBY, 0, healthBarWidth, healthBarHeight));
 		healthBarExtMesh.AddIndex(healthExtBar);
+		healthBarExtMesh.PushIndex();
         healthBar = ecs.createEntity(transformComponent(offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f));
         healthBossBar = ecs.createEntity(transformComponent(700, 70, 0, 500, 20));
         healthBossBar2 = ecs.createEntity(transformComponent(700, 170, 0, 500, 20));
@@ -97,17 +98,6 @@ bool GameManager::Initialize()
         mUIMesh.insert({ healthBar, mHealthBarMesh.UIQuad });
 		mUIMesh.insert({ healthBossBar, mHealthBarMesh.UIQuad });
 		mUIMesh.insert({ healthBossBar2, mHealthBarMesh.UIQuad });
-    }
-    {
-		Entity manaExtBar = ecs.createEntity(transformComponent(offsetMBX, offsetMBY, 0, healthBarWidth, healthBarHeight));
-		healthBarExtMesh.AddIndex(manaExtBar);
-		healthBarExtMesh.PushIndex();
-        mUIMesh.insert({ manaExtBar, healthBarExtMesh.UIQuad });
-        manaBar = ecs.createEntity(transformComponent(offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f));
-        UIRenderer healthBarMesh(XMFLOAT4(0,0,1,1));
-		healthBarMesh.AddIndex(manaBar);
-		healthBarMesh.PushIndex();
-        mUIMesh.insert({ manaBar, healthBarMesh.UIQuad });
     }
     mWindow->ExecuteInitCommands();
     mWindow->FlushCommandQueue();
@@ -181,24 +171,42 @@ void GameManager::Draw()
     {
         int entityID = it->first;
         MeshGeometry& meshRef = it->second;
-
+		if (meshRef.isRendered)
         mWindow->Draw(meshRef, entityID);
     }
     for (auto it = mUIMesh.begin(); it != mUIMesh.end(); ++it)
     {
         int entityID = it->first;
         MeshGeometry& meshRef = it->second;
-
+		if (meshRef.isRendered)
         mWindow->DrawUI(meshRef, entityID);
     }
 	timer += Timer::GetInstance()->GetDeltatime();
 
     {
         currentRoom.Draw();
-		mManaTextRenderer->DrawTxt(std::to_string((int)mPlayer->GetStats().mMana) + "/" + std::to_string((int)mPlayer->GetStats().mMana), offsetMBX + healthBarWidth * 0.06f, offsetMBY + healthBarHeight * 0.3f, 24);
-        mScoreTextRenderer->DrawTxt("EXP : " + std::to_string((int)mPlayer->GetStats().mExp) , 20, 20, 24);
+        mScoreTextRenderer->DrawTxt("Level " + std::to_string((int)mPlayer->GetStats().mLevel) + " : " + std::to_string((int)mPlayer->GetStats().mExp) + "/" + std::to_string((int)mPlayer->GetStats().mExpToNextLevel), 20, 20, 24);
         mLifeTextRenderer->DrawTxt(mPlayer->GetHealth() > 0 ? std::to_string((int)mPlayer->GetHealth()) + "/" + std::to_string((int)mPlayer->GetStats().mHealth) : "Game Over", offsetHBX + healthBarWidth * 0.06f, offsetHBY + healthBarHeight * 0.3f, 24);
-        //currentRoom.mNumberOfRoomRenderer->DrawTxt("Rooggegmy", 60, 220, 24);
+
+        if (mUIMesh[mPlayer->mPointsToAllocate].isRendered)
+        {
+            mChooseStatsTextRenderer->DrawTxt("You have " + std::to_string(mPlayer->GetStats().mStatsPointsToAllocate) + " stat(s) points! Press M to toggle.", 700, 833, 20);
+			int offset = 525;
+			int size = 259;
+			mChooseHPTextRenderer->DrawTxt("HP :" + std::to_string((int)mPlayer->GetStats().mHealth) + "\n(+ 10) (G)", offset, 875, 20);
+			offset += size;
+			mChooseHPRTextRenderer->DrawTxt("HP Regen : " + std::to_string((int)mPlayer->GetStats().mHealthRegen) + "\n(+ 0.1) (H)", offset, 875, 20);
+			offset += size;
+			mChooseSTRTextRenderer->DrawTxt("STR : " + std::to_string((int)mPlayer->GetStats().mStrength) + "\n(+ 2) (J)", offset, 875, 20);
+			offset += size;
+			mChooseDEFTextRenderer->DrawTxt("DEF : " + std::to_string((int)mPlayer->GetStats().mDefense) + "\n(+ 1) (K)", offset, 875, 20);
+			offset += size;
+			mChooseSPDTextRenderer->DrawTxt("SPD : " + std::to_string((int)mPlayer->GetStats().mSpeed) + "\n(+ 2) (L)", offset, 875, 20);
+        }
+        else
+        {
+            mChooseStatsTextRenderer->DrawTxt("Points : " + std::to_string(mPlayer->GetStats().mStatsPointsToAllocate), 20, 120, 24);
+        }
 
         if (mBossList.size() > 0)
         {
@@ -267,11 +275,6 @@ void GameManager::CheckInput()
         }
         Destroy();
     }
-    if (InputSystem::isKeyDown('C'))
-    {
-        //SpawnMob(rand() % 100 - 50, rand() % 100 - 50, 0);
-    }
-
 }
 
 float GameManager::GetDeltatime() {
@@ -374,7 +377,7 @@ void GameManager::BulletUpdate()
                             if (!enemy->IsAlive()) {
                                 mDestroyEnemyList.push_back(enemy);
 
-                                mPlayer->GetStats().mExp += 10;
+								mPlayer->GetStats().mExp += enemy->mStats.mExp;
                             }
                             if (!bullet->isPersistantBullet) {
                                 bullet->toBeDestroyed = true;
@@ -443,7 +446,7 @@ void GameManager::BulletUpdate()
                                 boss = mBossList.back();
                                 mBossList.pop_back();
 
-                                mPlayer->GetStats().mExp += 50;
+								mPlayer->GetStats().mExp += boss->ExpToGive();
                             }
                             if (!bullet->isPersistantBullet) { bullet->toBeDestroyed = true; break; }
                         }

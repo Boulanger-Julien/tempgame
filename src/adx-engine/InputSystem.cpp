@@ -12,6 +12,18 @@ char InputSystem::GetKeyDown()
 	}
 }
 
+bool InputSystem::isKeyDown()
+{
+	for (int i = 0; i < 256; ++i)
+	{
+		if (GetAsyncKeyState(i) & 0x8000)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool InputSystem::isKeyDown(char key)
 {
 	if (GetAsyncKeyState(key) & 0x8000)

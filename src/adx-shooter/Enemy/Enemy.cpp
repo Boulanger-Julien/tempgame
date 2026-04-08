@@ -66,9 +66,9 @@ void Enemy::Init(int _playerIndex)
 	OnInit();
 }
 
-void Enemy::InitStats(float _health, float _healthRegen, float _mana, float _manaRegen, float _strength, float _defense, float _moveSpeed, float _exp, float _magicPower)
+void Enemy::InitStats(float _health, float _healthRegen, float _strength, float _defense, float _moveSpeed, float _exp)
 {
-	mStats.SetStats(_health, _healthRegen, _mana, _manaRegen, _strength, _defense, _moveSpeed, _exp, _magicPower);
+	mStats.SetStats(_health, _healthRegen, _strength, _defense, _moveSpeed, _exp);
 	mHealthComponent.mHealth = mStats.mHealth;
 }
 
