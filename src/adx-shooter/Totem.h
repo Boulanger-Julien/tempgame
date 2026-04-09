@@ -20,6 +20,7 @@ public:
 	ColliderComponent mCollider;
 	MeshGeometry TotemMesh;
 	Entity mPlayer;
+	bool changePattern = false;
 protected:
 
 };

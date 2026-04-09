@@ -64,7 +64,7 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
      {
         case NEXT_ENEMY:
 			_room.type = RoomType::ENEMY_ROOM;
-            AddEnemies(_room);
+            AddEnemies(_room, (GameManager::GetInstance().mPlayer->GetStats().mLevel * 0.1f)-0.1f);
 			break;
         case NEXT_BOSS:
             _room.type = RoomType::BOSS_ROOM;
@@ -91,11 +91,11 @@ void RoomGenerator::GenerateRoom(Rooms& _room)
 }
 
 
-void RoomGenerator::AddEnemies(Rooms& _room)
+void RoomGenerator::AddEnemies(Rooms& _room, float hppercentage)
 {
     int numberOfEnnemies = (rand() % 5*_room.mdifficulty) + _room.numberOfRoom;
     for (int i = 0; i < numberOfEnnemies; i++) {
-        _room.EnemyRooms.push_back(MobGenerator::SpawnMob(rand() % 90 - 45, rand() % 90 - 45, 0));
+        _room.EnemyRooms.push_back(MobGenerator::SpawnMob(rand() % 90 - 45, rand() % 90 - 45, hppercentage));
     }
 }
 

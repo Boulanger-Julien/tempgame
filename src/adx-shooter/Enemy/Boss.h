@@ -30,6 +30,7 @@ class Boss
 	virtual void ChangeShootPattern() = 0;
 	std::string GetName() { return name; }
 	float ExpToGive() { return (mStats.mExp); }
+	StatsComponent& GetStats() { return mStats; }
 protected:
 
 	enum BossState

@@ -114,7 +114,13 @@ void Enemy::Attack(float _deltaTime)
 
 }
 void Enemy::TakeDamage(int _damage) {
-	HealthSystem::TakeDamage(mHealthComponent, _damage);
+	int dmg = _damage;
+	if (mStats.mDefense > 0)
+	{
+		dmg -= rand() % (int)mStats.mDefense;
+	}
+
+	HealthSystem::TakeDamage(mHealthComponent, dmg);
 }
 
 bool Enemy::IsAlive()

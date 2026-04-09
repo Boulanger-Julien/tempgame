@@ -424,7 +424,7 @@ void Player::Shoot()
 	static bool cDownLastFrame4 = false;
 	mNextFShootTimer += Timer::GetDeltatime()*2;
 	mNextSShootTimer += Timer::GetDeltatime()*1.5f;
-	mNextFShootTimer += Timer::GetDeltatime();
+	mNextTShootTimer += Timer::GetDeltatime();
 
 	if (InputSystem::isKeyDown(VK_LBUTTON))
 	{
@@ -491,7 +491,7 @@ void Player::LevelUp()
 		mStats.mExpToNextLevel *= mStats.mLevelUpMultiplier; 
 		mHealthComponent.mMaxHealth = mStats.mHealth;
 		mHealthComponent.mHealth = mStats.mHealth;
-		mStats.mStatsPointsToAllocate += 5;
+		mStats.mStatsPointsToAllocate += 3;
 	}
 	CanAllocatePoints();
 }
@@ -523,7 +523,7 @@ void Player::CanAllocatePoints()
 				switch (key)
 				{
 				case 'G':
-					mStats.mHealth += 10;
+					mStats.mHealth += 5;
 					mHealthComponent.mMaxHealth = mStats.mHealth;
 					mHealthComponent.mHealth = mStats.mHealth;
 					mStats.mStatsPointsToAllocate -= 1;
@@ -533,7 +533,7 @@ void Player::CanAllocatePoints()
 					mStats.mStatsPointsToAllocate -= 1;
 					break;
 				case 'J':
-					mStats.mStrength += 2;
+					mStats.mStrength += 1;
 					mStats.mStatsPointsToAllocate -= 1;
 					break;
 				case 'K':
@@ -541,7 +541,7 @@ void Player::CanAllocatePoints()
 					mStats.mStatsPointsToAllocate -= 1;
 					break;
 				case 'L':
-					mStats.mSpeed += 2;
+					mStats.mSpeed += 1.5f;
 					mStats.mStatsPointsToAllocate -= 1;
 					break;
 				default:

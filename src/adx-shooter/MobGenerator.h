@@ -7,7 +7,7 @@
 
 struct MobGenerator
 {
-	static Enemy* SpawnMob(float x, float z, int mob);
+	static Enemy* SpawnMob(float x, float z, float hp);
 	
 	static Boss* SpawnBoss(float x, float z);
 

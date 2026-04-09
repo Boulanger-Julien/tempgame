@@ -6,7 +6,7 @@
 struct RoomGenerator
 {
     static void GenerateRoom(Rooms& _room);
-	static void AddEnemies(Rooms& _room);
+	static void AddEnemies(Rooms& _room, float hppercentage = 0);
 	static void PlaceDoor(Rooms& _room);
 	static void PlacePlayer(Rooms& _room);
 };

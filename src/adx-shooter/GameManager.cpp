@@ -195,15 +195,17 @@ void GameManager::Draw()
             mChooseStatsTextRenderer->DrawTxt("You have " + std::to_string(mPlayer->GetStats().mStatsPointsToAllocate) + " stat(s) points! Press M to toggle.", 700, 833, 20);
 			int offset = 525;
 			int size = 259;
-			mChooseHPTextRenderer->DrawTxt("HP :" + std::to_string((int)mPlayer->GetStats().mHealth) + "\n(+ 10) (G)", offset, 875, 20);
+			mChooseHPTextRenderer->DrawTxt("HP :" + std::to_string((int)mPlayer->GetStats().mHealth) + "\n(+ 5) (G)", offset, 875, 20);
 			offset += size;
-			mChooseHPRTextRenderer->DrawTxt("HP Regen : " + std::to_string((int)mPlayer->GetStats().mHealthRegen) + "\n(+ 0.1) (H)", offset, 875, 20);
+			std::string hprStr = std::format("{:.1f}", mPlayer->GetStats().mHealthRegen);
+			mChooseHPRTextRenderer->DrawTxt("Regen : " + hprStr + "\n(+ 0.1) (H)", offset, 875, 20);
 			offset += size;
-			mChooseSTRTextRenderer->DrawTxt("STR : " + std::to_string((int)mPlayer->GetStats().mStrength) + "\n(+ 2) (J)", offset, 875, 20);
+			mChooseSTRTextRenderer->DrawTxt("STR : " + std::to_string((int)mPlayer->GetStats().mStrength) + "\n(+ 1) (J)", offset, 875, 20);
 			offset += size;
 			mChooseDEFTextRenderer->DrawTxt("DEF : " + std::to_string((int)mPlayer->GetStats().mDefense) + "\n(+ 1) (K)", offset, 875, 20);
 			offset += size;
-			mChooseSPDTextRenderer->DrawTxt("SPD : " + std::to_string((int)mPlayer->GetStats().mSpeed) + "\n(+ 2) (L)", offset, 875, 20);
+			std::string spdStr = std::format("{:.1f}", mPlayer->GetStats().mSpeed);
+			mChooseSPDTextRenderer->DrawTxt("SPD : " + spdStr + "\n(+ 1.5) (L)", offset, 875, 20);
         }
         else
         {
@@ -272,9 +274,57 @@ void GameManager::CheckInput()
     {
         HealthSystem::RecoverHealth(mPlayer->GetHealthComponent(), mPlayer->GetHealthComponent().mMaxHealth);
         mAppPaused = !mAppPaused;
-        for (Bullet* bullet : mBulletList) {
-            bullet->toBeDestroyed = true;
+        bool alreadyInDestroyList = false;
+  //      for (Bullet* bullet : mBulletList) {
+  //          bullet->toBeDestroyed = true;
+		//	mDestroyBulletList.push_back(bullet);
+  //      }
+  //      for (Enemy* enemy : mEnemyList) {
+  //          enemy->isDead = true;
+		//	enemy->mStats.mExp = 0;
+		//	mDestroyEnemyList.push_back(enemy);
+		//}
+  //      for (Boss* boss : mBossList) {
+  //          boss->TakeDamage(boss->GetHealth());
+		//	boss->GetStats().mExp = 0;
+		//	mDestroyBossList.push_back(boss);
+		//}
+
+        for (Enemy* enemy : mEnemyList) {
+            bool alreadyInDestroyList = false;
+            enemy->mStats.mExp = 0;
+			enemy->isDead = true;
+			enemy->TakeDamage(enemy->GetHealth());
+            for (Enemy* enemy2 : mDestroyEnemyList)
+            {
+                if (enemy == enemy2)
+                {
+                    alreadyInDestroyList = true;
+                    break;
+                }
+            }
+            if (enemy->isDead && !alreadyInDestroyList) {
+                mDestroyEnemyList.push_back(enemy);
+            }
+
         }
+        for (Boss* boss : mBossList) {
+            bool alreadyInDestroyList = false;
+            boss->GetStats().mExp = 0;
+			boss->TakeDamage(boss->GetHealth());
+            for (Boss* boss2 : mDestroyBossList)
+            {
+                if (boss == boss2)
+                {
+                    alreadyInDestroyList = true;
+                    break;
+                }
+            }
+            if (!boss->IsAlive() && !alreadyInDestroyList) {
+                mDestroyBossList.push_back(boss);
+            }
+		}
+        EnemyUpdate();
         Destroy();
     }
 }

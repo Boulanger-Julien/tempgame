@@ -5,7 +5,7 @@
 
 
 
-Enemy* MobGenerator::SpawnMob(float x, float z, int mob)
+Enemy* MobGenerator::SpawnMob(float x, float z, float hp)
 {
 	Window* mWindow = GameManager::GetInstance().GetWindow();
 
@@ -13,7 +13,8 @@ Enemy* MobGenerator::SpawnMob(float x, float z, int mob)
 	newEnemy->Init(GameManager::GetInstance().mPlayer->mEntity);
 	newEnemy->GetTransform() = ECS::GetInstance().getComponent<transformComponent>(newEnemy->mEntity);
 	newEnemy->GetTransform().position = FLOAT3(x, 2, z);
-
+	newEnemy->mStats.mHealth += (newEnemy->mStats.mHealth * hp);
+	newEnemy->mHealthComponent.mHealth = newEnemy->mStats.mHealth;
 	MeshGeometry newMesh;
 	newMesh = MeshCreator::CreateBox(GameManager::GetInstance().GetWindow(), 3, 2, 2, 2, (XMFLOAT4)Colors::DarkRed, L"Diamond2.dds");
 

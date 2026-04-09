@@ -35,17 +35,20 @@ bool InputSystem::isKeyDown(char key)
 
 bool InputSystem::isKeyUp(char key)
 {
-	static bool pressed = false;
+	static bool keysPressed[256] = { false };
+	unsigned char k = (unsigned char)key;
+
 	if (GetAsyncKeyState(key) & 0x8000)
 	{
-		pressed = true;
+		keysPressed[k] = true;
 		return false;
 	}
-	else if(pressed)
+	else if (keysPressed[k])
 	{
-		pressed = false;
+		keysPressed[k] = false;
 		return true;
 	}
+	return false;
 }
 
 float InputSystem::GetMouseX()

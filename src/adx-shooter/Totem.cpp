@@ -42,8 +42,9 @@ void Totem::Update(RoomType state)
 
 	if (mCollider.collisionCheck(mPlayer))
 	{
-		int a = 9;
+		changePattern = true;
 	}
+	else changePattern = false;
 
 	mCollider.updateCollider();
 	UpdateComponent();

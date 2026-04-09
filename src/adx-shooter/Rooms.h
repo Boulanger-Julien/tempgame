@@ -59,6 +59,8 @@ public:
     int numMaxInDunjeon = 0;
     Player* mPlayer;
     std::string timerStr;
+	bool isChoosingPattern = false;
+	int attackTochange = 0;
 protected: 
     void UpdateComponent();
 	Window* mWindow;
@@ -74,6 +76,7 @@ protected:
     TextRenderer* mChooseDifficultyRenderer;
 	std::string mDifficultyStr = "";
     TextRenderer* mTimerTextRenderer;  
+    TextRenderer* mPatternTextRenderer;  
 
 
 	friend class RoomGenerator;

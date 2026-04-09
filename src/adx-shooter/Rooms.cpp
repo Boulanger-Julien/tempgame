@@ -61,6 +61,8 @@ void Rooms::Initialize(Window* _window)
 
 	mChooseDifficultyRenderer = new TextRenderer();
 
+	mPatternTextRenderer = new TextRenderer();
+
 }
 
 void Rooms::Update()
@@ -113,6 +115,18 @@ void Rooms::Draw()
 	}
 	else mDifficultyStr = "";
 
+	if (isChoosingPattern)
+	{
+		if (attackTochange != 0)
+		{
+			mPatternTextRenderer->DrawTxt("Choose new pattern for attack " + std::to_string(attackTochange) + " : 1 - Single Shot | 2 -  Explosion |\n3 - Pump | 4 - Line | 5 - Choc | 6 - Thunder | 7 - Boomerang | 8 - Bomb"
+				, 20, 220, 24);
+		}
+		else
+		{
+			mPatternTextRenderer->DrawTxt("Choose attack to change : 1 - First | 2 - Second | 3 - Third", 20, 220, 24);
+		}
+	}
 }
 
 
@@ -147,15 +161,22 @@ void Rooms::OnUpdate(float _dt)
 			hours, minutes, seconds, centiemes);
 	}
 	
-	if (InputSystem::isKeyUp('E') && door.changeRoom == true)
+	if (InputSystem::isKeyUp('E'))
 	{
-		if (mdifficulty != 0)
+		if (door.changeRoom)
 		{
-			RoomGenerator::GenerateRoom(*this);
+			if (mdifficulty != 0)
+			{
+				RoomGenerator::GenerateRoom(*this);
+			}
+			else
+			{
+				isChoosingDifficulty = true;
+			}
 		}
-		else 
+		else if (totem.changePattern)
 		{
-			isChoosingDifficulty = true;
+			isChoosingPattern = true;
 		}
 	}
 
@@ -179,12 +200,33 @@ void Rooms::OnUpdate(float _dt)
 			isChoosingDifficulty = false;
 			RoomGenerator::GenerateRoom(*this);
 		}
+	}	
+	static bool eDownLastFrame = false;
+	static int test = 0;
+	if (isChoosingPattern)
+	{
+		if (attackTochange == 0)
+		{
+			if (InputSystem::isKeyUp('1')) { attackTochange = 1; eDownLastFrame = true; }
+			else if (InputSystem::isKeyUp('2')) { attackTochange = 2; eDownLastFrame = true; }
+			else if (InputSystem::isKeyUp('3')) { attackTochange = 3; eDownLastFrame = true; }
+		}
+		else if (!eDownLastFrame)
+		{
+			char key = InputSystem::GetKeyDown();
+			int value = key - '0';
+
+			if (value >= 1 && value <= ShootPatternType::Amount - 1 && !eDownLastFrame)
+			{
+				mPlayer->ChangePattern(attackTochange, value);
+				attackTochange = 0;
+				isChoosingPattern = false;
+			}
+
+		test++;
+		}
+		eDownLastFrame = false; // Maintenant il ne se remet à false que si aucune touche n'est active
 	}
-
-
-
-
-	
 }
 
 void Rooms::UpdateComponent()

@@ -30,7 +30,7 @@ struct StatsComponent
 	float mDefense;
 	float mExp;
 	float mLevel = 1.0f;
-	float mExpToNextLevel = 100.0f;
-	float mLevelUpMultiplier = 1.5f;
+	float mExpToNextLevel = 125.0f;
+	float mLevelUpMultiplier = 1.3f;
 	int mStatsPointsToAllocate = 0;
 };

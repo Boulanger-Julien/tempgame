@@ -15,9 +15,13 @@ class Makhina_Boss : public Boss
 	virtual void init() override;
 	virtual void TakeDamage(float damage) override
 	{
-		mHealthComponent.mHealth -= damage;
-		if (mHealthComponent.mHealth <= 0)
+		int dmg = damage;
+		if (mStats.mDefense > 0)
 		{
+			dmg -= rand() % (int)mStats.mDefense;
+		}
+		HealthSystem::TakeDamage(mHealthComponent, dmg);
+		if (mHealthComponent.mHealth <= 0) {
 			isAlive = false;
 		}
 	}
