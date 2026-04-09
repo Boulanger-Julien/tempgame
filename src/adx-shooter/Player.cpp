@@ -46,17 +46,10 @@ Player::Player() {
 	InitUI(STRBar, {1,0,0,1});
 	InitUI(DEFBar, {0,0,1,1});
 	InitUI(SPDBar, {1,1,0,1});
-	ShootPatternCooldowns.insert({ 0, 0.0f });
-	ShootPatternCooldowns.insert({ 1, 0.5f });
-	ShootPatternCooldowns.insert({ 2, 3.0f });
-	ShootPatternCooldowns.insert({ 3, 2.0f });
-	ShootPatternCooldowns.insert({ 4, 0.75f });
-	ShootPatternCooldowns.insert({ 5, 1.5f });
-	ShootPatternCooldowns.insert({ 6, 5.0f });
-	ShootPatternCooldowns.insert({ 7, 3.0f });
-	ShootPatternCooldowns.insert({ 8, 5.0f });
-
-	mSShootColdown = ShootPatternCooldowns[1];
+	
+	ChangePattern(1, ShootPatternType::Single_Shot);
+	ChangePattern(2, ShootPatternType::None);
+	ChangePattern(3, ShootPatternType::None);
 }
 void Player::InitUI(int index, FLOAT4 color)
 {
@@ -67,107 +60,121 @@ void Player::InitUI(int index, FLOAT4 color)
 	GameManager::GetInstance().mUIMesh.insert({ index, barMesh.UIQuad });
 }
 
-void Player::EnableShooting(int shotindex)
+void Player::EnableShooting(int shotindex, int pattern)
 {
 
 
 	switch (shotindex) {
-	case 0:
+	case ShootPatternType::None:
 		break;
-	case 1:
-		if (mNextFShootTimer > mFShootColdown && mFShootColdown != 0) {
+	case ShootPatternType::Single_Shot:
+		if (mNextFShootTimer > mFShootColdown && mFShootColdown != 0 && pattern == ShootPatternAttack[1]) {
 			AddBullet();
 			mNextFShootTimer = 0;
 		}
-		else if (mNextSShootTimer > mSShootColdown && mSShootColdown != 0) {
+		else if (mNextSShootTimer > mSShootColdown && mSShootColdown != 0 && pattern == ShootPatternAttack[2]) {
 			AddBullet();
 			mNextSShootTimer = 0;
 		}
-		else if (mNextTShootTimer > mTShootColdown && mTShootColdown != 0) {
+		else if (mNextTShootTimer > mTShootColdown && mTShootColdown != 0 && pattern == ShootPatternAttack[3]) {
 			AddBullet();
 			mNextTShootTimer = 0;
 		}
 		break;
-	case 2:
-		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+	case ShootPatternType::Pump:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0 && pattern == ShootPatternAttack[1]) {
+			AddPumpBullet();
+			mNextFShootTimer = 0;
+		}
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0 && pattern == ShootPatternAttack[2]) {
+			AddPumpBullet();
+			mNextSShootTimer = 0;
+		}
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0 && pattern == ShootPatternAttack[3]) {
+			AddPumpBullet();
+			mNextTShootTimer = 0;
+		}
+		break;
+	case ShootPatternType::Explosion:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0 && pattern == ShootPatternAttack[1]) {
 			AddExplosionBullet();
 			mNextFShootTimer = 0;
 		}
-		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0 && pattern == ShootPatternAttack[2]) {
 			AddExplosionBullet();
 			mNextSShootTimer = 0;
 		}
-		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0 && pattern == ShootPatternAttack[3]) {
 			AddExplosionBullet();
 			mNextTShootTimer = 0;
 		}
 		break;
-	case 3:
-		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+	case ShootPatternType::Line:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0 && pattern == ShootPatternAttack[1]) {
 			AddLineBullet();
 			mNextFShootTimer = 0;
 		}
-		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0 && pattern == ShootPatternAttack[2]) {
 			AddLineBullet();
 			mNextSShootTimer = 0;
 		}
-		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0 && pattern == ShootPatternAttack[3]) {
 			AddLineBullet();
 			mNextTShootTimer = 0;
 		}
 		break;
-	case 4:
-		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+	case ShootPatternType::Choc:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0 && pattern == ShootPatternAttack[1]) {
 			AddChoc();
 			mNextFShootTimer = 0;
 		}
-		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0 && pattern == ShootPatternAttack[2]) {
 			AddChoc();
 			mNextSShootTimer = 0;
 		}
-		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0 && pattern == ShootPatternAttack[3]) {
 			AddChoc();
 			mNextTShootTimer = 0;
 		}
 		break;
-	case 5:
-		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+	case ShootPatternType::Thunder:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0 && pattern == ShootPatternAttack[1]) {
 			AddLighting();
 			mNextFShootTimer = 0;
 		}
-		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0 && pattern == ShootPatternAttack[2]) {
 			AddLighting();
 			mNextSShootTimer = 0;
 		}
-		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0 && pattern == ShootPatternAttack[3]) {
 			AddLighting();
 			mNextTShootTimer = 0;
 		}
 		break;
-	case 6:
-		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+	case ShootPatternType::Boomerang:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0 && pattern == ShootPatternAttack[1]) {
 			AddWindBoomerang();
 			mNextFShootTimer = 0;
 		}
-		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0 && pattern == ShootPatternAttack[2]) {
 			AddWindBoomerang();
 			mNextSShootTimer = 0;
 		}
-		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0 && pattern == ShootPatternAttack[3]) {
 			AddWindBoomerang();
 			mNextTShootTimer = 0;
 		}
 		break;
-	case 7:
-		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0) {
+	case ShootPatternType::Bomb:
+		if (mNextFShootTimer >= mFShootColdown && mFShootColdown != 0 && pattern == ShootPatternAttack[1]) {
 			AddBomb();
 			mNextFShootTimer = 0;
 		}
-		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0) {
+		else if (mNextSShootTimer >= mSShootColdown && mSShootColdown != 0 && pattern == ShootPatternAttack[2]) {
 			AddBomb();
 			mNextSShootTimer = 0;
 		}
-		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0) {
+		else if (mNextTShootTimer >= mTShootColdown && mTShootColdown != 0 && pattern == ShootPatternAttack[3]) {
 			AddBomb();
 			mNextTShootTimer = 0;
 		}
@@ -193,7 +200,6 @@ void Player::ChooseClass(int classID) {
 		break;
 	}
 }
-
 void Player::Update(const Ray& mouseRay) {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
 
@@ -320,7 +326,17 @@ void Player::AddLineBullet() {
 
 	GameManager::GetInstance().mPlayerbulletList.push_back(newBullet);
 }
-void Player::AddExplosionBullet() {
+void Player::AddExplosionBullet()
+{
+	Shot* newShot = Shoot_Pattern_Explosion::Shoot(mEntity, 8, mStats.mStrength, 1, 50);
+	for (int i = 0; i < newShot->bulletList.size(); ++i)
+	{
+		GameManager::GetInstance().mEntityMesh.insert({ newShot->bulletList[i]->mEntity, GameManager::GetInstance().mBulletMesh });
+		GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newShot->bulletList[i]->mEntity);
+		GameManager::GetInstance().mPlayerbulletList.push_back(newShot->bulletList[i]);
+	}
+}
+void Player::AddPumpBullet() {
 	Shot* newShot = Shoot_Pattern_Pump::Shoot(mEntity, 9, mStats.mStrength, 1, 50);
 	for (int i = 0; i < newShot->bulletList.size(); ++i)
 	{
@@ -406,22 +422,22 @@ void Player::TestShootPattern()
 void Player::Shoot()
 {
 	static bool cDownLastFrame4 = false;
+	mNextFShootTimer += Timer::GetDeltatime()*2;
+	mNextSShootTimer += Timer::GetDeltatime()*1.5f;
 	mNextFShootTimer += Timer::GetDeltatime();
-	mNextSShootTimer += Timer::GetDeltatime();
-	mNextFShootTimer += Timer::GetDeltatime();
-
-	if (InputSystem::isKeyDown(VK_RBUTTON))
-	{
-		EnableShooting(mFirstShootPattern);
-	}
 
 	if (InputSystem::isKeyDown(VK_LBUTTON))
 	{
-		EnableShooting(mSecondShootPattern);
+		EnableShooting(mFirstShootPattern, ShootPatternAttack[1]);
+	}
+
+	if (InputSystem::isKeyDown(VK_RBUTTON))
+	{
+		EnableShooting(mSecondShootPattern, ShootPatternAttack[2]);
 	}
 
 	if (InputSystem::isKeyDown(VK_SPACE)) {
-		EnableShooting(mThirdShootPattern);
+		EnableShooting(mThirdShootPattern, ShootPatternAttack[3]);
 	}
 	if (InputSystem::isKeyDown('W')) {
 		if (!cDownLastFrame4) {
@@ -537,6 +553,29 @@ void Player::CanAllocatePoints()
 		{
 			mDownLastFrame2 = false;
 		}
+	}
+}
+
+void Player::ChangePattern(int key, int pattern)
+{
+	switch (key) {
+	case 1:
+		mFirstShootPattern = pattern;
+		ShootPatternAttack[1] = mFirstShootPattern;
+		mFShootColdown = ShootPatternCooldowns[pattern];
+		break;
+	case 2:
+		mSecondShootPattern = pattern;
+		ShootPatternAttack[2] = mSecondShootPattern;
+		mSShootColdown = ShootPatternCooldowns[pattern];
+		break;
+	case 3:
+		mThirdShootPattern = pattern;
+		ShootPatternAttack[3] = mThirdShootPattern;
+		mTShootColdown = ShootPatternCooldowns[pattern];
+		break;
+	default:
+		break;
 	}
 }
 
