@@ -16,7 +16,7 @@ protected:
 
 	bool CheckDistanceToFollowPlayer();
 	bool CheckDistanceToAttackPlayer();
-	void InitStats(float _health, float _healthRegen, float _mana, float _manaRegen, float _strength, float _defense, float _moveSpeed, float _exp, float _magicPower);
+	void InitStats(float _health, float _healthRegen, float _strength, float _defense, float _moveSpeed, float _exp);
 	enum EnemyState {
 		NONE,
 		FOLLOWPLAYER,

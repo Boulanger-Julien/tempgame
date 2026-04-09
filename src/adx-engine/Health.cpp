@@ -3,6 +3,8 @@
 
 void HealthSystem::TakeDamage(HealthComponent& _healthComponent, float _damage)
 {
+	if (_damage < 0)
+		return;
 	_healthComponent.mHealth -= _damage;
 }
 

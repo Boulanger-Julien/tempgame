@@ -66,9 +66,9 @@ void Enemy::Init(int _playerIndex)
 	OnInit();
 }
 
-void Enemy::InitStats(float _health, float _healthRegen, float _mana, float _manaRegen, float _strength, float _defense, float _moveSpeed, float _exp, float _magicPower)
+void Enemy::InitStats(float _health, float _healthRegen, float _strength, float _defense, float _moveSpeed, float _exp)
 {
-	mStats.SetStats(_health, _healthRegen, _mana, _manaRegen, _strength, _defense, _moveSpeed, _exp, _magicPower);
+	mStats.SetStats(_health, _healthRegen, _strength, _defense, _moveSpeed, _exp);
 	mHealthComponent.mHealth = mStats.mHealth;
 }
 
@@ -182,11 +182,8 @@ void Enemy::ExplosionBullets()
 
 void Enemy::LineBullets()
 {
-	Bullet* newLineBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength, 10, 1);
+	Bullet* newLineBullet = Shoot_Pattern_Line::Shoot(mEntity, mStats.mStrength*1.5f, 10, 1);
 	GameManager::GetInstance().GetWindow()->RegisterExistingMeshForEntity(newLineBullet->mEntity);
 	GameManager::GetInstance().mEntityMesh.insert({ newLineBullet->mEntity, GameManager::GetInstance().mLineBulletMesh });
-	XMMATRIX lineBulletWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newLineBullet->mEntity));
-	GameManager::GetInstance().GetWindow()->Update(newLineBullet->mEntity, lineBulletWorld);
-	newLineBullet->mDamage = mStats.mStrength;
 	GameManager::GetInstance().mBulletList.push_back(newLineBullet);
 }

@@ -47,6 +47,7 @@ public:
 	MeshGeometry mBulletMesh;
 	MeshGeometry mCircleMesh;
 	MeshGeometry mLineBulletMesh;
+	MeshGeometry mThorusMesh;
 	std::vector<Bullet*> mBulletList;
 	std::vector<Bullet*> mPlayerbulletList;
 	std::vector<Boss*> mBossList;
@@ -94,7 +95,6 @@ private:
 	Entity healthBar;
 	Entity healthBossBar;
 	Entity healthBossBar2;
-	Entity manaBar;
 	Boss* newBoss;
 
 	MeshGeometry mPlayerMesh;
@@ -115,9 +115,13 @@ private:
 
 	TextRenderer* mScoreTextRenderer;
 	TextRenderer* mLifeTextRenderer;
-	TextRenderer* mManaTextRenderer;
 	TextRenderer* mTimerTextRenderer;
 	TextRenderer* mBossNameTextRenderer;
 	TextRenderer* mBossName2TextRenderer;
-
+	TextRenderer* mChooseStatsTextRenderer;
+	TextRenderer* mChooseHPTextRenderer;
+	TextRenderer* mChooseHPRTextRenderer;
+	TextRenderer* mChooseSTRTextRenderer;
+	TextRenderer* mChooseDEFTextRenderer;
+	TextRenderer* mChooseSPDTextRenderer;
 };

@@ -25,7 +25,8 @@ void Makhina_Boss::init()
 	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);
 	mCollider.compOwner = mEntity;
 	mCollider.updateCollider();
-	mStats.SetStats(300, 0, 0, 0, 30, 10, 0, 60, 0);
+	mStats.SetStats(300, 0, 30, 10, 0, 60);
+	mStats.mExp = 1000;
 	mHealthComponent.mHealth = mStats.mHealth;
 	name = "Makhina, Creation Promise";
 }

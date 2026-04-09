@@ -98,6 +98,10 @@ inline FLOAT3 toFLOAT3(DirectX::XMFLOAT3 f)
 {
 	return FLOAT3{ f.x, f.y, f.z };
 }
+inline DirectX::XMFLOAT4 toXMFLOAT4(FLOAT4 f)
+{
+	return DirectX::XMFLOAT4(f.x, f.y, f.z, f.w);
+}
 
 struct transformComponent
 {

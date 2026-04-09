@@ -5,33 +5,23 @@ struct StatsComponent
 	void SetStats(
 		float _health,
 		float _healthRegen,
-		float _mana,
-		float _manaRegen,
 		float _strength,
 		float _defense,
 		float _moveSpeed,
-		float _exp,
-		float _magicPower)	
+		float _exp)	
 	{
 		mHealth = _health;
 		mHealthRegen = _healthRegen;
-
-		mMana = _mana;
-		mManaRegen = _manaRegen;
 
 		mStrength = _strength;
 
 		mDefense = _defense;
 		mSpeed = _moveSpeed;
 		mExp = _exp;
-		mMagicPower = _magicPower;
 	}
 
 	float mHealth;
 	float mHealthRegen;
-
-	float mMana;
-	float mManaRegen;
 
 	float mSpeed;
 
@@ -39,6 +29,8 @@ struct StatsComponent
 
 	float mDefense;
 	float mExp;
-	float mMagicPower;
 	float mLevel = 1.0f;
+	float mExpToNextLevel = 100.0f;
+	float mLevelUpMultiplier = 1.5f;
+	int mStatsPointsToAllocate = 0;
 };
