@@ -11,6 +11,7 @@ public:
 	void Update();
 	static char GetKeyDown();
 	static bool isKeyDown(char key);
+	static bool isKeyDown();
 	static bool isKeyUp(char key);
 	static float GetMouseX();
 	static float GetMouseY();

@@ -1,24 +1,21 @@
 #include "pch.h"
 #include "TextRenderer.h"
-
-TextRenderer::TextRenderer(Window* window) : mWindow(window) {}
+#include "adx-shooter/GameManager.h"
 
 TextRenderer::~TextRenderer() {}
 
-bool TextRenderer::Initialize(const wchar_t* spriteFile, int cols, int rows,
-    float glyphWidthWorld, float glyphHeightWorld, unsigned char startChar) {
-    if (mInitialized || !mWindow) return true;
-
-    mCols = cols;
-    mRows = rows;
-    mGlyphHeightWorld = glyphHeightWorld;
-    mStartChar = startChar;
-    mSpriteFile = spriteFile ? spriteFile : L"";
+bool TextRenderer::Initialize() {
+    if (mInitialized) return true;
+    mCols = 15;
+    mRows = 8;
+    mGlyphHeightWorld = 1;
+    mStartChar = 32;
+    mSpriteFile = L"sheet.dds";
 	mMeshIndex = 1;
 
     for (int i = 0; i < 256; ++i) {
-        mChars[i].width = glyphWidthWorld;
-        mChars[i].height = glyphHeightWorld;
+        mChars[i].width = 1;
+        mChars[i].height = 1;
 
         int idx = i - static_cast<int>(mStartChar);
         if (idx < 0 || idx >= mCols * mRows) {
@@ -30,14 +27,13 @@ bool TextRenderer::Initialize(const wchar_t* spriteFile, int cols, int rows,
             mChars[i].posy = static_cast<float>(idx / mCols);
         }
     }
-
-    mMesh = mWindow->CreateDynamicMesh(mMeshIndex, MAX_CHARS * 4, MAX_CHARS * 6);
+    mMesh = GameManager::GetInstance().GetWindow()->CreateDynamicMesh(mMeshIndex, MAX_CHARS * 4, MAX_CHARS * 6);
 
     std::vector<Vertex> dummyV;
     std::vector<uint32_t> dummyI;
     std::wstring fullPath = L"..\\..\\res\\Textures\\" + mSpriteFile;
-    mWindow->BuildMesh(dummyV, dummyI, fullPath.c_str());
-	mWindow->SetTextureToIndex({ mMeshIndex }, fullPath.c_str());
+    GameManager::GetInstance().GetWindow()->BuildMesh(dummyV, dummyI, fullPath.c_str());
+    GameManager::GetInstance().GetWindow()->SetTextureToIndex({ mMeshIndex }, fullPath.c_str());
     mInitialized = true;
     return true;
 }
@@ -91,6 +87,6 @@ void TextRenderer::DrawTxt(const std::string& text, float x, float y, float scal
 
     mMesh.DrawArgs["box"].IndexCount = static_cast<UINT>(vertices.size() / 4 * 6);
 
-    mWindow->UpdateUI(mMeshIndex, XMMatrixIdentity());
-    mWindow->DrawUI(mMesh, mMeshIndex);
+    GameManager::GetInstance().GetWindow()->UpdateUI(mMeshIndex, XMMatrixIdentity());
+    GameManager::GetInstance().GetWindow()->DrawUI(mMesh, mMeshIndex);
 }

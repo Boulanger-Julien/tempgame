@@ -17,15 +17,14 @@ public:
     // Each glyph is a cell in a grid (cols x rows) inside a single texture
     // This class builds quads (4 vertices, 6 indices) per glyph
     // And Window renders as a mesh
-    TextRenderer() = default;
-    TextRenderer(Window* window);
+    TextRenderer() { Initialize(); }
     ~TextRenderer();
 
     // - spriteFile : path to texture (wstring)
     // - cols / rows : number of colomns/lines dans in  sprite sheet
     // - glyphWidthWorld / glyphHeightWorld : size of a glyph in world units
     // - startChar : code of first character in grid (default space 32)
-    bool Initialize(const wchar_t* spriteFile, int cols, int rows, float glyphWidthWorld = 1.0f, float glyphHeightWorld = 1.0f, unsigned char startChar = 32);
+    bool Initialize();
 
     // Draws texte at pos(x,y) in world units; scale multiplies dimensions definined by glyphWidthWorld / glyphHeightWorld
     // text: the ASCII/UTF-8 string
@@ -35,7 +34,6 @@ public:
 
 private:
     bool mInitialized = false;
-    Window* mWindow = nullptr;
     std::wstring mSpriteFile;
     int mCols = 0;
     int mRows = 0;
