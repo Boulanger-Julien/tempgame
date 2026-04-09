@@ -572,6 +572,7 @@ void GameManager::Destroy() {
     if (!mDestroyEnemyList.empty()) {
         for (Enemy* enemy : mDestroyEnemyList) {
             auto it = std::find(mEnemyList.begin(), mEnemyList.end(), enemy);
+            mPlayer->GetStats().mExp += enemy->mStats.mExp;
             if (it != mEnemyList.end()) {
                 mEnemyList.erase(it);
             }
@@ -587,6 +588,7 @@ void GameManager::Destroy() {
     if (!mDestroyBossList.empty()) {
         for (Boss* boss : mDestroyBossList) {
             auto it = std::find(mBossList.begin(), mBossList.end(), boss);
+            mPlayer->GetStats().mExp += boss->ExpToGive();
             if (it != mBossList.end()) {
                 mBossList.erase(it);
             }
