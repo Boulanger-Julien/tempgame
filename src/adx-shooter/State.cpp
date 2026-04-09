@@ -88,6 +88,13 @@ void DyingBossState::OnEnter(Boss& cur)
 	 
 void DyingBossState::OnExecute(Boss& cur)
 {	
+	float dt = Timer::GetInstance()->GetDeltatime();
+	cur.mCollider.isTrigger = false;
+	transformSystem::Rotate(cur.mTransform, 0, 500 * dt, 0);
+	cur.mTransform.scale = FLOAT3(cur.mTransform.scale.x - dt, cur.mTransform.scale.y - dt, cur.mTransform.scale.z - dt);
+	if (cur.mTransform.scale.x <= 0) {
+		cur.isAlive = false;
+	}
 }	
 	
 void DyingBossState::OnExit(Boss& cur)

@@ -12,7 +12,7 @@ class Boss
 	bool IsAlive(){
 		if (mHealthComponent.mHealth <= 0)
 		{
-			isAlive = false;
+			currentBossState = BossState::DYING;
 		}
 		return isAlive;
 	}
