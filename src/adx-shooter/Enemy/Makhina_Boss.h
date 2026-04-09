@@ -20,10 +20,10 @@ class Makhina_Boss : public Boss
 		{
 			dmg -= rand() % (int)mStats.mDefense;
 		}
-		HealthSystem::TakeDamage(mHealthComponent, dmg);
-		if (mHealthComponent.mHealth <= 0) {
-			isAlive = false;
-		}
+		// HealthSystem::TakeDamage(mHealthComponent, dmg);
+		// if (mHealthComponent.mHealth <= 0) {
+		// 	isAlive = false;
+		// }
 	}
 	virtual void InitStats() override
 	{

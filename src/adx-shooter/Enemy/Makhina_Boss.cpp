@@ -22,6 +22,9 @@ void Makhina_Boss::Update()
 	case BossState::DYING:
 		DyingBossState::OnExecute(*this);
 		break;
+	case BossState::ENTERING:
+		CommingBackBossState::OnExecute(*this);
+		break;
 	default:
 		break;
 	}
@@ -30,10 +33,12 @@ void Makhina_Boss::Update()
 
 void Makhina_Boss::init()
 {
-	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 0, 0, 10, 10, 10), ColliderComponent(), HealthComponent());
+	mEntity = ECS::GetInstance().createEntity(transformComponent(0, 100, 80, 10, 10, 10), ColliderComponent(), HealthComponent());
 	mHeadEntity = ECS::GetInstance().createEntity(transformComponent(0, 0, 0, 1, 1, 1));
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
+	mTransform.position = { 0,100,80 };
+	currentBossState = BossState::ENTERING;
 	mHeadTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 	mHeadTransform.position.y = 2.0f;
 	mHealthComponent = ECS::GetInstance().getComponent<HealthComponent>(mEntity);
