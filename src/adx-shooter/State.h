@@ -42,4 +42,10 @@ struct DyingBossState
 	static void OnExecute(Boss& cur);
 	static void OnExit(Boss& cur);
 };
+struct CommingBackBossState
+{
+	static void OnEnter(Boss& cur);
+	static void OnExecute(Boss& cur);
+	static void OnExit(Boss& cur);
+};
 

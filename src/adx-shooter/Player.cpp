@@ -19,6 +19,7 @@ Player::Player() {
 	mCollider.updateCollider();
 
 	mStats.SetStats(100, 0, 3, 0, 20, 0);
+	mStats.SetStats(1000, 0, 500, 0, 50, 0);
 	mHealthComponent.mMaxHealth = mStats.mHealth;
 	mHealthComponent.mHealth = mStats.mHealth;
 	

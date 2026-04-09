@@ -35,7 +35,7 @@ Boss* MobGenerator::SpawnBoss(float x, float z)
 
 
 	newBoss->GetTransform() = ECS::GetInstance().getComponent<transformComponent>(newBoss->GetEntity());
-	newBoss->GetTransform().position = FLOAT3(x, newBoss->GetTransform().scale.y / 2, z);
+	//newBoss->GetTransform().position = FLOAT3(x, newBoss->GetTransform().scale.y / 2, z);
 	mWindow->RegisterExistingMeshForEntity(newBoss->GetEntity());
 	XMMATRIX enemyWorld = transformSystem::GetWorldMatrix(ECS::GetInstance().getComponent<transformComponent>(newBoss->GetEntity()));
 	GameManager::GetInstance().mEntityMesh.insert({ newBoss->GetEntity(), GameManager::GetInstance().gBossMesh()});

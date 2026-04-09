@@ -35,6 +35,7 @@ protected:
 	enum BossState
 	{
 		IDLE,
+		ENTERING,
 		MOVING,
 		ATTACKING,
 		DYING
@@ -61,5 +62,12 @@ protected:
 	float mPatternChangeCurrentCooldown = 0;
 	std::string name = "Boss";
 
+	float mSpeedDying = 150.0f; // Speed at which the boss moves during the dying state
+	float deathTimer = 0.0f; // Timer to track the duration of the dying state
+
+	float SpeedEntering = 100.0f; // Speed at which the boss moves during the entering state
+
+
 	friend struct DyingBossState;
+	friend struct CommingBackBossState;
 };

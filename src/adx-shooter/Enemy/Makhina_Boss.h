@@ -16,10 +16,6 @@ class Makhina_Boss : public Boss
 	virtual void TakeDamage(float damage) override
 	{
 		mHealthComponent.mHealth -= damage;
-		if (mHealthComponent.mHealth <= 0)
-		{
-			isAlive = false;
-		}
 	}
 	virtual void InitStats() override
 	{
