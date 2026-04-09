@@ -31,6 +31,17 @@ class Boss
 	std::string GetName() { return name; }
 	float ExpToGive() { return (mStats.mExp); }
 protected:
+
+	enum BossState
+	{
+		IDLE,
+		MOVING,
+		ATTACKING,
+		DYING
+	};
+	BossState currentBossState = IDLE;
+
+
 	Entity mEntity;
 	Entity mHeadEntity;
 	ColliderComponent mCollider;
@@ -49,4 +60,6 @@ protected:
 	int mPatternChangeCooldown = 3;
 	float mPatternChangeCurrentCooldown = 0;
 	std::string name = "Boss";
+
+	friend struct DyingBossState;
 };

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Makhina_Boss.h"
 #include "GameManager.h"
+#include "State.h"
 Makhina_Boss::~Makhina_Boss()
 {
 }
@@ -8,9 +9,22 @@ Makhina_Boss::~Makhina_Boss()
 void Makhina_Boss::Update()
 {
 	float deltatime = Timer::GetInstance()->GetDeltatime();
-	LookPlayer();
-	Attack(deltatime);
-	ChangeShootPattern();
+
+
+
+	switch (currentBossState)
+	{
+	case BossState::IDLE:
+		LookPlayer();
+		Attack(deltatime);
+		ChangeShootPattern();
+		break;
+	case BossState::DYING:
+		DyingBossState::OnExecute(*this);
+		break;
+	default:
+		break;
+	}
 	UpdateComponent();
 }
 
