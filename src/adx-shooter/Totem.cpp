@@ -9,9 +9,7 @@ Totem::Totem()
 	mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntityfeur);
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntityfeur);
 	mTransform.scale = FLOAT3(2, 10, 2);// FLOAT3(2, 10, 2);
-	mCollider.depth = mTransform.scale.z;
-	mCollider.width = mTransform.scale.x;
-	mCollider.height = mTransform.scale.y;
+
 	mCollider.compOwner = mEntityfeur;
 	//mCollider.isTrigger = true;
 	mCollider.compOwner = mEntityfeur;

@@ -9,9 +9,7 @@ Door::Door()
 	mTransform = ECS::GetInstance().getComponent<transformComponent>(mEntity);
 	mTransform.scale = FLOAT3(10, 5, 10);
 	mTransform.position.z = 48;
-	mCollider.depth = mTransform.scale.z; 
-	mCollider.width = mTransform.scale.x;
-	mCollider.height = mTransform.scale.y;
+
 	mCollider.compOwner = mEntity;
 	//mCollider.isTrigger = true;
 	mCollider.compOwner = mEntity;
@@ -32,8 +30,6 @@ void Door::Initialize(Window* _window)
 
 void Door::Update(int _enemyleft) 
 {
-	//mCollider = ECS::GetInstance().getComponent<ColliderComponent>(mEntity);
-	//mCollider.collisionCheck(mPlayer);
 
 	if (_enemyleft <= 0) // Utilisation de VK_LBUTTON pour plus de fiabilité
 	{
