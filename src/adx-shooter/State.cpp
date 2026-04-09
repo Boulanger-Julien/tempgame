@@ -81,3 +81,15 @@ void StuntedState::OnExecute(Enemy& cur)
 void StuntedState::OnExit(Enemy& cur)
 {
 }
+
+void DyingBossState::OnEnter(Boss& cur)
+{	 
+}	 
+	 
+void DyingBossState::OnExecute(Boss& cur)
+{	
+}	
+	
+void DyingBossState::OnExit(Boss& cur)
+{
+}
